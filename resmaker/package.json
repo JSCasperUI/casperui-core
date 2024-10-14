@@ -1,0 +1,12 @@
+{
+  "name": "casperui_resource_maker",
+  "version": "1.0.0",
+  "index": "src/main.js",
+  "scripts": {
+    "run": "node src/main.js",
+    "build": "ncc build src/main.js -o dist -m"
+  },
+  "devDependencies": {
+    "@vercel/ncc": "^0.38.1"
+  }
+}
