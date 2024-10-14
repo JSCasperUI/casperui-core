@@ -54,7 +54,8 @@ export class Application  extends ContextWrapper {
 
     }
 
-    addNewFontFace(){
-
+    addFontFace(family:string,data:DataView, descriptors?: FontFaceDescriptors){
+        // @ts-ignore
+        document.fonts.add(new FontFace(family,data,descriptors))
     }
 }

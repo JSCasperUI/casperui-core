@@ -233,6 +233,7 @@ export class View extends ViewNode {
         return (this.node as HTMLElement).matches(':hover')
     }
     addClassList(className:string){
+        if (className && className.length)
         className.split(" ").forEach(cName=> (this.node as HTMLElement).classList.add(cName))
 
     }

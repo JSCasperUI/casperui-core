@@ -19,7 +19,7 @@ export class Activity extends ContextWrapper implements ILiveManager,IFragmentMa
         this.liveManager = new LiveManager();
         this.fragmentMemory = createFragmentMemory()
         this.fragmentManager = new FragmentManager(this,true)
-        this.root = new View(this,document.body.querySelector("[id='app']"))
+        this.root = new View(this,document.body)
         this.mWindow = new View(this,document.body)
         this.inflater = new BXMLInflater(this)
     }

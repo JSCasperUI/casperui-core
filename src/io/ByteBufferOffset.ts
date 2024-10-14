@@ -6,6 +6,11 @@ export class ByteBufferOffset {
     public pos: number;
     public size: number;
 
+
+    getDataView(): DataView {
+        return this.arr;
+    }
+
     constructor(buffer:ArrayBuffer|ByteBufferOffset, offset:number, mSize:number) {
         this.size = mSize
         this.pos = 0

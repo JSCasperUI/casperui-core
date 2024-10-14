@@ -82,7 +82,7 @@ class ResourceMaker {
                     filesHeader.writeBytes(newPath)
                 }
 
-                if (file.endsWith("xml")|| file.endsWith("html")|| file.endsWith("svg")) {
+                if (file.endsWith("xml")|| file.endsWith("html")) {
                     let bin = new XML2CasBin("xml",this.mConfigs[i].resourceConstID)
                     byteData = bin.html2CaperBinary(byteData.toString(),file)
                 }

@@ -29,6 +29,9 @@ export abstract class JFragment implements ILiveManager,IFragmentManager {
         this.mContext = context
 
     }
+    getContext(){
+        return this.mContext
+    }
 
 
     getLiveManager(){
