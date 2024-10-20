@@ -6,14 +6,15 @@ import {FragmentManager} from "@casperui/core/app/FragmentManager";
 import {Activity} from "@casperui/core/app/Activity";
 import {View} from "@casperui/core/view/View";
 import {BXMLInflater} from "@casperui/core/view/inflater/BXMLInflater";
+import {ViewAttributes} from "@casperui/core/view/ViewAttributes";
 
-
+export type FragmentResizeHandler = (newWidth:number, newHeight:number) => void;
 export abstract class JFragment implements ILiveManager,IFragmentManager {
     fragmentMemory = createFragmentMemory();
     liveManager = new LiveManager();
     fragmentManager = new FragmentManager(this)
 
-
+    private mResizeObserver:ResizeObserver = null
     mBaseView:View
     mContext:Context
     mIsAttached = false
@@ -149,5 +150,16 @@ export abstract class JFragment implements ILiveManager,IFragmentManager {
     }
 
     innerBinders: any;
+
+
+    onSizeChangeListener(handler:FragmentResizeHandler){
+        if (this.mResizeObserver){
+            this.mResizeObserver.disconnect()
+        }
+        this.mResizeObserver = new ResizeObserver(entries => {
+            handler(entries[0].contentRect.width,entries[0].contentRect.height)
+        })
+        this.mResizeObserver.observe(this.getFragmentView().getElement());
+    }
 }
 

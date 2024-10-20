@@ -298,11 +298,13 @@ export class View extends ViewNode {
         if (this["_old_fn_"+type]) {
             this.getNode().removeEventListener(type, this["_old_fn_"+type]); // Удаление предыдущего обработчика
         }
-        this["_keeper_"+type] = func
-        let ref = new WeakRef(func)
+        const ref = new WeakRef(func)
+        this["_keeper_"+type] =  func
         this["_old_fn_"+type] = (e)=>{
             let fn = ref.deref()
-            if (fn) fn(e)
+            if (fn){
+                fn(e)
+            }
         };
         this.getNode().addEventListener(type, this["_old_fn_"+type]);
     }

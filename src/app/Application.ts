@@ -9,7 +9,7 @@ export class Application  extends ContextWrapper {
     private mainActivity:Activity
     private mApplicationContext:Context
     private mResources:Resources
-
+    private mWidth = 0
 
     constructor() {
         super();
@@ -17,7 +17,6 @@ export class Application  extends ContextWrapper {
         this.mainActivity = undefined
         this.mApplicationContext = new ContextWrapper()
         this.mResources = new BinaryResources()
-
         // WidgetRegistrar.
         this.attachBaseContext(this.mApplicationContext)
     }
@@ -42,7 +41,6 @@ export class Application  extends ContextWrapper {
             }
             xhr.send(null);
         });
-        console.log(out);
         (this.mResources as BinaryResources).initResources(out as ArrayBuffer)
     }
 
@@ -51,6 +49,9 @@ export class Application  extends ContextWrapper {
         this.mainActivity = activity
         this.mainActivity.attachBaseContext(this)
         this.mainActivity.create()
+        this.mainActivity.getWindowView().getElement().addEventListener("resize",()=>{
+            this.mWidth = 1
+        })
 
     }
 
