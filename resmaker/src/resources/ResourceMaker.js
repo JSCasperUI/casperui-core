@@ -65,6 +65,10 @@ class ResourceMaker {
         let files = 0
         for (let i = 0; i < this.mConfigs.length; i++) {
             for (const file of this.mConfigs[i].files) {
+
+                if (file.indexOf("cluster.xml") > -1){
+                    console.log("a")
+                }
                 if (file.endsWith(".css")){
                     this.cssMerge.addCSS(file)
                     continue

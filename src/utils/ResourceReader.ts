@@ -46,7 +46,7 @@ export class ResourceReader {
 
 
         }
-        console.log(this.names)
+        // console.log(this.names)
     }
 }
 

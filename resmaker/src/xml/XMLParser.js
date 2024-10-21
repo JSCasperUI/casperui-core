@@ -9,7 +9,11 @@ const TAG_COLON = ':'
 const TAG_Q = '?'
 const TAG_EOF = '\0'
 function isLetterOrDigit(char) {
-    return /^[0-9a-zA-Z]$/.test(char);
+    const code = char.charCodeAt(0);
+    if (code >= 48 && code <= 57) return true;
+    if (code >= 65 && code <= 90) return true;
+    if (code >= 97 && code <= 122) return true;
+    return false;
 }
 class XMLParser extends NextParser {
     constructor() {

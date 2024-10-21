@@ -26,6 +26,11 @@ class Dictionary {
         this.tags = ["#t"]
         this.keys = []
         this.values = []
+        this.valuesMap = new Map()
+        this.keysMap = new Map()
+        this.tagsMap = new Map()
+
+
         this.fileSize = 0
         this.treeBuffer = new ByteBufferOutputStream()
         this.output = new ByteBufferOutputStream()
@@ -43,6 +48,7 @@ class Dictionary {
         this.treeBuffer.writeVarInt(value)
     }
     createIndexedBuffer() {
+        console.log("createIndexedBuffer")
         this.output.writeBytes(HEADER)
         this.output.writeByte(VERSION)
         this.output.writeVarInt(this.tags.length)
@@ -56,10 +62,15 @@ class Dictionary {
             this.output.writeVarInt(str.length)
             this.output.writeBytes(str)
         }
-        for (const str of this.values) {
-            this.output.writeVarInt(str.length)
-            this.output.writeBytes(str)
+
+        for (let i = 0; i < this.values.length; i++) {
+            this.output.writeVarInt(this.values[i].length)
+            this.output.writeBytes(this.values[i])
         }
+        // for (const str of this.values) {
+        //     this.output.writeVarInt(str.length)
+        //     this.output.writeBytes(str)
+        // }
 
         this.output.writeBytes(this.treeBuffer.toByteArray())
         return this.output.toByteArray()
@@ -68,37 +79,47 @@ class Dictionary {
         if (value === "#text"){
             return 0
         }
-        let index = this.tags.indexOf(value)
-        if (index < 0) {
-            this.fileSize += value.length + 1
-            this.tags.push(value)
-            return this.tags.length - 1
+
+        if (this.tagsMap.has(value)){
+            return this.tagsMap.get(value)
         }
 
+        this.fileSize += value.length + 1
+        this.tags.push(value)
+        let index =this.tags.length - 1
+        this.tagsMap.set(value,index)
         return index
     }
 
     key(value) {
-        let index = this.keys.indexOf(value)
-        if (index < 0) {
-            this.fileSize += value.length + 1
-            this.keys.push(value)
-            return this.keys.length - 1
+        if (this.keysMap.has(value)){
+            return this.keysMap.get(value)
         }
+        this.fileSize += value.length + 1
+        this.keys.push(value)
+        let index = this.keys.length - 1
+        this.keysMap.set(value,index)
         return index
+
     }
 
 
     value(mValue) {
         let tValue = Buffer.from(mValue.trim())
-        for (let i = 0; i < this.values.length; i++) {
-            if (tValue.equals(this.values[i])){
-                return i
-            }
+        let valString = tValue.toString()
+        if (this.valuesMap.has(valString)){
+            return this.valuesMap.get(valString)
         }
+        // for (let i = 0; i < this.values.length; i++) {
+        //     if (tValue.equals(this.values[i])){
+        //         return i
+        //     }
+        // }
 
         this.fileSize += tValue.length + 1
         this.values.push(tValue)
+
+        this.valuesMap.set(valString,this.values.length - 1)
         return this.values.length - 1
     }
 
