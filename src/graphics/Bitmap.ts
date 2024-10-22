@@ -1,3 +1,4 @@
+import {Rect} from "@casperui/core/graphics/Rect";
 
 export class Bitmap {
     private image: HTMLImageElement | OffscreenCanvas;
