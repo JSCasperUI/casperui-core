@@ -1,4 +1,3 @@
-import {Rect} from "@casperui/core/graphics/Rect";
 
 export class Bitmap {
     private image: HTMLImageElement | OffscreenCanvas;
@@ -65,12 +64,15 @@ export class Bitmap {
             ctx.putImageData(data,0,0)
         }
     }
-    setPixelsDirty(data:ImageData,rect:Rect){
+
+    setPixelsDitry(data:ImageData,rect:Rect){
         if (this.image instanceof OffscreenCanvas){
             const ctx = this.image.getContext('2d');
             ctx.putImageData(data,0,0,rect.mLeft,rect.mTop,rect.getWidth(),rect.getHeight());
         }
     }
+
+
     getWidth(): number {
         return this.image.width
     }

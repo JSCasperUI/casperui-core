@@ -27,11 +27,9 @@ export class LiveData<T> {
 
 
     setValue(newValue:T) {
-        if (this.value !== newValue) {
             this.value = newValue;
             this.clearPublishHistory(); // Сбрасываем историю публикаций при изменении
             this.notifyObservers();
-        }
     }
 
 
