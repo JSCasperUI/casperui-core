@@ -65,6 +65,13 @@ export class Rect {
         this.mBottom = bottom
     }
 
+
+    clipClamp(left: number, top: number, right: number, bottom: number){
+        this.mLeft = Math.max(this.mLeft,left)
+        this.mTop = Math.max(this.mTop,top)
+        this.mRight = Math.min(this.mRight,right)
+        this.mBottom = Math.min(this.mBottom,bottom)
+    }
     setRect(rect: Rect) {
         this.mLeft = rect.mLeft
         this.mTop = rect.mTop
