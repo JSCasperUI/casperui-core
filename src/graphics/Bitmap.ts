@@ -52,8 +52,6 @@ export class Bitmap {
         }
     }
 
-
-
     getPixels(sx:number = 0,sy:number = 0,width?:number,height?:number):ImageData {
         if (this.image instanceof OffscreenCanvas){
             const ctx = this.image.getContext('2d');

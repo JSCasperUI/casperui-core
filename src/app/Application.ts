@@ -35,7 +35,7 @@ export class Application  extends ContextWrapper {
             let xhr = new XMLHttpRequest()
             xhr.withCredentials = true
             xhr.responseType = "arraybuffer"
-            xhr.open("GET", "/res.html");
+            xhr.open("GET", "res.html");
             xhr.onload = function (){
                 resolve(xhr.response)
             }
