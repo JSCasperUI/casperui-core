@@ -9,6 +9,8 @@ export class Canvas {
      ctx2D: CanvasRenderingContext2D
 
     private mMatrix = new Matrix();
+    private mTR1 = new Rect(0,0,0,0);
+    private mTR2 = new Rect(0,0,0,0);
 
     constructor(element?: HTMLCanvasElement | Bitmap | View) {
         if (element && element instanceof HTMLCanvasElement) {
@@ -150,10 +152,12 @@ export class Canvas {
         if (paint.isStroke) this.ctx2D.stroke();
 
     }
-
+    drawRectC(left: number, top: number, right: number, bottom: number, paint: Paint){
+        this.mTR1.set(left, top, right, bottom)
+        this.drawRect(this.mTR1,paint)
+    }
     drawRect(rect: Rect, paint: Paint) {
         paint.applyToContext(this.ctx2D)
-
         if (paint.isFill)
             this.ctx2D.fillRect(rect.mLeft, rect.mTop, rect.getWidth(), rect.getHeight());
         if (paint.isStroke)

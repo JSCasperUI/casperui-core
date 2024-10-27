@@ -19,7 +19,10 @@ export class Paint {
     private mFillColor = "#000000"
     private mStrokeColor =  "#000000"
     private mStrokeWith = 1.0
-    private mStyle = 0
+    private mStyle = 1
+    private mFontSize = 18
+
+
 
 
     isFill = false
@@ -66,10 +69,10 @@ export class Paint {
 
     applyToContext(ctx: CanvasRenderingContext2D){
         ctx.globalAlpha = this.mOpacity;
-
         if (this.isFill) {
             ctx.fillStyle = this.mFillColor;
         }
+        ctx.font = "18px serif";
 
         if (this.isStroke) {
             ctx.strokeStyle = this.mStrokeColor;
