@@ -27,20 +27,20 @@ export class Canvas {
         this.ctx2D = (this.mElement  as HTMLCanvasElement).getContext('2d');
     }
 
-    setWidth(width: number) {
+    setCanvasWidth(width: number) {
         this.mElement.width = width;
     }
 
-    setHeight(height: number) {
+    setCanvasHeight(height: number) {
         this.mElement.height = height;
     }
 
 
-    getWidth(): number {
+    getCanvasWidth(): number {
         return this.mElement.width;
     }
 
-    getHeight(): number {
+    getCanvasHeight(): number {
         return this.mElement.height;
     }
 
