@@ -3,7 +3,7 @@ import {Context} from "@casperui/core/content/Context";
 import {BXMLInflater} from "@casperui/core/view/inflater/BXMLInflater";
 import {ViewAttributes} from "@casperui/core/view/ViewAttributes";
 
-
+export type ViewTag = string|Element
 export class View extends ViewNode {
 
     id:number = -1
@@ -15,7 +15,7 @@ export class View extends ViewNode {
     isWaitingDom:boolean = false
     inflater:BXMLInflater
 
-    constructor(context:Context,tag?:string|Element,attr?:ViewAttributes) {
+    constructor(context:Context,tag?:ViewTag,attr?:ViewAttributes) {
         if (!tag){
             super("div")
         }else {
