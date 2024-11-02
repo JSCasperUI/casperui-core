@@ -10,10 +10,10 @@ import {WidgetRegistrar} from "@casperui/core/view/inflater/WidgetRegistrar";
 
 export class BXMLInflater {
 
-    context:Context;
+    mContext:Context;
     cacheNodes:Record<number, BXNode>
     constructor(context:Context) {
-        this.context = context;
+        this.mContext = context;
         this.cacheNodes  = {}
     }
 
@@ -24,18 +24,19 @@ export class BXMLInflater {
             if (this.cacheNodes[id]){
                 node = this.cacheNodes[id]
             }else{
-                node = (new BXMLParser(this.context.getResources().getBufferById(id))).parse()
+                node = (new BXMLParser(this.mContext.getResources().getBufferById(id))).readTree()
                 this.cacheNodes[id] = node
             }
         }else{
-            node = (new BXMLParser(this.context.getResources().getBufferById(id))).parse()
+            node = (new BXMLParser(this.mContext.getResources().getBufferById(id))).readTree()
         }
         let result = this.inflateChild(node) as View
         if (root){
             if (rootNodeReplace){
-                root.node = result.node
-                for (let i = 0; i < result.getChildren().length; i++) {
-                    root.addView(result.children[i])
+                root.mNode = result.mNode
+                let children = result.getChildren()
+                for (let i = 0; i < children.length; i++) {
+                    root.addView(children[i])
                 }
             }else{
                 root.addView(result)
@@ -48,40 +49,32 @@ export class BXMLInflater {
     objectToXml(obj, skipRoot) {
         let xml = '';
 
-        // Функция для преобразования объекта в XML
         function buildXml(obj) {
-            // Если необходимо пропустить корневой элемент, обрабатываем только дочерние узлы
             if (skipRoot && obj.childNodes && obj.childNodes.length > 0) {
                 obj.childNodes.forEach(childNode => {
                     buildXml(childNode);
                 });
             } else {
-                // Открываем тег с названием объекта
                 xml += `<${obj.tag}`;
 
-                // Добавляем атрибуты объекта, если они есть
                 if (obj.attrs) {
                     for (let [key, value] of Object.entries(obj.attrs)) {
                         xml += ` ${key}="${value}"`;
                     }
                 }
 
-                // Если есть дочерние узлы, рекурсивно вызываем buildXml для каждого из них
                 if (obj.childNodes && obj.childNodes.length > 0) {
                     xml += '>';
                     obj.childNodes.forEach(childNode => {
                         buildXml(childNode);
                     });
-                    // Закрываем тег
                     xml += `</${obj.tag}>`;
                 } else {
-                    // Если нет дочерних узлов, закрываем тег без дополнительного контента
                     xml += '/>';
                 }
             }
         }
 
-        // Вызываем функцию для построения XML
         buildXml(obj);
 
         return xml;
@@ -98,8 +91,8 @@ export class BXMLInflater {
             case "svg":{
                 let nd = new ViewNode(NodeType.SVG,"")
                 for (const key in node.attrs) {
-                    (nd.node as HTMLElement).setAttribute(key, node.attrs[key] as string);
-                    (nd.node as HTMLElement).innerHTML = this.objectToXml(node,true)
+                    (nd.mNode as HTMLElement).setAttribute(key, node.attrs[key] as string);
+                    (nd.mNode as HTMLElement).innerHTML = this.objectToXml(node,true)
 
                 }
 
@@ -108,7 +101,7 @@ export class BXMLInflater {
             }
         }
 
-        let view = WidgetRegistrar.createInstance(node.tag,this.context,node.tag,node.attrs);
+        let view = WidgetRegistrar.createInstance(node.tag,this.mContext,node.tag,node.attrs);
 
         view.inViewInflated()
         for (let i = 0; i < node.children.length; i++) {

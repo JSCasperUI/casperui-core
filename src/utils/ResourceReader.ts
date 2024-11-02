@@ -3,25 +3,25 @@ import {ByteBufferOffset} from "@casperui/core/io/ByteBufferOffset";
 export class ResourceReader {
 
     private mData:ArrayBuffer
-    private files:Array<ByteBufferOffset>
-    private names:Array<string>
+    private mFiles:Array<ByteBufferOffset>
+    private mNames:Array<string>
     private fBuf:ByteBufferOffset
 
     constructor(mData:ArrayBuffer) {
 
         this.mData = mData
 
-        this.files = []
-        this.names = []
+        this.mFiles = []
+        this.mNames = []
         this.fBuf = new ByteBufferOffset(mData,0,mData.byteLength)
-        this.init()
+        this.initResources()
 
     }
 
     getFileByIndex(index:number):ByteBufferOffset {
-        return this.files[index]
+        return this.mFiles[index]
     }
-    init(){
+    initResources(){
         this.fBuf.read24BE() // header
         this.fBuf.read8BE() // VERSION
         let flags = this.fBuf.read8BE() // FLAGS
@@ -33,10 +33,10 @@ export class ResourceReader {
             if (flags){
                 let nameSize = this.fBuf.read16BE()
                 name = this.fBuf.readString(nameSize)
-                this.names.push(name)
+                this.mNames.push(name)
             }
             let fileSize = this.fBuf.read32BE()
-            this.files.push(new ByteBufferOffset(this.mData, fileDataOffset, fileSize))
+            this.mFiles.push(new ByteBufferOffset(this.mData, fileDataOffset, fileSize))
 
             if (name.endsWith("html")){
                 // let xx = new BXMLParser(this.files[this.files.length - 1])

@@ -48,7 +48,7 @@ export class Application  extends ContextWrapper {
         await this.readExtendedResources()
         this.mainActivity = activity
         this.mainActivity.attachBaseContext(this)
-        this.mainActivity.create()
+        this.mainActivity.createActivity()
         this.mainActivity.getWindowView().getElement().addEventListener("resize",()=>{
             this.mWidth = 1
         })

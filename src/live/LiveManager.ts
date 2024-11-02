@@ -1,18 +1,20 @@
 import {LiveData} from "@casperui/core/live/LiveData";
 
 export class LiveManager {
-    isActive = false
+    private mIsActive = false
     private liveDataRegistry:Set<LiveData<any>> = new Set()
-
     activate() {
-        if (this.isActive) return
-        this.isActive = true;
+        if (this.mIsActive) return
+        this.mIsActive = true;
         this.refreshLiveData();
     }
 
 
+    hasActive(){
+          return this.mIsActive
+    }
     deactivate() {
-        this.isActive = false;
+        this.mIsActive = false;
     }
 
     registerLiveData(liveData:LiveData<any>) {
@@ -21,7 +23,7 @@ export class LiveManager {
 
 
    private refreshLiveData() {
-        if (this.isActive){
+        if (this.mIsActive){
             this.liveDataRegistry.forEach(liveData => {
                 liveData.notifyObserver(this);
             });

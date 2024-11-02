@@ -3,19 +3,13 @@ import {IFragmentManager} from "@casperui/core/app/IFragmentManager";
 import {JFragment} from "@casperui/core/app/JFragment";
 import {View} from "@casperui/core/view/View";
 
-
 export class FragmentManager {
     mManager:IFragmentManager
-    isRoot:boolean
     isAttached:boolean
 
     constructor(manager:IFragmentManager, isRoot = false) {
         this.mManager = manager
-
-        this.isRoot = isRoot
-
         this.isAttached = false
-
     }
 
     attachFragmentManager() {
@@ -40,7 +34,7 @@ export class FragmentManager {
         memory.forEach((fr, id) => {
             let fragment = fr//.deref()
             if (fragment) {
-                fragment.detach()
+                fragment.detachFragment()
             }
         });
 
@@ -82,7 +76,7 @@ export class FragmentManager {
         }
 
         if (oldFragment != null) {
-            oldFragment.detach()
+            oldFragment.detachFragment()
             container.removeView(oldFragment.getFragmentView())
         }
         if (!fragment.isFragmentCreated()) {
@@ -131,6 +125,9 @@ export class FragmentManager {
         }
     }
 
+
+
+
     getIdByFragment(fragment:JFragment):number {
         let memory = this.mManager.getFragmentMemory()
         for (let [key, value] of memory) {
@@ -143,13 +140,13 @@ export class FragmentManager {
 
 
 
-    dropFragment(fragmentOld:JFragment, fragmentNew:JFragment, container:View|null = null) {
+    dropFragment(fragmentOld:JFragment, container:View|null = null) {
         let memory = this.mManager.getFragmentMemory()
         let containerId = this.getIdByFragment(fragmentOld)
         if (memory.has(containerId)) {
             let oldFragment = memory.get(containerId)//.deref()
             memory.delete(containerId)
-            oldFragment.detach()
+            oldFragment.detachFragment()
             if (!container) {
                 container = this.mManager.getFragmentView().byId(containerId)
             }
@@ -166,7 +163,7 @@ export class FragmentManager {
         let index = container.indexView(oldView)
 
         if (index >= 0) {
-            oldFragment.detach()
+            oldFragment.detachFragment()
 
             container.removeView(oldView)
             container.addView(newFragment.getFragmentView(), index)

@@ -35,24 +35,24 @@ export class LiveDataConfig<T> extends LiveData<ValueObject<T>> {
      * @param {object?} caller
      */
     updateAttribute(key:string, newValue:any, caller?:any) {
-        const oldValue = this.value.config[key]; // Старое значение
+        const oldValue = this.mValue.config[key]; // Старое значение
         if (oldValue !== newValue) {
-            this.value.config[key] = newValue;
-            this.value.key = key;
-            this.value.caller = caller;
-            this.value.oldValue = oldValue
-            this.value.newValue = newValue
+            this.mValue.config[key] = newValue;
+            this.mValue.key = key;
+            this.mValue.caller = caller;
+            this.mValue.oldValue = oldValue
+            this.mValue.newValue = newValue
             this.clearPublishHistory()
             this.notifyObservers()
         }
     }
 
     updateObject(object:T,caller:any) {
-        this.value.oldValue = Object.assign({},this.value.config)
-        this.value.config = object;
-        this.value.key = null;
-        this.value.caller = caller;
-        this.value.newValue = object
+        this.mValue.oldValue = Object.assign({},this.mValue.config)
+        this.mValue.config = object;
+        this.mValue.key = null;
+        this.mValue.caller = caller;
+        this.mValue.newValue = object
         this.clearPublishHistory()
         this.notifyObservers()
 

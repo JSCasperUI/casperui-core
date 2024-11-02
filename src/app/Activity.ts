@@ -8,39 +8,42 @@ import {BXMLInflater} from "@casperui/core/view/inflater/BXMLInflater";
 
 
 export class Activity extends ContextWrapper implements ILiveManager,IFragmentManager {
-    private liveManager:LiveManager
-    private fragmentMemory:FragmentMemory
-    private fragmentManager:FragmentManager
+    private mLiveManager:LiveManager
+    private mFragmentMemory:FragmentMemory
+    private mFragmentManager:FragmentManager
     private mWindow:View
-    private root:View
-    private inflater:BXMLInflater
+    private mRoot:View
+    private mInflater:BXMLInflater
     constructor() {
         super();
-        this.liveManager = new LiveManager();
-        this.fragmentMemory = createFragmentMemory()
-        this.fragmentManager = new FragmentManager(this,true)
-        this.root = new View(this,document.body)
+        this.mLiveManager = new LiveManager();
+        this.mFragmentMemory = createFragmentMemory()
+        this.mFragmentManager = new FragmentManager(this,true)
+        this.mRoot = new View(this,document.body)
         this.mWindow = new View(this,document.body)
-        this.inflater = new BXMLInflater(this)
+        this.mInflater = new BXMLInflater(this)
     }
 
     getInflater(): BXMLInflater {
-        return this.inflater
+        return this.mInflater
     }
 
     getLiveManager(){
-        return this.liveManager;
+        return this.mLiveManager;
     }
 
+    getRootView():View{
+        return this.mRoot
+    }
 
     getWindowView():View{
         return this.mWindow
     }
 
-    create(){
+    createActivity(){
         this.onCreate()
-        this.fragmentManager.attachFragmentManager()
-        this.liveManager.activate()
+        this.mFragmentManager.attachFragmentManager()
+        this.mLiveManager.activate()
     }
     onCreate(){
 
@@ -49,33 +52,33 @@ export class Activity extends ContextWrapper implements ILiveManager,IFragmentMa
     }
 
     byId(id:number):View{
-        return this.root.byId(id)
+        return this.mRoot.byId(id)
     }
 
 
     getLayoutInflater():BXMLInflater{
-        return this.inflater
+        return this.mInflater
     }
 
 
     setContentView(layoutId:number){
-        (this.root.node as HTMLElement).innerHTML = "";
-        this.inflater.inflate(layoutId,false,this.root);
+        (this.mRoot.mNode as HTMLElement).innerHTML = "";
+        this.mInflater.inflate(layoutId,false,this.mRoot);
         this.onLayout()
     }
 
 
 
     getFragmentView():View{
-        return this.root
+        return this.mRoot
     }
 
     getFragmentMemory(): FragmentMemory {
-        return this.fragmentMemory
+        return this.mFragmentMemory
     }
 
     getFragmentManager(): FragmentManager {
-        return this.fragmentManager;
+        return this.mFragmentManager;
     }
 
     innerBinders: any;

@@ -9,9 +9,9 @@ export class LiveDataObjectId<T> extends LiveData<T> {
     }
 
     pushValueToArray(item) {
-        if (Array.isArray(this.value)) {
-            this.value.push(item)
-            this.idHashMap[item._id] = this.value.length - 1
+        if (Array.isArray(this.mValue)) {
+            this.mValue.push(item)
+            this.idHashMap[item._id] = this.mValue.length - 1
             this.clearPublishHistory()
             this.notifyObservers();
 
@@ -21,17 +21,17 @@ export class LiveDataObjectId<T> extends LiveData<T> {
     updateIdMap() {
         this.idHashMap = {};
 
-        if (Array.isArray(this.value)) {
-            for (let i = 0; i < this.value.length; i++) {
-                this.idHashMap[this.value[i]._id] = i
+        if (Array.isArray(this.mValue)) {
+            for (let i = 0; i < this.mValue.length; i++) {
+                this.idHashMap[this.mValue[i]._id] = i
             }
         }
     }
 
     setValue(newValue:T) {
-        if (this.value !== newValue) {
-            this.value = newValue;
-            if (this.value != null && Array.isArray(this.value)) {
+        if (this.mValue !== newValue) {
+            this.mValue = newValue;
+            if (this.mValue != null && Array.isArray(this.mValue)) {
                 this.updateIdMap()
             }
             this.clearPublishHistory()
@@ -45,6 +45,6 @@ export class LiveDataObjectId<T> extends LiveData<T> {
     }
 
     getValueByObjectId(id:string) {
-        return this.value[this.idHashMap[id]]
+        return this.mValue[this.idHashMap[id]]
     }
 }

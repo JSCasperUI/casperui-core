@@ -20,79 +20,79 @@ const DYNAMIC_TYPE = {
 }
 
 export class BXMLParser {
-    private data:ByteBufferOffset
-    private tree:ByteBufferOffset
-    private tags:Array<string>
-    private keys:Array<string>
-    private values:Array<string|number>
-    private root:BXNode = { tag: "root", isText: false, children: [], attrs: {} };
+    private mData:ByteBufferOffset
+    private mTree:ByteBufferOffset
+    private mTags:Array<string>
+    private mKeys:Array<string>
+    private mValues:Array<string|number>
+    private mRoot:BXNode = { tag: "root", isText: false, children: [], attrs: {} };
 
 
     constructor(data:ByteBufferOffset) {
-        this.data = data
-        this.tags = []
-        this.keys = []
-        this.values = []
-        this.tree = undefined
-        this.init()
+        this.mData = data
+        this.mTags = []
+        this.mKeys = []
+        this.mValues = []
+        this.mTree = undefined
+        this.initBXMLParser()
     }
-    init(){
+    initBXMLParser(){
 
-        this.data.setPosition(5)
+        this.mData.setPosition(5)
 
-        let tagSize = this.data.readIndex()
-        let keySize = this.data.readIndex()
-        let valueSize = this.data.readIndex()
+        let tagSize = this.mData.readIndex()
+        let keySize = this.mData.readIndex()
+        let valueSize = this.mData.readIndex()
         let size = 0
 
         for (let i = 0; i < tagSize; i++) {
-            size = this.data.readIndex()
-            this.tags.push(this.data.readString(size))
+            size = this.mData.readIndex()
+            this.mTags.push(this.mData.readString(size))
         }
         for (let i = 0; i < keySize; i++) {
-            size = this.data.readIndex()
-            this.keys.push(this.data.readString(size))
+            size = this.mData.readIndex()
+            this.mKeys.push(this.mData.readString(size))
         }
         for (let i = 0; i < valueSize; i++) {
-            size = this.data.readIndex()
-            let type = this.data.get(this.data.pos)
+            size = this.mData.readIndex()
+            let type = this.mData.get(this.mData.pos)
             if (type > DYNAMIC_TYPE.MIN && type < DYNAMIC_TYPE.MAX) {
                 if (type === DYNAMIC_TYPE.IDENTIFIER) {
-                    this.data.positionOffset(1)
-                    this.values.push(this.data.read16BE())
+                    this.mData.positionOffset(1)
+                    this.mValues.push(this.mData.read16BE())
                 }
             }else{
-                this.values.push(this.data.readString(size))
+                this.mValues.push(this.mData.readString(size))
             }
 
         }
 
-        let headerOffset = this.data.position()
-        this.tree = new ByteBufferOffset(this.data, headerOffset, this.data.size - (headerOffset))
+        let headerOffset = this.mData.position()
+        this.mTree = new ByteBufferOffset(this.mData, headerOffset, this.mData.size - (headerOffset))
     }
-    parse() {
-        this.startReadTag(this.root)
-        return this.root.children[0]
+    readTree() {
+        this.startReadTag(this.mRoot)
+        return this.mRoot.children[0]
     }
     startReadTag(node:BXNode,depth = 1){
-        if (!this.tree.hasRemaining()){
+        if (!this.mTree.hasRemaining()){
             return false
         }
 
-        while (this.tree.hasRemaining()){
-            let tagIndex = this.tree.readIndex()
+        while (this.mTree.hasRemaining()){
+            let tagIndex = this.mTree.readIndex()
             let isTextNode = tagIndex === 0
-            let tag = this.tags[tagIndex]
+            let tag = this.mTags[tagIndex]
             let child = {tag:tag,isText:isTextNode,attrs:null,children:[]} as BXNode
-            let atrAndDir = this.tree.read8BE()
+            let atrAndDir = this.mTree.read8BE()
             let dir = atrAndDir & 0xC0
             let attributeSize = atrAndDir & 0x3f
             node.children.push(child)
             if (attributeSize > 0) {
                 child.attrs = {}
                 for (let i = 0; i < attributeSize; i++) {
-                    let name = this.keys[this.tree.readIndex()]
-                    child.attrs[name] = this.values[this.tree.readIndex()]
+                    let name = this.mKeys[this.mTree.readIndex()]
+                    child.attrs[name] = this.mValues[this.mTree.readIndex()]
                 }
             }
             switch (dir) {

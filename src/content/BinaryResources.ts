@@ -4,23 +4,23 @@ import {ResourceReader} from "@casperui/core/utils/ResourceReader";
 
 export class BinaryResources extends Resources {
 
-    private resourceReader:ResourceReader
-    private svgBlobsCache = {}
-    private cache = {}
+    private mResourceReader:ResourceReader
+    private mSvgBlobsCache = {}
+    private mCache = {}
     constructor() {
         super();
-        this.resourceReader = null
-        this.svgBlobsCache = {}
-        this.cache = {}
+        this.mResourceReader = null
+        this.mSvgBlobsCache = {}
+        this.mCache = {}
     }
 
     initResources(dataFile:ArrayBuffer) {
-        this.resourceReader = new ResourceReader(dataFile)
+        this.mResourceReader = new ResourceReader(dataFile)
     }
 
 
     getBufferById(id:number):ByteBufferOffset {
-        let out = this.resourceReader.getFileByIndex(id)
+        let out = this.mResourceReader.getFileByIndex(id)
         out.reset()
         return out
     }
@@ -28,11 +28,11 @@ export class BinaryResources extends Resources {
 
     getDataString(id:number,cache = true):string{
         if (cache){
-            if (this.cache[id]){
-                return this.cache[id]
+            if (this.mCache[id]){
+                return this.mCache[id]
             }else{
                 let value = this.getBufferById(id).toUTFString()
-                this.cache[id] = value
+                this.mCache[id] = value
                 return value
             }
         }
@@ -41,12 +41,12 @@ export class BinaryResources extends Resources {
 
     getSVGImageBlob(id:number):Blob {
 
-        let blob = this.svgBlobsCache[id]
+        let blob = this.mSvgBlobsCache[id]
         if (blob) {
             return blob
         }
         blob = URL.createObjectURL(new Blob([this.getBufferById(id).toUTFString()], {type: 'image/svg+xml'}));
-        this.svgBlobsCache[id] = blob
+        this.mSvgBlobsCache[id] = blob
         return blob
     }
 }

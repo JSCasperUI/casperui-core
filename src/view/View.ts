@@ -5,15 +5,20 @@ import {ViewAttributes} from "@casperui/core/view/ViewAttributes";
 
 export type ViewTag = string|Element
 export class View extends ViewNode {
+    private mId:number = -1
+    private mContext:Context
+    private mChildren:Array<View> = []
+    private mCurrentSVGContentId:Number = -1;
+    private mIsWaitingDom:boolean = false
 
-    id:number = -1
-    context:Context
+    static  CLICK = "click"
+    static  MOUSE_OVER = "mouseover"
+    static  MOUSE_DOUBLE_CLICK = "dblclick"
+    static  MOUSE_MOVE = "mousemove"
+    static  MOUSE_OUT = "mouseout"
+    static  MOUSE_DOWN = "mousedown"
+    static  MOUSE_UP = "mouseup"
 
-    children:Array<View> = []
-
-    currentSVGContentId:Number = -1;
-    isWaitingDom:boolean = false
-    inflater:BXMLInflater
 
     constructor(context:Context,tag?:ViewTag,attr?:ViewAttributes) {
         if (!tag){
@@ -21,7 +26,7 @@ export class View extends ViewNode {
         }else {
             if (tag instanceof Element){
                 super("div")
-                this.node = tag
+                this.mNode = tag
             }else {
                 super(tag)
             }
@@ -30,57 +35,39 @@ export class View extends ViewNode {
             }
         }
 
-
-        // if (!args) {
-        //     super("div");
-        //     this.id = -1
-        // } else if (args.length === 1 && typeof args[0] === "string"){//(context: Context, tag: String)
-        //     super(args[0]);
-        //     this.id = -1
-        // } else if (args.length === 1 && typeof args[0] === "object"){//(context: Context, tag: Element)
-        //     super("div");
-        //     this.node = args[0]
-        //     this.id = -1
-        // }else if (args.length === 2 ){//(context: Context, tag: String, attributes:HashMap<String, DType>)
-        //     super(args[0]);
-        //     this.id = -1
-        //     if (args[1]){
-        //         this.appendAttributes(args[1])
-        //     }
-        // }else{
-        //     super("div");
-        //     this.id = -1
-        // }
-        this.context = context
+        this.mContext = context
 
     }
 
-    init(){
-        this.id = -1
+    getId(){
+        return this.mId
+    }
+    setId(id:number){
+        this.mId = id
     }
 
+
+    ctx():Context {
+        return this.mContext
+    }
 
     inflateSelf(id:number,cache:boolean){
-        this.inflater = this.context.getInflater()// (this.context as Activity).getLayoutInflater()
-        this.inflater.inflate(id, cache, this, true)
+        this.mContext.getInflater().inflate(id, cache, this, true)
     }
 
 
 
     waitingSelf( callback: () => void) {
-        if (this.isWaitingDom) return;
+        if (this.mIsWaitingDom) return;
 
 
-        if (document.body.contains(this.node)) {
+        if (document.body.contains(this.mNode)) {
             requestAnimationFrame(() => callback());
             return;
         }
-
-
-        // Иначе наблюдаем за добавлением элемента в DOM
         const observer = new MutationObserver(() => {
-            if (document.body.contains(this.node)) {
-                this.isWaitingDom = false
+            if (document.body.contains(this.mNode)) {
+                this.mIsWaitingDom = false
                 requestAnimationFrame(() => {
                     callback(); // Элемент добавлен и размеры корректны
                 });
@@ -92,40 +79,50 @@ export class View extends ViewNode {
     }
 
 
-    /** @public */
+
     onViewChildInflated(){
     }
 
     appendAttributes(attrs:any){
-        if (!this.node){
+        if (!this.mNode){
             return
         }
-        for (const key in attrs) {
+        let keys = Object.keys(attrs)
 
-
+        for (let i = 0; i < keys.length; i++) {
+            const key = keys[i]
             if (key === "id") {
-                this.id = parseInt(attrs[key])
+                this.mId = parseInt(attrs[key])
             }else if (key === "class"){
                 this.addClassList(attrs[key])
             }else{
-                 this.getElement().setAttribute(key,attrs[key])
-             }
-            // this.node.setAttribute(key,attrs[key])
+                (this.mNode as HTMLElement).setAttribute(key,attrs[key])
+            }
         }
+
+        // for (const key in attrs) {
+        //     if (key === "id") {
+        //         this.id = parseInt(attrs[key])
+        //     }else if (key === "class"){
+        //         this.addClassList(attrs[key])
+        //     }else{
+        //          this.getElement().setAttribute(key,attrs[key])
+        //      }
+        // }
     }
     addView(view:View,index?:number){
         if (index === undefined || index === -1){
-            index = this.children.length
+            index = this.mChildren.length
         }
-        this.children.splice( index, 0,view);
-        this.node.insertBefore(view.getNode(), this.node.childNodes[index])
+        this.mChildren.splice( index, 0,view);
+        this.mNode.insertBefore(view.getNode(), this.mNode.childNodes[index])
         // this.node.parentNode.insertBefore(view.getNode(),this.node.nextSibling)
         // this.node.insertBefore(view.getNode(), this.node.childNodes[index])
     }
     removeAllViews(){
-        this.children = []
+        this.mChildren = [];
 
-        this.getElement().innerHTML = ""
+        (this.mNode as HTMLElement).innerHTML = ""
     }
 
 
@@ -144,13 +141,13 @@ export class View extends ViewNode {
         if (index===-1){
             return
         }
-        this.children.splice(index, 1);
-        this.node.removeChild(content.getNode())
+        this.mChildren.splice(index, 1);
+        this.mNode.removeChild(content.getNode())
     }
 
 
     byId(id:number):View|null{
-        if (this.id === id){
+        if (this.mId === id){
             return this
         }
         for (const child of this.getChildren()) {
@@ -166,7 +163,7 @@ export class View extends ViewNode {
 
 
     getChildren():Array<View>{
-        return this.children
+        return this.mChildren
     }
 
     inViewInflated(){
@@ -188,60 +185,66 @@ export class View extends ViewNode {
 
     }
 
-    getHeight(){
-        return (this.node as HTMLElement).clientHeight
-    }
     getWidth(){
-        return (this.node as HTMLElement).clientWidth
+        return (this.mNode as HTMLElement).clientWidth
+    }
+    getHeight(){
+        return (this.mNode as HTMLElement).clientHeight
     }
 
     setWidth(width:number) {
-        (this.node as HTMLElement).style.width = `${width}px`
+        (this.mNode as HTMLElement).style.width = `${width}px`
     }
-
+    setHeight(height:number) {
+        (this.mNode as HTMLElement).style.height = `${height}px`
+    }
 
     setOpacity(value:number){
         if (value === 1){
-            (this.node as HTMLElement).style.opacity = ''
+            (this.mNode as HTMLElement).style.opacity = ''
         }else{
-            (this.node as HTMLElement).style.opacity = `${value}`
+            (this.mNode as HTMLElement).style.opacity = `${value}`
         }
     }
     getOpacity(){
-        return parseFloat((this.node as HTMLElement).style.opacity)
+        return parseFloat((this.mNode as HTMLElement).style.opacity)
     }
     getVisibility():boolean {
-        return (this.node as HTMLElement).style.display !== "none";
+        return (this.mNode as HTMLElement).style.display !== "none";
     }
     setVisibility(value:boolean){
         if (value){
-            (this.node as HTMLElement).style.display = "";
+            (this.mNode as HTMLElement).style.display = "";
         }else{
-            (this.node as HTMLElement).style.display = "none";
+            (this.mNode as HTMLElement).style.display = "none";
         }
     }
 
 
-    setHeight(height:number) {
-        (this.node as HTMLElement).style.height = `${height}px`
-    }
+
     setTextContent(text:string){
-        this.node.textContent = text
+        this.mNode.textContent = text
     }
 
     isHovered():boolean{
-        return (this.node as HTMLElement).matches(':hover')
+        return (this.mNode as HTMLElement).matches(':hover')
     }
     addClassList(className:string){
-        if (className && className.length)
-        className.split(" ").forEach(cName=> (this.node as HTMLElement).classList.add(cName))
+        if (className && className.length){
+            if (className.indexOf(" ")>0){
+                className.split(" ").forEach(cName=> (this.mNode as HTMLElement).classList.add(cName))
+            }else{
+                (this.mNode as HTMLElement).classList.add(className);
+            }
+        }
+
 
     }
     addClass(className:string){
-        (this.node as HTMLElement).classList.add(className)
+        (this.mNode as HTMLElement).classList.add(className)
     }
     removeClass(className:string){
-        (this.node as HTMLElement).classList.remove(className)
+        (this.mNode as HTMLElement).classList.remove(className)
     }
     swapClass(removeClass:string,setClass:string){
         this.removeClass(removeClass)
@@ -249,39 +252,39 @@ export class View extends ViewNode {
     }
 
     getValue(){
-        return (this.node as HTMLInputElement).value
+        return (this.mNode as HTMLInputElement).value
     }
     setValue(value:string|number){
         if (typeof value === "string") {
-            (this.node as HTMLInputElement).value = value
+            (this.mNode as HTMLInputElement).value = value
         }else{
-            (this.node as HTMLInputElement).value = value.toString()
+            (this.mNode as HTMLInputElement).value = value.toString()
 
         }
     }
 
     setBoolValue(value:boolean){
-        (this.node as HTMLInputElement).checked = value
+        (this.mNode as HTMLInputElement).checked = value
     }
     isChecked(){
-        return (this.node as HTMLInputElement).checked
+        return (this.mNode as HTMLInputElement).checked
     }
 
     setLeft(value:number){
-        (this.node as HTMLElement).style.left = `${value}px`
+        (this.mNode as HTMLElement).style.left = `${value}px`
     }
     getLeft():number{
-        let v = (this.node as HTMLElement).style.left
+        let v = (this.mNode as HTMLElement).style.left
         if (v.length === 0){
             return 0
         }
         return parseFloat(v.replace("px",""))
     }
     setTop(value:number){
-        (this.node as HTMLElement).style.top = `${value}px`
+        (this.mNode as HTMLElement).style.top = `${value}px`
     }
     getTop():number{
-        let v = (this.node as HTMLElement).style.top
+        let v = (this.mNode as HTMLElement).style.top
         if (v.length === 0){
             return 0
         }
@@ -291,6 +294,9 @@ export class View extends ViewNode {
 
     setOnClickListener(func:EventListenerOrEventListenerObject){
         this.makeSafeEvent("click",func)
+    }
+    vEvent(event:string,func:EventListenerOrEventListenerObject){
+        this.makeSafeEvent(event,func)
     }
 
 
@@ -354,11 +360,11 @@ export class View extends ViewNode {
     }
 
     setParameter(name:string, value:any) {
-        this.getElement().setAttribute(name, value)
+        (this.mNode as HTMLElement).setAttribute(name, value)
     }
 
     getParameter(name:string):string {
-        return this.getElement().getAttribute(name)
+        return (this.mNode as HTMLElement).getAttribute(name)
     }
 
     getParent(){
@@ -366,29 +372,29 @@ export class View extends ViewNode {
     }
 
     setSVGContent(svg:string){
-        (this.node as HTMLElement).innerHTML = svg
+        (this.mNode as HTMLElement).innerHTML = svg
     }
 
     setSVGById(id:number){
-        if (this.currentSVGContentId !== id){
-            this.currentSVGContentId = id;
-            (this.node as HTMLElement).innerHTML = this.context.getResources().getDataString(id)
+        if (this.mCurrentSVGContentId !== id){
+            this.mCurrentSVGContentId = id;
+            (this.mNode as HTMLElement).innerHTML = this.mContext.getResources().getDataString(id)
         }
 
     }
 
     setImageSrc(url:string){
-        (this.node as HTMLImageElement).src = url// `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svgString)}`
+        (this.mNode as HTMLImageElement).src = url// `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svgString)}`
     }
 
 
     getScrollY():number {
-        return (this.node as HTMLElement).scrollTop
+        return (this.mNode as HTMLElement).scrollTop
     }
 
 
     getScrollX():number {
-        return (this.node as HTMLElement).scrollLeft
+        return (this.mNode as HTMLElement).scrollLeft
     }
 
 

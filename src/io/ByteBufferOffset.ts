@@ -2,7 +2,7 @@ const decoder = new TextDecoder();
 
 
 export class ByteBufferOffset {
-    private arr: DataView | undefined;
+    arr: DataView | undefined;
     public pos: number;
     public size: number;
 

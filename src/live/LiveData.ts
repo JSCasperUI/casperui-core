@@ -1,40 +1,39 @@
 import {ILiveManager} from "@casperui/core/live/ILiveManager";
 import {LiveManager} from "@casperui/core/live/LiveManager";
 
-
+export type ObserverCallback<T> = (value: T) => void
 
 export class LiveData<T> {
-    value:T
-    observers = new Map();
-    publishHistory = new Map();
-    constructor(initialValue:T) {
-        this.value = initialValue;
+    protected mValue: T
+    protected mObservers: Map<WeakRef<LiveManager>, WeakRef<ObserverCallback<T>>> = new Map();
+    protected mPublishHistory = new Map();
+
+    constructor(initialValue: T) {
+        this.mValue = initialValue;
     }
 
     getValue() {
-        return this.value;
+        return this.mValue;
     }
 
-    pushValueToArray(item:T) {
-        if (Array.isArray(this.value)) {
-            this.value.push(item)
+    pushValueToArray(item: T) {
+        if (Array.isArray(this.mValue)) {
+            this.mValue.push(item)
             this.clearPublishHistory();
             this.notifyObservers();
         }
     }
 
 
-
-
-    setValue(newValue:T) {
-            this.value = newValue;
-            this.clearPublishHistory(); // Сбрасываем историю публикаций при изменении
-            this.notifyObservers();
+    setValue(newValue: T) {
+        this.mValue = newValue;
+        this.clearPublishHistory();
+        this.notifyObservers();
     }
 
 
-    observe(observer:ILiveManager, callback: (value: T) => void) {
-        if (!observer.innerBinders){
+    observe(observer: ILiveManager, callback: ObserverCallback<T>) {
+        if (!observer.innerBinders) {
             observer.innerBinders = []
         }
         callback = callback.bind(observer)
@@ -43,14 +42,14 @@ export class LiveData<T> {
         let rfa = new WeakRef(lm);
         let cbRef = new WeakRef(callback);
 
-        this.observers.set(rfa, cbRef);
+        this.mObservers.set(rfa, cbRef);
 
         if (lm) {
             lm.registerLiveData(this);
         }
-        if (lm.isActive) {
-            callback(this.value);
-            this.publishHistory.set(cbRef, true);
+        if (lm.hasActive()) {
+            callback(this.mValue);
+            this.mPublishHistory.set(cbRef, true);
         }
     }
 
@@ -60,35 +59,36 @@ export class LiveData<T> {
     }
 
     notifyObservers() {
-        this.observers.forEach((callback, mObserver) => {
+        this.mObservers.forEach((callback, mObserver) => {
             let ref = mObserver.deref()
             let cb = callback.deref()
             if (!ref || !cb) {
-                this.observers.delete(mObserver)
+                this.mObservers.delete(mObserver)
             } else {
-                if (ref.isActive && !this.publishHistory.get(callback)) {
-                    cb(this.value);
-                    this.publishHistory.set(callback, true);
+                if (ref.hasActive() && !this.mPublishHistory.get(callback)) {
+                    cb(this.mValue);
+                    this.mPublishHistory.set(callback, true);
                 }
             }
 
         });
     }
 
-    notifyObserver(observer:LiveManager) {
-        this.observers.forEach((callback, mObserver) => {
+    notifyObserver(observer: LiveManager) {
+        this.mObservers.forEach((callback, mObserver) => {
             if (mObserver.deref() === observer) {
                 let cb = callback.deref()
-                if (cb && !this.publishHistory.get(callback)) {
-                    cb(this.value);
-                    this.publishHistory.set(callback, true);
+                if (cb && !this.mPublishHistory.get(callback)) {
+                    cb(this.mValue);
+                    this.mPublishHistory.set(callback, true);
                 }
 
             }
         });
 
     }
+
     clearPublishHistory() {
-        this.publishHistory.clear();
+        this.mPublishHistory.clear();
     }
 }

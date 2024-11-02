@@ -1,57 +1,54 @@
 import {NodeType} from "@casperui/core/view/nodes/NodeType";
 
 export class ViewNode {
-    private type:NodeType
-    node:Node
+    private mType:NodeType
+    mNode:Node
 
     constructor(type:NodeType|string,content?:string) {
-        this.type = NodeType.ELEMENT;
+        this.mType = NodeType.ELEMENT;
         if (typeof type === "string") {
             if (type.startsWith("#") && type === "#t") {
-                this.node = document.createTextNode("");
+                this.mNode = document.createTextNode("");
             }else {
                 if (type === "WTAG"){
 
                 }else{
-                    this.node = document.createElement(type);
+                    this.mNode = document.createElement(type);
                 }
 
             }
         }else{
-            this.type = type;
+            this.mType = type;
             switch (type) {
                 case NodeType.TEXT:{
-                    this.node = document.createTextNode(content)
+                    this.mNode = document.createTextNode(content)
                     break
                 }
                 case NodeType.STYLE: {
-                    this.node = document.createElement("style");
-                    (this.node as HTMLElement).innerHTML = content
+                    this.mNode = document.createElement("style");
+                    (this.mNode as HTMLElement).innerHTML = content
                     break
                 }
                 case NodeType.SCRIPT: {
-                    this.node = document.createElement("script");
-                    (this.node as HTMLElement).innerHTML = content
+                    this.mNode = document.createElement("script");
+                    (this.mNode as HTMLElement).innerHTML = content
                     break
                 }
                 case NodeType.SVG: {
-                    this.node = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-                    (this.node as HTMLElement).innerHTML = content
+                    this.mNode = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+                    (this.mNode as HTMLElement).innerHTML = content
                     break
                 }
             }
         }
-
-
-
     }
 
     getNode():Node{
-        return this.node
+        return this.mNode
     }
 
     getElement():HTMLElement{
-        return this.node as HTMLElement
+        return this.mNode as HTMLElement
     }
 }
 

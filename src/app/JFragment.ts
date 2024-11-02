@@ -7,30 +7,36 @@ import {Activity} from "@casperui/core/app/Activity";
 import {View} from "@casperui/core/view/View";
 import {BXMLInflater} from "@casperui/core/view/inflater/BXMLInflater";
 import {ViewAttributes} from "@casperui/core/view/ViewAttributes";
+import {PostAction} from "@casperui/core/space/PostAction";
 
 export type FragmentResizeHandler = (newWidth:number, newHeight:number) => void;
-export abstract class JFragment implements ILiveManager,IFragmentManager {
-    fragmentMemory = createFragmentMemory();
-    liveManager = new LiveManager();
-    fragmentManager = new FragmentManager(this)
+
+
+export abstract class JFragment implements ILiveManager, IFragmentManager {
+
+    static readonly POST_A_ATTACHED = 1;
+
+
+    private fragmentMemory = createFragmentMemory();
+    private liveManager = new LiveManager();
+    private fragmentManager = new FragmentManager(this)
 
     private mResizeObserver:ResizeObserver = null
-    mBaseView:View
+    private mBaseView:View
     mContext:Context
-    mIsAttached = false
-    mParent:WeakRef<JFragment> = null
+    private mIsAttached = false
+    private mParent:WeakRef<JFragment> = null
+    private isSingleAttached = false
 
-    isSingleAttached = false
+    private mPostActions = new PostAction<number>()
 
 
     constructor(context:Context) {
-
-
         this.mBaseView = null;
         this.mContext = context
 
     }
-    getContext(){
+    ctx(){
         return this.mContext
     }
 
@@ -53,7 +59,7 @@ export abstract class JFragment implements ILiveManager,IFragmentManager {
     }
 
 
-    getParent():JFragment|null{
+    getParentFragment():JFragment|null{
         if (this.mParent){
             return this.mParent.deref()
         }
@@ -64,21 +70,21 @@ export abstract class JFragment implements ILiveManager,IFragmentManager {
         return this.mContext as Activity
     }
 
+    postAttach(func:any){
+        this.mPostActions.run(JFragment.POST_A_ATTACHED,func)
+    }
+
     attach(){
 
-            // if (!this.isSingleAttached){
-            //     this.isSingleAttached = true
-            //     this.onAttachSingle()
-            // }
-            // this.onAttach()
 
-            this.getFragmentManager().attachFragmentManager()
-            this.mIsAttached = true
-            this.liveManager.activate()
+        this.getFragmentManager().attachFragmentManager()
+        this.mIsAttached = true
+        this.liveManager.activate()
 
         if (!this.isSingleAttached){
             this.isSingleAttached = true
             this.onAttachSingle()
+            this.mPostActions.doneAction(JFragment.POST_A_ATTACHED)
         }
         this.onAttach()
         // requestAnimationFrame(()=>{
@@ -98,26 +104,17 @@ export abstract class JFragment implements ILiveManager,IFragmentManager {
         return this.mIsAttached
     }
 
-    detach(){
+    detachFragment(){
         this.mIsAttached = false
         this.getFragmentManager().detachFragmentManager()
         this.onDetach()
         this.liveManager.deactivate()
     }
 
-    protected onAttach(){
-
-    }
-
-    protected onAttachSingle(){
-
-    }
-
-
-
-    protected onDetach(){
-
-    }
+    protected onAttach(){}
+    protected onAttachSingle(){}
+    protected onDetach(){}
+    onCreated(){}
 
     isFragmentCreated(){
         return this.mBaseView != null
@@ -134,15 +131,13 @@ export abstract class JFragment implements ILiveManager,IFragmentManager {
 
 
     byId(id:number):View{
-        if (this.mBaseView.id === id){
+        if (this.mBaseView.getId() === id){
             return this.mBaseView
         }
         return this.mBaseView.byId(id)
     }
 
-    onCreated(){
 
-    }
 
 
     getFragmentMemory(): FragmentMemory {
@@ -150,7 +145,6 @@ export abstract class JFragment implements ILiveManager,IFragmentManager {
     }
 
     innerBinders: any;
-
 
     onSizeChangeListener(handler:FragmentResizeHandler){
         if (this.mResizeObserver){
