@@ -1,25 +1,32 @@
 const {ByteBufferOutputStream} = require("./ByteBufferOutputStream");
 
-const DIR = {
+const TREE_DIRECTION = {
     LINE:0,
     INSIDE_LINE:0x40,
     INSIDE_BACK:0x80,
     BACK:0xC0,
 }
-module.exports.DIR = DIR
-const HEADER = "CASB"
-const VERSION = 1
+module.exports.TDIR = TREE_DIRECTION
+
+const HEADER = [0xCA,0xBB]
+const RESERVED_TYPES = [7,8,11,12,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31];
+const DYNAMIC_TYPE_MASK = 0xFFFFD9FF
+const FORMAT_VERSION = 1
 const DYNAMIC_TYPE = {
-    IDENTIFIER     : 16,
-    UINT_16        : 17,
-    FLOAT_64       : 18,
-    UINT_32        : 19,
-    UINT_64        : 21,
-    FLOAT_32       : 22,
-    SVG_PATH       : 23,
-    EXTENSION      : 24,
+    UINT_16       : 0,
+    UINT_32       : 1,
+    UINT_64       : 2,
+    FLOAT_32      : 3,
+    FLOAT_64      : 4,
+    SVG_PATH      : 5,
+    IDENTIFIER    : 6,
 }
+
+
+const TYPE_MASK = 0xFF_FF_D9_FF
 module.exports.DYNAMIC_TYPE = DYNAMIC_TYPE
+
+
 class Dictionary {
     constructor(extension) {
         this.extension = extension
@@ -29,51 +36,47 @@ class Dictionary {
         this.valuesMap = new Map()
         this.keysMap = new Map()
         this.tagsMap = new Map()
-
-
-        this.fileSize = 0
         this.treeBuffer = new ByteBufferOutputStream()
-        this.output = new ByteBufferOutputStream()
 
     }
 
     writeTag(tag) {
         this.treeBuffer.writeVarInt(tag)
     }
+
     writeAttributesLengthAndDirection(size, dir) {
         this.treeBuffer.writeByte(size | dir)
     }
+
     writeAttribute(key, value) {
         this.treeBuffer.writeVarInt(key)
         this.treeBuffer.writeVarInt(value)
     }
+
+    writeDataArray(output, items) {
+        for (let i = 0; i < items.length; i++) {
+            output.writeVarInt(items[i].length);
+            output.writeBytes(items[i]);
+        }
+    }
+
     createIndexedBuffer() {
-        console.log("createIndexedBuffer")
-        this.output.writeBytes(HEADER)
-        this.output.writeByte(VERSION)
-        this.output.writeVarInt(this.tags.length)
-        this.output.writeVarInt(this.keys.length)
-        this.output.writeVarInt(this.values.length)
-        for (const str of this.tags) {
-            this.output.writeVarInt(str.length)
-            this.output.writeBytes(str)
-        }
-        for (const str of this.keys) {
-            this.output.writeVarInt(str.length)
-            this.output.writeBytes(str)
-        }
 
-        for (let i = 0; i < this.values.length; i++) {
-            this.output.writeVarInt(this.values[i].length)
-            this.output.writeBytes(this.values[i])
-        }
-        // for (const str of this.values) {
-        //     this.output.writeVarInt(str.length)
-        //     this.output.writeBytes(str)
-        // }
+        let output = new ByteBufferOutputStream()
+        output.writeBytes(HEADER)
+        output.writeByte(FORMAT_VERSION)
 
-        this.output.writeBytes(this.treeBuffer.toByteArray())
-        return this.output.toByteArray()
+
+        output.writeVarInt(this.tags.length)   //Tags count
+        output.writeVarInt(this.keys.length)   //keys count
+        output.writeVarInt(this.values.length) //values count
+
+        this.writeDataArray(output,this.tags)
+        this.writeDataArray(output,this.keys)
+        this.writeDataArray(output,this.values)
+
+        output.writeBytes(this.treeBuffer.toByteArray())
+        return output.toByteArray()
     }
     tag(value) {
         if (value === "#text"){
@@ -105,21 +108,13 @@ class Dictionary {
 
 
     value(mValue) {
-        let tValue = Buffer.from(mValue.trim())
-        let valString = tValue.toString()
-        if (this.valuesMap.has(valString)){
-            return this.valuesMap.get(valString)
+        let tValue = Buffer.from(mValue)
+        if (this.valuesMap.has(mValue)){
+            return this.valuesMap.get(mValue)
         }
-        // for (let i = 0; i < this.values.length; i++) {
-        //     if (tValue.equals(this.values[i])){
-        //         return i
-        //     }
-        // }
 
-        this.fileSize += tValue.length + 1
         this.values.push(tValue)
-
-        this.valuesMap.set(valString,this.values.length - 1)
+        this.valuesMap.set(mValue,this.values.length - 1)
         return this.values.length - 1
     }
 
@@ -131,13 +126,13 @@ class Dictionary {
         }
 
         let tValue = Buffer.concat([Buffer.from([type]),Buffer.from(mValue)])
-        for (let i = 0; i < this.values.length; i++) {
-            if (tValue.equals(this.values[i])){
-                return i
-            }
+        let strVal = tValue.toString()
+        if (this.valuesMap.has(strVal)){
+            return this.valuesMap.get(strVal)
         }
-        this.fileSize += tValue.length + 1
+
         this.values.push(tValue)
+        this.valuesMap.set(strVal,this.values.length - 1)
         return this.values.length - 1
     }
 }

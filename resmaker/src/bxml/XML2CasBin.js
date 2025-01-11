@@ -1,4 +1,4 @@
-const {Dictionary, DIR, DYNAMIC_TYPE} = require("./Dictionary");
+const {Dictionary, TDIR, DYNAMIC_TYPE} = require("./Dictionary");
 const {HTMLParser} = require("../xml/HTMLParser");
 const {xml2Tree} = require("../xml/XMLTree");
 const {minifyCSS} = require("./utils/css");
@@ -41,7 +41,6 @@ function checkIdentifier(name) {
 }
 
 
-//{tag:xmlNode.name,isText:false,textContent:content,attrs:[],childNodes:[]}
 class XML2CasBin {
     constructor(extension,resourceConstID) {
         this.extension = extension;
@@ -70,15 +69,15 @@ class XML2CasBin {
         let direct;
         if (node.childNodes.length === 0){
             if (isLastChild){
-                direct = DIR.BACK
+                direct = TDIR.BACK
             }else{
-                direct = DIR.LINE
+                direct = TDIR.LINE
             }
         }else{
             if (isLastChild){
-                direct = DIR.INSIDE_BACK
+                direct = TDIR.INSIDE_BACK
             }else{
-                direct = DIR.INSIDE_LINE
+                direct = TDIR.INSIDE_LINE
             }
         }
 
@@ -117,6 +116,7 @@ class XML2CasBin {
 
         this.dictatory.writeTag(tagIndex)
         this.dictatory.writeAttributesLengthAndDirection(Object.keys(node.attrs).length,direct)
+
         for (const aKey in node.attrs) {
             let key = this.dictatory.key(aKey)
             let value = 0

@@ -7,4 +7,5 @@ export abstract class Resources {
     abstract getSVGImageBlob(id:number)
 
     abstract getDataString(id:number,cache?:boolean):string
+    abstract getSvgUrlBase64(id:number,cache?:boolean):string
 }

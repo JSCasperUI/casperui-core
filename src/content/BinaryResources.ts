@@ -38,6 +38,9 @@ export class BinaryResources extends Resources {
         }
         return this.getBufferById(id).toUTFString()
     }
+    getSvgUrlBase64(id: number, cache?: boolean): string {
+        return `url(data:image/svg+xml;base64,${btoa(this.getDataString(id,cache))})`;
+    }
 
     getSVGImageBlob(id:number):Blob {
 

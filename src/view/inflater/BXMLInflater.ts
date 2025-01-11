@@ -11,6 +11,7 @@ import {WidgetRegistrar} from "@casperui/core/view/inflater/WidgetRegistrar";
 export class BXMLInflater {
 
     mContext:Context;
+
     cacheNodes:Record<number, BXNode>
     constructor(context:Context) {
         this.mContext = context;
@@ -76,7 +77,6 @@ export class BXMLInflater {
         }
 
         buildXml(obj);
-
         return xml;
     }
 

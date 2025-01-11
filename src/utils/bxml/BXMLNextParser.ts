@@ -7,23 +7,34 @@ const DIR_INSIDE_BACK = 0x80
 const DIR_BACK = 0xC0
 
 const DYNAMIC_TYPE = {
-    UINT_16       : 0,
-    UINT_32       : 1,
-    UINT_64       : 2,
-    FLOAT_32      : 3,
-    FLOAT_64      : 4,
-    SVG_PATH      : 5,
-    IDENTIFIER    : 6,
+    MIN            : 15,
+    IDENTIFIER     : 16,
+    UINT_16        : 17,
+    FLOAT_64       : 18,
+    UINT_32        : 19,
+    UINT_64        : 21,
+    FLOAT_32       : 22,
+    SVG_PATH       : 23,
+    EXTENSION      : 24,
+    MAX            : 25
 }
-const TYPE_MASK = 0xFF_FF_D9_FF
-export class BXMLParser {
+const END_TAG = 0
+const END_DOCUMENT = 1
+const START_TAG = 2
+export interface BXNodeNext {
+    tag:string;
+    isText:boolean;
+    attrs:Record<string, string|number>|null
+}
+
+export class BXMLNextParser {
     private mData:ByteBufferOffset
     private mTree:ByteBufferOffset
     private mTags:Array<string>
     private mKeys:Array<string>
     private mValues:Array<string|number>
 
-    private mRoot:BXNode = { tag: "root", isText: false, children: [], attrs: {} };
+    private mRoot:BXNode = {tag: "root", isText: false, children: [], attrs: {} };
 
 
     constructor(data:ByteBufferOffset) {
@@ -36,7 +47,7 @@ export class BXMLParser {
     }
     initBXMLParser(){
 
-        this.mData.setPosition(3)
+        this.mData.setPosition(5)
 
         let tagSize = this.mData.readIndex()
         let keySize = this.mData.readIndex()
@@ -54,7 +65,7 @@ export class BXMLParser {
         for (let i = 0; i < valueSize; i++) {
             size = this.mData.readIndex()
             let type = this.mData.get(this.mData.pos)
-            if (type < 8) {
+            if (type > DYNAMIC_TYPE.MIN && type < DYNAMIC_TYPE.MAX) {
                 if (type === DYNAMIC_TYPE.IDENTIFIER) {
                     this.mData.positionOffset(1)
                     this.mValues.push(this.mData.read16BE())
@@ -70,6 +81,8 @@ export class BXMLParser {
         this.startReadTag(this.mRoot)
         return this.mRoot.children[0]
     }
+
+
     startReadTag(node:BXNode,depth = 1){
         if (!this.mTree.hasRemaining()){
             return false
@@ -91,16 +104,16 @@ export class BXMLParser {
                     child.attrs[name] = this.mValues[this.mTree.readIndex()]
                 }
             }
+
             switch (dir) {
                 case DIR_INSIDE_BACK:{
                     return this.startReadTag(child, depth + 1)
                 }
-                case DIR_BACK:{
+                case DIR_BACK: {
                     return false
                 }
                 case DIR_INSIDE_LINE:{
-                    let ld = depth + 1
-                    while (this.startReadTag(child, ld)) {}
+                    while (this.startReadTag(child, depth + 1)) {}
                 }
             }
         }

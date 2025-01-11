@@ -114,7 +114,7 @@ export abstract class JFragment implements ILiveManager, IFragmentManager {
     protected onAttach(){}
     protected onAttachSingle(){}
     protected onDetach(){}
-    onCreated(){}
+    onCreated():void{}
 
     isFragmentCreated(){
         return this.mBaseView != null

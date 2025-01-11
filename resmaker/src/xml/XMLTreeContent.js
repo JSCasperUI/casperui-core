@@ -16,8 +16,6 @@ function xml2TreeContent(xmlParser,node,depth = 0){
         }
     }
 
-
-
     if (node!=null && content.length===0){
         node.childNodes.push(child)
 
@@ -40,8 +38,6 @@ function xml2TreeContent(xmlParser,node,depth = 0){
         }
 
     }
-
-
     return node
 }
 module.exports.xml2TreeContent = xml2TreeContent

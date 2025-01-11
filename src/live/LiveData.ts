@@ -24,11 +24,18 @@ export class LiveData<T> {
         }
     }
 
-
     setValue(newValue: T) {
         this.mValue = newValue;
         this.clearPublishHistory();
         this.notifyObservers();
+    }
+
+    setIfChanged(newValue: T) {
+        if (newValue!=this.mValue){
+            this.mValue = newValue;
+            this.clearPublishHistory();
+            this.notifyObservers();
+        }
     }
 
 

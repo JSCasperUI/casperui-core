@@ -22,6 +22,11 @@ export class Paint {
     private mStyle = 1
     private mFontSize = 18
 
+    constructor(style?:number) {
+        if (style){
+            this.setStyle(style)
+        }
+    }
 
 
 

@@ -4,6 +4,8 @@ import {BXMLInflater} from "@casperui/core/view/inflater/BXMLInflater";
 import {ViewAttributes} from "@casperui/core/view/ViewAttributes";
 
 export type ViewTag = string|Element
+
+type FEvent = (event:UIEvent)=>any
 export class View extends ViewNode {
     private mId:number = -1
     private mContext:Context
@@ -145,6 +147,14 @@ export class View extends ViewNode {
         this.mNode.removeChild(content.getNode())
     }
 
+
+    byIds(ids:number[]):View[]{
+        let out = []
+        for (let i = 0; i < ids.length; i++) {
+            out.push(this.byId(ids[i]))
+        }
+        return out
+    }
 
     byId(id:number):View|null{
         if (this.mId === id){
@@ -292,15 +302,15 @@ export class View extends ViewNode {
     }
 
 
-    setOnClickListener(func:EventListenerOrEventListenerObject){
+    setOnClickListener(func:FEvent){
         this.makeSafeEvent("click",func)
     }
-    vEvent(event:string,func:EventListenerOrEventListenerObject){
+    vEvent(event:string,func:FEvent){
         this.makeSafeEvent(event,func)
     }
 
 
-    makeSafeEvent(type:string,func:any){
+    makeSafeEvent(type:string,func:FEvent){
         if (this["_old_fn_"+type]) {
             this.getNode().removeEventListener(type, this["_old_fn_"+type]); // Удаление предыдущего обработчика
         }
@@ -314,48 +324,51 @@ export class View extends ViewNode {
         };
         this.getNode().addEventListener(type, this["_old_fn_"+type]);
     }
+    getStyle():CSSStyleDeclaration{
+        return (this.mNode as HTMLElement).style
+    }
 
-    onMouseOverListener(func:EventListenerOrEventListenerObject){
+    onMouseOverListener(func:FEvent){
         this.makeSafeEvent("mouseover",func)
     }
 
-    onMouseDoubleClickListener(func:EventListenerOrEventListenerObject){
+    onMouseDoubleClickListener(func:FEvent){
         this.makeSafeEvent("dblclick",func)
     }
 
 
-    onMouseOutListener(func:EventListenerOrEventListenerObject){
+    onMouseOutListener(func:FEvent){
         this.makeSafeEvent("mouseout",func)
     }
 
 
-    onMouseMoveListener(func:EventListenerOrEventListenerObject){
+    onMouseMoveListener(func:FEvent){
         this.makeSafeEvent("mousemove",func)
     }
 
-    onMouseClickListener(func:EventListenerOrEventListenerObject){
+    onMouseClickListener(func:FEvent){
         this.makeSafeEvent("click",func)
     }
 
 
-    onMouseDownListener(func:EventListenerOrEventListenerObject){
+    onMouseDownListener(func:FEvent){
         this.makeSafeEvent("mousedown",func)
     }
 
 
-    setOnMouseOver(func:EventListenerOrEventListenerObject){
+    setOnMouseOver(func:FEvent){
 
         this.makeSafeEvent("mouseover",func)
 
     }
 
 
-    setOnMouseOut(func:EventListenerOrEventListenerObject){
+    setOnMouseOut(func:FEvent){
         this.makeSafeEvent("mouseout",func)
 
     }
 
-    setOnFastClickListener(func:EventListenerOrEventListenerObject){
+    setOnFastClickListener(func:FEvent){
         this.makeSafeEvent("mousedown",func)
     }
 

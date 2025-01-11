@@ -9,7 +9,7 @@ function xml2Tree(xmlParser,node,depth = 0){
     let xmlNode = xmlParser.getFullTag()
     let content = xmlNode.content
     let child = {tag:xmlNode.name,isText:false,textContent:content,attrs:[],childNodes:[],line:xmlNode.line}
-    if (xmlNode.attributes.length>0){
+    if (xmlNode.attributes.length > 0 ){
         child.attrs = {}
         for (const attribute of xmlNode.attributes) {
             child.attrs[attribute.name] = attribute.value

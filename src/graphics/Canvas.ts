@@ -110,7 +110,7 @@ export class Canvas {
 
 
     drawBitmap(bitmap: Bitmap, paint: Paint, dst: Rect, src?: Rect): void {
-        paint.applyToContext(this.ctx2D);
+        if (paint) paint.applyToContext(this.ctx2D);
 
         if (src) {
             this.ctx2D.drawImage(
