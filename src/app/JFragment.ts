@@ -151,7 +151,8 @@ export abstract class JFragment implements ILiveManager, IFragmentManager {
             this.mResizeObserver.disconnect()
         }
         this.mResizeObserver = new ResizeObserver(entries => {
-            handler(entries[0].contentRect.width,entries[0].contentRect.height)
+            if (this.isAttached())
+                handler(entries[0].contentRect.width,entries[0].contentRect.height)
         })
         this.mResizeObserver.observe(this.getFragmentView().getElement());
     }

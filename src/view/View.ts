@@ -290,10 +290,29 @@ export class View extends ViewNode {
         }
         return parseFloat(v.replace("px",""))
     }
-    setTop(value:number){
-        (this.mNode as HTMLElement).style.top = `${value}px`
+    // setTop(value:number){
+    //     (this.mNode as HTMLElement).style.top = `${value}px`
+    // }
+
+    private _top: number = 0;
+    private _translateY: number = 0;
+
+    setTop(value: number) {
+        this._top = value;
+        (this.mNode as HTMLElement).style.top = value + "px";
     }
-    getTop():number{
+
+    setTranslateY(value:number) {
+        this._translateY = value;
+        (this.mNode as HTMLElement).style.transform = `translateY(${value}px)`;
+    }
+    getTranslateY():number{
+        return this._translateY
+    }
+    getTop(): number {
+        return this._top;
+    }
+    getTopReal():number{
         let v = (this.mNode as HTMLElement).style.top
         if (v.length === 0){
             return 0
