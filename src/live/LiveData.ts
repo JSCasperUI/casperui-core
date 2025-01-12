@@ -16,6 +16,11 @@ export class LiveData<T> {
         return this.mValue;
     }
 
+
+    update(){
+        this.clearPublishHistory();
+        this.notifyObservers();
+    }
     pushValueToArray(item: T) {
         if (Array.isArray(this.mValue)) {
             this.mValue.push(item)

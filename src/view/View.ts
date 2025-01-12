@@ -264,6 +264,13 @@ export class View extends ViewNode {
     getValue(){
         return (this.mNode as HTMLInputElement).value
     }
+    setSafeValue(value:any){
+        if (value === undefined || value === null){
+            this.setValue("")
+        }else{
+            this.setValue(value)
+        }
+    }
     setValue(value:string|number){
         if (typeof value === "string") {
             (this.mNode as HTMLInputElement).value = value
