@@ -1,7 +1,7 @@
 
 import {IFragmentManager} from "@casperui/core/app/IFragmentManager";
 import {JFragment} from "@casperui/core/app/JFragment";
-import {View} from "@casperui/core/view/View";
+import {IParentView, View} from "@casperui/core/view/View";
 
 export class FragmentManager {
     mManager:IFragmentManager
@@ -85,6 +85,7 @@ export class FragmentManager {
         }
 
         container.addView(fragment.getFragmentView());
+        fragment.getFragmentView().setParentView(this.mManager as unknown as IParentView)
         fragment.setParentFrame(new WeakRef(this.mManager))
         if (this.isAttached) {
             fragment.attach()
@@ -119,6 +120,7 @@ export class FragmentManager {
         // fragment.getFragmentView().id = containerId
 
         container.addView(fragment.getFragmentView());
+        fragment.getFragmentView().setParentView(this.mManager as unknown as IParentView)
         fragment.setParentFrame(new WeakRef(this.mManager))
         if (this.isAttached) {
             fragment.attach()
@@ -167,6 +169,7 @@ export class FragmentManager {
 
             container.removeView(oldView)
             container.addView(newFragment.getFragmentView(), index)
+            newFragment.getFragmentView().setParentView(this.mManager as unknown as IParentView)
             newFragment.attach()
         }
 

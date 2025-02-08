@@ -10,6 +10,7 @@ export const WidgetRegistrar = {
     register:function (className:string,constructor:ViewConstructor){
         classMap[className] = constructor;
     },
+
     createInstance:function (className:string,context:Context,tag:string,attributes:ViewAttributes) {
         if (classMap[className]) {
             return classMap[className](context,tag,attributes)

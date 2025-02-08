@@ -4,7 +4,7 @@ import {LiveManager} from "@casperui/core/live/LiveManager";
 import {createFragmentMemory, FragmentMemory, IFragmentManager} from "@casperui/core/app/IFragmentManager";
 import {FragmentManager} from "@casperui/core/app/FragmentManager";
 import {Activity} from "@casperui/core/app/Activity";
-import {View} from "@casperui/core/view/View";
+import {IParentView, View} from "@casperui/core/view/View";
 import {BXMLInflater} from "@casperui/core/view/inflater/BXMLInflater";
 import {ViewAttributes} from "@casperui/core/view/ViewAttributes";
 import {PostAction} from "@casperui/core/space/PostAction";
@@ -12,9 +12,12 @@ import {PostAction} from "@casperui/core/space/PostAction";
 export type FragmentResizeHandler = (newWidth:number, newHeight:number) => void;
 
 
-export abstract class JFragment implements ILiveManager, IFragmentManager {
+export abstract class JFragment implements ILiveManager, IFragmentManager,IParentView {
 
     static readonly POST_A_ATTACHED = 1;
+    static readonly POST_A_DETACHED = 2;
+    static readonly POST_ATTACH = 3;
+    static readonly POST_DETACH = 4;
 
 
     private fragmentMemory = createFragmentMemory();
@@ -31,6 +34,7 @@ export abstract class JFragment implements ILiveManager, IFragmentManager {
     private mPostActions = new PostAction<number>()
 
 
+    private mAttachEventListeners = []
     constructor(context:Context) {
         this.mBaseView = null;
         this.mContext = context
@@ -56,7 +60,9 @@ export abstract class JFragment implements ILiveManager, IFragmentManager {
 
     setParentFrame(parent){
         this.mParent = parent
+
     }
+
 
 
     getParentFragment():JFragment|null{
@@ -73,6 +79,9 @@ export abstract class JFragment implements ILiveManager, IFragmentManager {
     postAttach(func:any){
         this.mPostActions.run(JFragment.POST_A_ATTACHED,func)
     }
+    getPostActions():PostAction<number>{
+        return this.mPostActions;
+    }
 
     attach(){
 
@@ -87,17 +96,12 @@ export abstract class JFragment implements ILiveManager, IFragmentManager {
             this.mPostActions.doneAction(JFragment.POST_A_ATTACHED)
         }
         this.onAttach()
-        // requestAnimationFrame(()=>{
-        //     if (!this.isSingleAttached){
-        //         this.isSingleAttached = true
-        //         this.onAttachSingle()
-        //     }
-        //     this.onAttach()
-        //
-        //     this.getFragmentManager().attachFragmentManager()
-        //     this.mIsAttached = true
-        //     this.liveManager.activate()
-        // })
+        this.mPostActions.doneAction(JFragment.POST_ATTACH)
+        this.mAttachEventListeners.forEach(listener=>listener())
+
+    }
+    addAttachEventListener(listener:any){
+        this.mAttachEventListeners.push(listener)
     }
 
     isAttached(){
@@ -109,6 +113,7 @@ export abstract class JFragment implements ILiveManager, IFragmentManager {
         this.getFragmentManager().detachFragmentManager()
         this.onDetach()
         this.liveManager.deactivate()
+        this.mPostActions.doneAction(JFragment.POST_DETACH)
     }
 
     protected onAttach(){}
@@ -122,6 +127,7 @@ export abstract class JFragment implements ILiveManager, IFragmentManager {
 
     startCreatingView(){
         this.mBaseView = this.onCreateView(this.getActivity().getLayoutInflater(), null)
+
     }
 
 
@@ -129,6 +135,13 @@ export abstract class JFragment implements ILiveManager, IFragmentManager {
         return this.mBaseView
     }
 
+    byIds(ids:number[]):View[]{
+        let out = []
+        for (let i = 0; i < ids.length; i++) {
+            out.push(this.byId(ids[i]))
+        }
+        return out
+    }
 
     byId(id:number):View{
         if (this.mBaseView.getId() === id){
@@ -155,6 +168,18 @@ export abstract class JFragment implements ILiveManager, IFragmentManager {
                 handler(entries[0].contentRect.width,entries[0].contentRect.height)
         })
         this.mResizeObserver.observe(this.getFragmentView().getElement());
+    }
+
+    getParentView(): IParentView | null {
+        return this;
+    }
+
+    isFragmentView(): boolean {
+        return true;
+    }
+
+    setParentView(parentView?: IParentView): void {
+
     }
 }
 

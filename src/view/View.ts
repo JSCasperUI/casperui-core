@@ -1,12 +1,18 @@
 import {ViewNode} from "@casperui/core/view/nodes/ViewNode";
 import {Context} from "@casperui/core/content/Context";
-import {BXMLInflater} from "@casperui/core/view/inflater/BXMLInflater";
 import {ViewAttributes} from "@casperui/core/view/ViewAttributes";
+import {IFragmentManager} from "@casperui/core/app/IFragmentManager";
 
 export type ViewTag = string|Element
+export interface IParentView {
+    getParentView(): IParentView|null;
+    setParentView(parentView?: IParentView): void;
+    isFragmentView(): boolean;
+
+}
 
 type FEvent = (event:UIEvent)=>any
-export class View extends ViewNode {
+export class View extends ViewNode implements IParentView {
     private mId:number = -1
     private mContext:Context
     private mChildren:Array<View> = []
@@ -57,7 +63,15 @@ export class View extends ViewNode {
         this.mContext.getInflater().inflate(id, cache, this, true)
     }
 
-
+    getFragmentManager():IFragmentManager {
+        let parent:IParentView = this
+        while ((parent = parent.getParentView())!=null){
+            if (parent.isFragmentView()){
+                return parent as unknown as IFragmentManager
+            }
+        }
+        return null;
+    }
 
     waitingSelf( callback: () => void) {
         if (this.mIsWaitingDom) return;
@@ -116,17 +130,31 @@ export class View extends ViewNode {
         if (index === undefined || index === -1){
             index = this.mChildren.length
         }
+        if (view instanceof View){
+            view.setParentView(this)
+        }
+
         this.mChildren.splice( index, 0,view);
         this.mNode.insertBefore(view.getNode(), this.mNode.childNodes[index])
-        // this.node.parentNode.insertBefore(view.getNode(),this.node.nextSibling)
-        // this.node.insertBefore(view.getNode(), this.node.childNodes[index])
     }
     removeAllViews(){
-        this.mChildren = [];
 
+        for (let i = 0; i < this.mChildren.length; i++) {
+            this.mChildren[i].setParentView(null)
+        }
+        this.mChildren = [];
         (this.mNode as HTMLElement).innerHTML = ""
     }
 
+    removeView(content:View){
+        let index = this.getChildren().indexOf(content)
+        if (index===-1){
+            return
+        }
+        this.mChildren[index].setParentView(null)
+        this.mChildren.splice(index, 1);
+        this.mNode.removeChild(content.getNode())
+    }
 
     hasView(content:View):boolean{
         return this.getChildren().indexOf(content) !==-1
@@ -138,14 +166,6 @@ export class View extends ViewNode {
 
 
 
-    removeView(content:View){
-        let index = this.getChildren().indexOf(content)
-        if (index===-1){
-            return
-        }
-        this.mChildren.splice(index, 1);
-        this.mNode.removeChild(content.getNode())
-    }
 
 
     byIds(ids:number[]):View[]{
@@ -242,7 +262,9 @@ export class View extends ViewNode {
     addClassList(className:string){
         if (className && className.length){
             if (className.indexOf(" ")>0){
-                className.split(" ").forEach(cName=> (this.mNode as HTMLElement).classList.add(cName))
+                className.split(" ").forEach(cName=> {
+                    if (cName.trim().length!=0) {(this.mNode as HTMLElement).classList.add(cName)}
+                })
             }else{
                 (this.mNode as HTMLElement).classList.add(className);
             }
@@ -431,9 +453,30 @@ export class View extends ViewNode {
         return (this.mNode as HTMLElement).scrollTop
     }
 
-
     getScrollX():number {
         return (this.mNode as HTMLElement).scrollLeft
+    }
+    setScrollY(value:number) {
+        (this.mNode as HTMLElement).scrollTop = value;
+    }
+    setScrollX(value:number) {
+        (this.mNode as HTMLElement).scrollLeft = value
+    }
+
+
+    private mParentView?:IParentView;
+    getParentView(): IParentView {
+        return this.mParentView;
+    }
+
+    isFragmentView(): boolean {
+        return false;
+    }
+
+
+
+    setParentView(parentView?: IParentView): void {
+        this.mParentView = parentView;
     }
 
 

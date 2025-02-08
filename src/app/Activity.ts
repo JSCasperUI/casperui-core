@@ -3,11 +3,11 @@ import {createFragmentMemory, FragmentMemory, IFragmentManager} from "@casperui/
 import {FragmentManager} from "@casperui/core/app/FragmentManager";
 import {ContextWrapper} from "@casperui/core/content/ContextWrapper";
 import {LiveManager} from "@casperui/core/live/LiveManager";
-import {View} from "@casperui/core/view/View";
+import {IParentView, View} from "@casperui/core/view/View";
 import {BXMLInflater} from "@casperui/core/view/inflater/BXMLInflater";
 
 
-export class Activity extends ContextWrapper implements ILiveManager,IFragmentManager {
+export class Activity extends ContextWrapper implements ILiveManager, IFragmentManager, IParentView {
     private mLiveManager:LiveManager
     private mFragmentMemory:FragmentMemory
     private mFragmentManager:FragmentManager
@@ -82,5 +82,16 @@ export class Activity extends ContextWrapper implements ILiveManager,IFragmentMa
     }
 
     innerBinders: any;
+
+    getParentView(): IParentView | null {
+        return this;
+    }
+
+    isFragmentView(): boolean {
+        return true;
+    }
+
+    setParentView(parentView?: IParentView): void {
+    }
 }
 
