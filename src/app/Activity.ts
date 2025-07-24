@@ -67,6 +67,9 @@ export class Activity extends ContextWrapper implements ILiveManager, IFragmentM
         this.onLayout()
     }
 
+    addAttachEventListener(listener:any){
+        listener()
+    }
 
 
     getFragmentView():View{

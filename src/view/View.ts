@@ -18,6 +18,7 @@ export class View extends ViewNode implements IParentView {
     private mChildren:Array<View> = []
     private mCurrentSVGContentId:Number = -1;
     private mIsWaitingDom:boolean = false
+    private _textCache:string = null
 
     static  CLICK = "click"
     static  MOUSE_OVER = "mouseover"
@@ -253,8 +254,16 @@ export class View extends ViewNode implements IParentView {
 
 
     setTextContent(text:string){
-        this.mNode.textContent = text
+        if (this._textCache && this._textCache == text) return
+        if (this.mNode.firstChild && this.mNode.childNodes.length === 1 && this.mNode.firstChild.nodeType === 3) {
+            this._textCache = text
+            this.mNode.firstChild.nodeValue = text;
+        } else {
+            this._textCache = text
+            this.mNode.textContent = text;
+        }
     }
+
 
     isHovered():boolean{
         return (this.mNode as HTMLElement).matches(':hover')

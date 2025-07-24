@@ -15,6 +15,9 @@ export class LiveData<T> {
     getValue() {
         return this.mValue;
     }
+    getOriginalValue(){
+        return this.mValue
+    }
 
 
     update(){
@@ -44,6 +47,8 @@ export class LiveData<T> {
     }
 
 
+
+
     observe(observer: ILiveManager, callback: ObserverCallback<T>) {
         if (!observer.innerBinders) {
             observer.innerBinders = []
@@ -60,7 +65,7 @@ export class LiveData<T> {
             lm.registerLiveData(this);
         }
         if (lm.hasActive()) {
-            callback(this.mValue);
+            callback(this.getValue());
             this.mPublishHistory.set(cbRef, true);
         }
     }
@@ -78,7 +83,7 @@ export class LiveData<T> {
                 this.mObservers.delete(mObserver)
             } else {
                 if (ref.hasActive() && !this.mPublishHistory.get(callback)) {
-                    cb(this.mValue);
+                    cb(this.getValue());
                     this.mPublishHistory.set(callback, true);
                 }
             }
@@ -91,7 +96,7 @@ export class LiveData<T> {
             if (mObserver.deref() === observer) {
                 let cb = callback.deref()
                 if (cb && !this.mPublishHistory.get(callback)) {
-                    cb(this.mValue);
+                    cb(this.getValue());
                     this.mPublishHistory.set(callback, true);
                 }
 
