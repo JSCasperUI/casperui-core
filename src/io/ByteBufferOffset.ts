@@ -83,7 +83,7 @@ export class ByteBufferOffset {
 
     readIndex():number {
         let out = this.arr.getUint8(this.pos)
-        if (out >= 128) {
+        if (out > 127) {
             out = this.arr.getUint16(this.pos, false) & 0x7FFF
             this.pos += 2
             return out

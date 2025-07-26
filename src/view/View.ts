@@ -13,6 +13,8 @@ export interface IParentView {
 
 type FEvent = (event:UIEvent)=>any
 export class View extends ViewNode implements IParentView {
+
+    static svgCache: Map<number, Element> = new Map();
     private mId:number = -1
     private mContext:Context
     private mChildren:Array<View> = []
@@ -105,27 +107,16 @@ export class View extends ViewNode implements IParentView {
             return
         }
         let keys = Object.keys(attrs)
-
         for (let i = 0; i < keys.length; i++) {
             const key = keys[i]
             if (key === "id") {
-                this.mId = parseInt(attrs[key])
+                this.mId = attrs[key]
             }else if (key === "class"){
                 this.addClassList(attrs[key])
             }else{
                 (this.mNode as HTMLElement).setAttribute(key,attrs[key])
             }
         }
-
-        // for (const key in attrs) {
-        //     if (key === "id") {
-        //         this.id = parseInt(attrs[key])
-        //     }else if (key === "class"){
-        //         this.addClassList(attrs[key])
-        //     }else{
-        //          this.getElement().setAttribute(key,attrs[key])
-        //      }
-        // }
     }
     addView(view:View,index?:number){
         if (index === undefined || index === -1){
@@ -268,18 +259,23 @@ export class View extends ViewNode implements IParentView {
     isHovered():boolean{
         return (this.mNode as HTMLElement).matches(':hover')
     }
-    addClassList(className:string){
-        if (className && className.length){
-            if (className.indexOf(" ")>0){
-                className.split(" ").forEach(cName=> {
-                    if (cName.trim().length!=0) {(this.mNode as HTMLElement).classList.add(cName)}
-                })
-            }else{
-                (this.mNode as HTMLElement).classList.add(className);
+
+    addClassList(className: string) {
+        if (!className) return;
+
+        const classList = (this.mNode as HTMLElement).classList;
+        let i = 0, start = 0, len = className.length;
+
+        while (i < len) {
+            while (i < len && className[i] === ' ') i++;
+            start = i;
+
+            while (i < len && className[i] !== ' ') i++;
+
+            if (i > start) {
+                classList.add(className.substring(start, i));
             }
         }
-
-
     }
     addClass(className:string){
         (this.mNode as HTMLElement).classList.add(className)
@@ -445,13 +441,42 @@ export class View extends ViewNode implements IParentView {
         (this.mNode as HTMLElement).innerHTML = svg
     }
 
-    setSVGById(id:number){
+    setSVGById_old(id:number){
         if (this.mCurrentSVGContentId !== id){
             this.mCurrentSVGContentId = id;
             (this.mNode as HTMLElement).innerHTML = this.mContext.getResources().getDataString(id)
         }
 
     }
+    setSVGById(id: number) {
+        if (this.mCurrentSVGContentId === id) return;
+
+        this.mCurrentSVGContentId = id;
+
+        let svgElement = View.svgCache.get(id);
+
+        if (!svgElement) {
+            const svgString = this.mContext.getResources().getDataString(id);
+            const template = document.createElement("template");
+            template.innerHTML = svgString.trim();
+
+            // предполагаем, что в svgString один корневой <svg>
+            svgElement = template.content.firstElementChild as Element;
+
+            if (!svgElement || svgElement.tagName.toLowerCase() !== "svg") {
+                console.warn("Invalid SVG", svgString);
+                return;
+            }
+
+            View.svgCache.set(id, svgElement);
+        }
+
+        // Очистить старое содержимое и вставить клон
+        const node = this.mNode as HTMLElement;
+        node.innerHTML = ""; // если нужно полностью заменить
+        node.appendChild(svgElement.cloneNode(true));
+    }
+
 
     setImageSrc(url:string){
         (this.mNode as HTMLImageElement).src = url// `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svgString)}`

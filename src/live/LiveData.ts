@@ -20,6 +20,7 @@ export class LiveData<T> {
     }
 
 
+
     update(){
         this.clearPublishHistory();
         this.notifyObservers();

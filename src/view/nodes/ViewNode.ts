@@ -26,17 +26,17 @@ export class ViewNode {
                 }
                 case NodeType.STYLE: {
                     this.mNode = document.createElement("style");
-                    (this.mNode as HTMLElement).innerHTML = content
+                    (this.mNode as HTMLElement).textContent = content
                     break
                 }
                 case NodeType.SCRIPT: {
                     this.mNode = document.createElement("script");
-                    (this.mNode as HTMLElement).innerHTML = content
+                    (this.mNode as HTMLElement).textContent = content
                     break
                 }
                 case NodeType.SVG: {
                     this.mNode = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-                    (this.mNode as HTMLElement).innerHTML = content
+                    (this.mNode as SVGSVGElement).innerHTML = content
                     break
                 }
             }

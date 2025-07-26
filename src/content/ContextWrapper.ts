@@ -12,6 +12,9 @@ export class ContextWrapper extends Context {
     }
 
 
+    getBaseContext(): Context {
+        return this.mBase;
+    }
     attachBaseContext(context:Context){
         this.mBase = context
     }

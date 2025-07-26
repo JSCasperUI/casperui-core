@@ -26,6 +26,8 @@ export class BXMLParser {
     private mRoot:BXNode = { tag: "root", isText: false, children: [], attrs: {} };
 
 
+
+
     constructor(data:ByteBufferOffset) {
         this.mData = data
         this.mTags = []
@@ -35,36 +37,41 @@ export class BXMLParser {
         this.initBXMLParser()
     }
     initBXMLParser(){
+        const data = this.mData
 
-        this.mData.setPosition(3)
+        data.setPosition(3)
 
-        let tagSize = this.mData.readIndex()
-        let keySize = this.mData.readIndex()
-        let valueSize = this.mData.readIndex()
+        let tagSize = data.readIndex()
+        let keySize = data.readIndex()
+        let valueSize = data.readIndex()
         let size = 0
 
+
+        this.mTags = new Array(tagSize)
+        this.mKeys = new Array(keySize)
+        this.mValues = new Array(valueSize)
         for (let i = 0; i < tagSize; i++) {
-            size = this.mData.readIndex()
-            this.mTags.push(this.mData.readString(size))
+            size = data.readIndex()
+            this.mTags[i] = data.readString(size)
         }
         for (let i = 0; i < keySize; i++) {
-            size = this.mData.readIndex()
-            this.mKeys.push(this.mData.readString(size))
+            size = data.readIndex()
+            this.mKeys[i] = data.readString(size)
         }
         for (let i = 0; i < valueSize; i++) {
-            size = this.mData.readIndex()
-            let type = this.mData.get(this.mData.pos)
+            size = data.readIndex()
+            let type = data.get(data.pos)
             if (type < 8) {
                 if (type === DYNAMIC_TYPE.IDENTIFIER) {
-                    this.mData.positionOffset(1)
-                    this.mValues.push(this.mData.read16BE())
+                    data.positionOffset(1)
+                    this.mValues[i] = data.read16BE()
                 }
             }else{
-                this.mValues.push(this.mData.readString(size))
+                this.mValues[i] = data.readString(size)
             }
         }
-        let headerOffset = this.mData.position()
-        this.mTree = new ByteBufferOffset(this.mData, headerOffset, this.mData.size - (headerOffset))
+        let headerOffset = data.position()
+        this.mTree = new ByteBufferOffset(data, headerOffset, data.size - (headerOffset))
     }
     readTree() {
         this.startReadTag(this.mRoot)
@@ -75,20 +82,22 @@ export class BXMLParser {
             return false
         }
 
-        while (this.mTree.hasRemaining()){
-            let tagIndex = this.mTree.readIndex()
+        const tree = this.mTree
+
+        while (tree.hasRemaining()){
+            let tagIndex = tree.readIndex()
             let isTextNode = tagIndex === 0
             let tag = this.mTags[tagIndex]
             let child = {tag:tag,isText:isTextNode,attrs:null,children:[]} as BXNode
-            let atrAndDir = this.mTree.read8BE()
+            let atrAndDir = tree.read8BE()
             let dir = atrAndDir & 0xC0
             let attributeSize = atrAndDir & 0x3f
             node.children.push(child)
             if (attributeSize > 0) {
                 child.attrs = {}
                 for (let i = 0; i < attributeSize; i++) {
-                    let name = this.mKeys[this.mTree.readIndex()]
-                    child.attrs[name] = this.mValues[this.mTree.readIndex()]
+                    let name = this.mKeys[tree.readIndex()]
+                    child.attrs[name] = this.mValues[tree.readIndex()]
                 }
             }
             switch (dir) {
