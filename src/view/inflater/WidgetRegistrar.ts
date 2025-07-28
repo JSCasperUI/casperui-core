@@ -1,20 +1,19 @@
 import {Context} from "@casperui/core/content/Context";
 import {ViewAttributes} from "@casperui/core/view/ViewAttributes";
 import {View} from "@casperui/core/view/View";
-type ViewConstructor = (context: Context, tag: string, attributes: ViewAttributes) => View;
+export type ViewConstructor = (context: Context, tag: string, attributes: ViewAttributes) => View;
 
-const classMap:Record<string, ViewConstructor> = {}
+const classMap: Record<string, ViewConstructor> = Object.create(null);
 
 export const WidgetRegistrar = {
-
-    register:function (className:string,constructor:ViewConstructor){
+    register(className: string, constructor: ViewConstructor): void {
         classMap[className] = constructor;
     },
 
-    createInstance:function (className:string,context:Context,tag:string,attributes:ViewAttributes) {
-        if (classMap[className]) {
-            return classMap[className](context,tag,attributes)
-        }
-        return new View(context,tag,attributes)
+    createInstance(className: string, context: Context, tag: string, attributes: ViewAttributes): View {
+        const ctor = classMap[className];
+        return ctor !== undefined
+            ? ctor(context, tag, attributes)
+            : new View(context, tag, attributes);
     }
-}
+};

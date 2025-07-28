@@ -1,8 +1,18 @@
+#!/usr/bin/env node
+
 const {ResourceMaker} = require("./resources/ResourceMaker");
 const {watchDirectory} = require("./FileWatcher");
 const fs= require("fs");
 const path = require("node:path");
 const {readResourceConfig} = require("./Config");
+
+console.log("=== CasperUI ResourceMaker ===");
+console.log("This tool scans and packs resources into a binary file.");
+console.log("");
+console.log("Usage:");
+console.log("  resmaker --watch --include_path");
+console.log("  (or define everything in a config file in your project folder)");
+console.log("");
 
 function parseArgs(argv) {
     const args = {};

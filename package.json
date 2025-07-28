@@ -1,16 +1,19 @@
 {
   "name": "@casperui/core",
-  "version": "1.0.0",
+  "version": "0.0.8",
   "description": "",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
   "files": [
     "dist/**/*",
-    "src/**/*",
+    "resmaker/dist/*",
     "*.map"
   ],
-  "exports": {
-    "./*": "./dist/*"
+  "scripts": {
+    "build": "tsc && tsc-alias && npx gen-exports dist -p package.json",
+    "resources": "node dev/core/resmaker/src/main.js --include_path",
+    "release_pack": "npm run build && npm pack"
+  },
+  "bin": {
+    "resmaker": "./resmaker/dist/index.js"
   },
   "typesVersions": {
     "*": {
@@ -19,17 +22,191 @@
       ]
     }
   },
-
-  "scripts": {
-    "generate-barrels": "barrelsby --structure filesystem --delete -d src",
-    "build": "npm run generate-barrels && tsc && tsc-alias",
-    "resources": "node dev/core/resmaker/src/main.js --include_path"
+  "exports": {
+    "./app/Activity": {
+      "import": "./dist/app/Activity.js",
+      "require": "./dist/app/Activity.js",
+      "types": "./dist/app/Activity.d.ts"
+    },
+    "./app/Application": {
+      "import": "./dist/app/Application.js",
+      "require": "./dist/app/Application.js",
+      "types": "./dist/app/Application.d.ts"
+    },
+    "./app/FragmentManager": {
+      "import": "./dist/app/FragmentManager.js",
+      "require": "./dist/app/FragmentManager.js",
+      "types": "./dist/app/FragmentManager.d.ts"
+    },
+    "./app/IFragmentManager": {
+      "import": "./dist/app/IFragmentManager.js",
+      "require": "./dist/app/IFragmentManager.js",
+      "types": "./dist/app/IFragmentManager.d.ts"
+    },
+    "./app/JFragment": {
+      "import": "./dist/app/JFragment.js",
+      "require": "./dist/app/JFragment.js",
+      "types": "./dist/app/JFragment.d.ts"
+    },
+    "./content/BinaryResources": {
+      "import": "./dist/content/BinaryResources.js",
+      "require": "./dist/content/BinaryResources.js",
+      "types": "./dist/content/BinaryResources.d.ts"
+    },
+    "./content/Context": {
+      "import": "./dist/content/Context.js",
+      "require": "./dist/content/Context.js",
+      "types": "./dist/content/Context.d.ts"
+    },
+    "./content/ContextWrapper": {
+      "import": "./dist/content/ContextWrapper.js",
+      "require": "./dist/content/ContextWrapper.js",
+      "types": "./dist/content/ContextWrapper.d.ts"
+    },
+    "./content/Resources": {
+      "import": "./dist/content/Resources.js",
+      "require": "./dist/content/Resources.js",
+      "types": "./dist/content/Resources.d.ts"
+    },
+    "./graphics/Bitmap": {
+      "import": "./dist/graphics/Bitmap.js",
+      "require": "./dist/graphics/Bitmap.js",
+      "types": "./dist/graphics/Bitmap.d.ts"
+    },
+    "./graphics/Canvas": {
+      "import": "./dist/graphics/Canvas.js",
+      "require": "./dist/graphics/Canvas.js",
+      "types": "./dist/graphics/Canvas.d.ts"
+    },
+    "./graphics/Matrix": {
+      "import": "./dist/graphics/Matrix.js",
+      "require": "./dist/graphics/Matrix.js",
+      "types": "./dist/graphics/Matrix.d.ts"
+    },
+    "./graphics/Paint": {
+      "import": "./dist/graphics/Paint.js",
+      "require": "./dist/graphics/Paint.js",
+      "types": "./dist/graphics/Paint.d.ts"
+    },
+    "./graphics/Rect": {
+      "import": "./dist/graphics/Rect.js",
+      "require": "./dist/graphics/Rect.js",
+      "types": "./dist/graphics/Rect.d.ts"
+    },
+    "./io/ByteBufferOffset": {
+      "import": "./dist/io/ByteBufferOffset.js",
+      "require": "./dist/io/ByteBufferOffset.js",
+      "types": "./dist/io/ByteBufferOffset.d.ts"
+    },
+    "./live/ILiveManager": {
+      "import": "./dist/live/ILiveManager.js",
+      "require": "./dist/live/ILiveManager.js",
+      "types": "./dist/live/ILiveManager.d.ts"
+    },
+    "./live/LiveData": {
+      "import": "./dist/live/LiveData.js",
+      "require": "./dist/live/LiveData.js",
+      "types": "./dist/live/LiveData.d.ts"
+    },
+    "./live/LiveDataConfig": {
+      "import": "./dist/live/LiveDataConfig.js",
+      "require": "./dist/live/LiveDataConfig.js",
+      "types": "./dist/live/LiveDataConfig.d.ts"
+    },
+    "./live/LiveDataObjectId": {
+      "import": "./dist/live/LiveDataObjectId.js",
+      "require": "./dist/live/LiveDataObjectId.js",
+      "types": "./dist/live/LiveDataObjectId.d.ts"
+    },
+    "./live/LiveManager": {
+      "import": "./dist/live/LiveManager.js",
+      "require": "./dist/live/LiveManager.js",
+      "types": "./dist/live/LiveManager.d.ts"
+    },
+    "./live/MappedLiveData": {
+      "import": "./dist/live/MappedLiveData.js",
+      "require": "./dist/live/MappedLiveData.js",
+      "types": "./dist/live/MappedLiveData.d.ts"
+    },
+    "./live/ViewModel": {
+      "import": "./dist/live/ViewModel.js",
+      "require": "./dist/live/ViewModel.js",
+      "types": "./dist/live/ViewModel.d.ts"
+    },
+    "./space/PostAction": {
+      "import": "./dist/space/PostAction.js",
+      "require": "./dist/space/PostAction.js",
+      "types": "./dist/space/PostAction.d.ts"
+    },
+    "./space/utils": {
+      "import": "./dist/space/utils.js",
+      "require": "./dist/space/utils.js",
+      "types": "./dist/space/utils.d.ts"
+    },
+    "./utils/ResourceReader": {
+      "import": "./dist/utils/ResourceReader.js",
+      "require": "./dist/utils/ResourceReader.js",
+      "types": "./dist/utils/ResourceReader.d.ts"
+    },
+    "./view/View": {
+      "import": "./dist/view/View.js",
+      "require": "./dist/view/View.js",
+      "types": "./dist/view/View.d.ts"
+    },
+    "./view/ViewAttributes": {
+      "import": "./dist/view/ViewAttributes.js",
+      "require": "./dist/view/ViewAttributes.js",
+      "types": "./dist/view/ViewAttributes.d.ts"
+    },
+    "./utils/bxml/BXMLNextParser": {
+      "import": "./dist/utils/bxml/BXMLNextParser.js",
+      "require": "./dist/utils/bxml/BXMLNextParser.js",
+      "types": "./dist/utils/bxml/BXMLNextParser.d.ts"
+    },
+    "./utils/bxml/BXMLParser": {
+      "import": "./dist/utils/bxml/BXMLParser.js",
+      "require": "./dist/utils/bxml/BXMLParser.js",
+      "types": "./dist/utils/bxml/BXMLParser.d.ts"
+    },
+    "./utils/bxml/BXNode": {
+      "import": "./dist/utils/bxml/BXNode.js",
+      "require": "./dist/utils/bxml/BXNode.js",
+      "types": "./dist/utils/bxml/BXNode.d.ts"
+    },
+    "./view/inflater/BXMLInflater": {
+      "import": "./dist/view/inflater/BXMLInflater.js",
+      "require": "./dist/view/inflater/BXMLInflater.js",
+      "types": "./dist/view/inflater/BXMLInflater.d.ts"
+    },
+    "./view/inflater/WidgetRegistrar": {
+      "import": "./dist/view/inflater/WidgetRegistrar.js",
+      "require": "./dist/view/inflater/WidgetRegistrar.js",
+      "types": "./dist/view/inflater/WidgetRegistrar.d.ts"
+    },
+    "./view/nodes/NodeType": {
+      "import": "./dist/view/nodes/NodeType.js",
+      "require": "./dist/view/nodes/NodeType.js",
+      "types": "./dist/view/nodes/NodeType.d.ts"
+    },
+    "./view/nodes/ViewNode": {
+      "import": "./dist/view/nodes/ViewNode.js",
+      "require": "./dist/view/nodes/ViewNode.js",
+      "types": "./dist/view/nodes/ViewNode.d.ts"
+    },
+    "./view/widget/CanvasView": {
+      "import": "./dist/view/widget/CanvasView.js",
+      "require": "./dist/view/widget/CanvasView.js",
+      "types": "./dist/view/widget/CanvasView.d.ts"
+    }
   },
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "barrelsby": "^2.8.1",
     "tsc-alias": "^1.8.10",
+    "tsc-esm-fix": "^3.1.2",
+    "gen-exports": "^1.1.2",
     "typescript": "^5.6.2"
-  }
+  },
+  "keywords": [],
+  "dependencies": {}
 }

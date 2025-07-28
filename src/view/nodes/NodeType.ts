@@ -3,5 +3,6 @@ export enum NodeType {
     ELEMENT,
     STYLE,
     SCRIPT,
-    SVG
+    SVG,
+    DOCUMENT_FRAGMENT
 }

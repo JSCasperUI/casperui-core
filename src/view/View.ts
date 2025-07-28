@@ -119,13 +119,15 @@ export class View extends ViewNode implements IParentView {
         }
     }
     addView(view:View,index?:number){
-        if (index === undefined || index === -1){
-            index = this.mChildren.length
-        }
+
         if (view instanceof View){
             view.setParentView(this)
         }
-
+        if (index === undefined || index === -1){
+            this.mChildren.push(view)
+            this.mNode.appendChild(view.getNode())
+            return
+        }
         this.mChildren.splice( index, 0,view);
         this.mNode.insertBefore(view.getNode(), this.mNode.childNodes[index])
     }

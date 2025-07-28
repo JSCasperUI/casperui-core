@@ -128,7 +128,6 @@ class XML2CasBin {
                 value = this.dictatory.valueTyped(DYNAMIC_TYPE.IDENTIFIER,indexOfVariable)
             }else{
                 value = this.dictatory.value(node.attrs[aKey])
-
             }
 
             this.dictatory.writeAttribute(key,value)

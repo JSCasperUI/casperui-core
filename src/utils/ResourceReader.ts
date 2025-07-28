@@ -35,6 +35,7 @@ export class ResourceReader {
                 name = this.fBuf.readString(nameSize)
                 this.mNames.push(name)
             }
+            // console.log(i,name)
             let fileSize = this.fBuf.read32BE()
             this.mFiles.push(new ByteBufferOffset(this.mData, fileDataOffset, fileSize))
 

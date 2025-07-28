@@ -21,6 +21,7 @@ export class BXMLInflater {
 
     inflate(id:number,cache:boolean = false, root:View|null = null,rootNodeReplace:boolean = false):View{
         let node:BXNode
+
         if (cache){
             if (this.cacheNodes[id]){
                 node = this.cacheNodes[id]
@@ -47,38 +48,7 @@ export class BXMLInflater {
         return result as View
     }
 
-    objectToXml(obj, skipRoot) {
-        let xml = '';
 
-        function buildXml(obj) {
-            if (skipRoot && obj.childNodes && obj.childNodes.length > 0) {
-                obj.childNodes.forEach(childNode => {
-                    buildXml(childNode);
-                });
-            } else {
-                xml += `<${obj.tag}`;
-
-                if (obj.attrs) {
-                    for (let [key, value] of Object.entries(obj.attrs)) {
-                        xml += ` ${key}="${value}"`;
-                    }
-                }
-
-                if (obj.childNodes && obj.childNodes.length > 0) {
-                    xml += '>';
-                    obj.childNodes.forEach(childNode => {
-                        buildXml(childNode);
-                    });
-                    xml += `</${obj.tag}>`;
-                } else {
-                    xml += '/>';
-                }
-            }
-        }
-
-        buildXml(obj);
-        return xml;
-    }
 
     inflateChild(node:BXNode):ViewNode{
         if (node.isText){
@@ -113,6 +83,39 @@ export class BXMLInflater {
         view.onViewChildInflated()
 
         return view
+    }
+
+    objectToXml(obj, skipRoot) {
+        let xml = '';
+
+        function buildXml(obj) {
+            if (skipRoot && obj.childNodes && obj.childNodes.length > 0) {
+                obj.childNodes.forEach(childNode => {
+                    buildXml(childNode);
+                });
+            } else {
+                xml += `<${obj.tag}`;
+
+                if (obj.attrs) {
+                    for (let [key, value] of Object.entries(obj.attrs)) {
+                        xml += ` ${key}="${value}"`;
+                    }
+                }
+
+                if (obj.childNodes && obj.childNodes.length > 0) {
+                    xml += '>';
+                    obj.childNodes.forEach(childNode => {
+                        buildXml(childNode);
+                    });
+                    xml += `</${obj.tag}>`;
+                } else {
+                    xml += '/>';
+                }
+            }
+        }
+
+        buildXml(obj);
+        return xml;
     }
 }
 

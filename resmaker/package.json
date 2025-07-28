@@ -4,7 +4,7 @@
   "index": "src/main.js",
   "scripts": {
     "run": "node src/main.js",
-    "build": "ncc build src/main.js -o dist -m"
+    "build": "ncc build src/main.js -o dist"
   },
   "devDependencies": {
     "@vercel/ncc": "^0.38.1"
