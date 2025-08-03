@@ -1,12 +1,18 @@
-import {ByteBufferOffset} from "@casperui/core/io/ByteBufferOffset";
 import {Resources} from "@casperui/core/content/Resources";
 import {ResourceReader} from "@casperui/core/utils/ResourceReader";
+import {ByteBuffer} from "@casperui/core/io/ByteBuffer";
+import {Locale} from "@casperui/core/utils/Locale";
 
 export class BinaryResources extends Resources {
+
+    setLocale(value: string): void {
+        this.locale.setLanguage(value);
+    }
 
     private mResourceReader:ResourceReader
     private mSvgBlobsCache = {}
     private mCache = {}
+    private locale: Locale;
     constructor() {
         super();
         this.mResourceReader = null
@@ -16,15 +22,20 @@ export class BinaryResources extends Resources {
 
     initResources(dataFile:ArrayBuffer) {
         this.mResourceReader = new ResourceReader(dataFile)
+        this.locale = new Locale(this.mResourceReader.getLangFile())
     }
 
 
-    getBufferById(id:number):ByteBufferOffset {
+    getBufferById(id:number):ByteBuffer {
         let out = this.mResourceReader.getFileByIndex(id)
         out.reset()
         return out
     }
 
+
+    getString(id: number): string {
+        return this.locale.getString(id);
+    }
 
     getDataString(id:number,cache = true):string{
         if (cache){

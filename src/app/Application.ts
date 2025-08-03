@@ -9,7 +9,7 @@ export class Application  extends ContextWrapper {
     private mainActivity:Activity
     private mApplicationContext:Context
     private mResources:Resources
-    private mWidth = 0
+    private resLoading: Promise<void>;
 
     constructor() {
         super();
@@ -17,8 +17,9 @@ export class Application  extends ContextWrapper {
         this.mainActivity = undefined
         this.mApplicationContext = new ContextWrapper()
         this.mResources = new BinaryResources()
-        // WidgetRegistrar.
+
         this.attachBaseContext(this.mApplicationContext)
+        this.resLoading = this.readExtendedResources()
     }
 
 
@@ -45,13 +46,11 @@ export class Application  extends ContextWrapper {
     }
 
     async startActivity(activity:Activity){
-        await this.readExtendedResources()
+        await this.resLoading;
         this.mainActivity = activity
         this.mainActivity.attachBaseContext(this)
         this.mainActivity.createActivity()
-        this.mainActivity.getWindowView().getElement().addEventListener("resize",()=>{
-            this.mWidth = 1
-        })
+
 
     }
 

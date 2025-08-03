@@ -1,7 +1,7 @@
 import {NodeType} from "@casperui/core/view/nodes/NodeType";
 
 export class ViewNode {
-    private mType:NodeType
+     mType:NodeType
     mNode:Node
 
     constructor(type:NodeType|string,content?:string) {

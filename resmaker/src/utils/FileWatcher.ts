@@ -1,8 +1,9 @@
-const fs = require('fs');
-const path = require('path');
+import fs from 'fs';
+import path from 'path';
 
 
-function watchDirectory(path,callback){
+export function watchDirectory(path:string,callback:any){
+    console.log("watchDirectory",path);
     fs.watch(path, { recursive: true }, (eventType, filename) => {
         callback(eventType,filename)
     })
@@ -30,4 +31,3 @@ function watchDirectory(path,callback){
         //     console.log('filename not provided');
         // }
 }
-module.exports.watchDirectory = watchDirectory;

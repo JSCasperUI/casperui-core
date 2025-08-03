@@ -1,8 +1,8 @@
-const fs = require('fs');
-const path = require('path');
+import fs from 'fs';
+import path from 'path';
 
 // Функция для конвертации числа в Base64 VLQ
-function toVLQ(num) {
+function toVLQ(num: number): string {
     let vlq = '';
     let value = (num < 0 ? ((-num) << 1) | 1 : num << 1);
 
@@ -18,13 +18,15 @@ function toVLQ(num) {
     return vlq;
 }
 
-class CSSMerge {
+export class CSSMerge {
+    private sourceRoot: string;
+    private files: any[];
     constructor() {
         this.files = [];
         this.sourceRoot = "/source/";  // Корневая директория для исходных файлов
     }
 
-    addCSS(cssFilePath) {
+    addCSS(cssFilePath:string) {
         if (fs.existsSync(cssFilePath)) {
             this.files.push(cssFilePath);
         } else {
@@ -32,16 +34,13 @@ class CSSMerge {
         }
     }
 
-    /**
-     * Компилирует объединенный CSS и создает source map с точным сопоставлением строк и файлов
-     * @return {{cssContent: string, sourceMap: string}} - объединённый CSS и source map
-     */
-    compileOutput(filename) {
+
+    compileOutput(filename:string) {
         if (!filename) return;
 
         let cssContent = '';
         let mappings = '';
-        const sourcesContent = [];
+        const sourcesContent:any[] = [];
 
         // Инициализация для отслеживания предыдущих значений
         let previousGeneratedColumn = 0;
@@ -55,11 +54,10 @@ class CSSMerge {
             const lines = content.split('\n');
             cssContent += content + '\n';
 
-            // Генерация `mappings` для каждой строки файла
+            // @ts-ignore
             lines.forEach((_, lineIndex) => {
                 if (lineIndex > 0 || mappings) mappings += ';'; // Переход на новую строку в `mappings`
 
-                // Сегмент указывает: колонка скомпилированного файла, индекс файла, строка файла, колонка исходного файла
                 const segment = [
                     toVLQ(0 - previousGeneratedColumn),  // Колонка в скомпилированном файле
                     toVLQ(sourceIndex - previousSourceIndex),  // Индекс исходного файла
@@ -69,7 +67,6 @@ class CSSMerge {
 
                 mappings += segment.join('');
 
-                // Обновление предыдущих значений для следующего сегмента
                 previousGeneratedColumn = 0;
                 previousSourceIndex = sourceIndex;
                 previousSourceLine = lineIndex;
@@ -93,4 +90,3 @@ class CSSMerge {
     }
 }
 
-module.exports.CSSMerge = CSSMerge;

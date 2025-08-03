@@ -149,12 +149,13 @@ export abstract class JFragment extends ContextWrapper implements ILiveManager, 
         return out
     }
 
-    byId(id:number):View{
-        if (this.baseView.getId() === id){
-            return this.baseView
+    byId<T extends View = View>(id: number): T {
+        if (this.baseView.getId() === id) {
+            return this.baseView as T;
         }
-        return this.baseView.byId(id)
+        return this.baseView.byId(id) as T;
     }
+
 
 
 

@@ -1,53 +1,53 @@
-import {ByteBufferOffset} from "@casperui/core/io/ByteBufferOffset";
+import {ByteBuffer} from "@casperui/core/io/ByteBuffer";
 
 export class ResourceReader {
 
     private mData:ArrayBuffer
-    private mFiles:Array<ByteBufferOffset>
+    private mFiles:Array<ByteBuffer>
     private mNames:Array<string>
-    private fBuf:ByteBufferOffset
+    private fBuf:ByteBuffer
 
     constructor(mData:ArrayBuffer) {
 
         this.mData = mData
 
-        this.mFiles = []
         this.mNames = []
-        this.fBuf = new ByteBufferOffset(mData,0,mData.byteLength)
+        this.fBuf = new ByteBuffer(mData)
         this.initResources()
 
-    }
 
-    getFileByIndex(index:number):ByteBufferOffset {
+    }
+    getLangFile():ByteBuffer{
+        return this.mFiles[this.mFiles.length-1]
+    }
+    getFileByIndex(index:number):ByteBuffer {
         return this.mFiles[index]
     }
     initResources(){
+
+        console.time("readExtendedResources")
         this.fBuf.read24BE() // header
         this.fBuf.read8BE() // VERSION
         let flags = this.fBuf.read8BE() // FLAGS
         let filesCount = this.fBuf.read16BE()
         let fileDataOffset = this.fBuf.read32BE()
+        this.mFiles = new Array<ByteBuffer>(filesCount)
+        const mNames = flags ? new Array<string>(filesCount) : null;
         for (let i = 0; i < filesCount; i++) {
-            let id = this.fBuf.read16BE()
-            let name = ""
-            if (flags){
-                let nameSize = this.fBuf.read16BE()
-                name = this.fBuf.readString(nameSize)
-                this.mNames.push(name)
+            if (flags) {
+                const nameSize = this.fBuf.read16BE();
+                mNames![i] = this.fBuf.readString(nameSize);
             }
-            // console.log(i,name)
             let fileSize = this.fBuf.read32BE()
-            this.mFiles.push(new ByteBufferOffset(this.mData, fileDataOffset, fileSize))
 
-            if (name.endsWith("html")){
-                // let xx = new BXMLParser(this.files[this.files.length - 1])
-                // console.log(name,xx.parse())
-            }
+            this.mFiles[i] = new ByteBuffer(new Uint8Array(this.mData, fileDataOffset, fileSize))
+
             fileDataOffset+=fileSize
 
 
         }
-        // console.log(this.names)
+        if (mNames) this.mNames = mNames;
+        console.timeEnd("readExtendedResources")
     }
 }
 

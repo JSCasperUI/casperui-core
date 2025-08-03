@@ -52,7 +52,13 @@ export class BXMLInflater {
 
     inflateChild(node:BXNode):ViewNode{
         if (node.isText){
-            return new ViewNode(NodeType.TEXT,node.attrs["#t"] as string);
+            if (node.attrs["#t"])
+                return new ViewNode(NodeType.TEXT,node.attrs["#t"] as string);
+            if (node.attrs["#i"]!=undefined)
+                return new ViewNode(NodeType.TEXT,"id:"+node.attrs["#i"].toString());
+            if (node.attrs["#l"]!=undefined){
+                return new ViewNode(NodeType.TEXT,this.mContext.getResources().getString(node.attrs["#l"] as number));
+            }
         }
 
         switch (node.tag){

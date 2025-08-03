@@ -1,5 +1,5 @@
-import {ByteBufferOffset} from "@casperui/core/io/ByteBufferOffset";
 import {BXNode} from "@casperui/core/utils/bxml/BXNode";
+import {ByteBuffer} from "@casperui/core/io/ByteBuffer";
 
 const DIR_LINE = 0x00
 const DIR_INSIDE_LINE = 0x40
@@ -28,8 +28,8 @@ export interface BXNodeNext {
 }
 
 export class BXMLNextParser {
-    private mData:ByteBufferOffset
-    private mTree:ByteBufferOffset
+    private mData:ByteBuffer
+    private mTree:ByteBuffer
     private mTags:Array<string>
     private mKeys:Array<string>
     private mValues:Array<string|number>
@@ -37,7 +37,7 @@ export class BXMLNextParser {
     private mRoot:BXNode = {tag: "root", isText: false, children: [], attrs: {} };
 
 
-    constructor(data:ByteBufferOffset) {
+    constructor(data:ByteBuffer) {
         this.mData = data
         this.mTags = []
         this.mKeys = []
@@ -64,7 +64,7 @@ export class BXMLNextParser {
         }
         for (let i = 0; i < valueSize; i++) {
             size = this.mData.readIndex()
-            let type = this.mData.get(this.mData.pos)
+            let type = this.mData.get(this.mData.offset)
             if (type > DYNAMIC_TYPE.MIN && type < DYNAMIC_TYPE.MAX) {
                 if (type === DYNAMIC_TYPE.IDENTIFIER) {
                     this.mData.positionOffset(1)
@@ -75,7 +75,7 @@ export class BXMLNextParser {
             }
         }
         let headerOffset = this.mData.position()
-        this.mTree = new ByteBufferOffset(this.mData, headerOffset, this.mData.size - (headerOffset))
+        this.mTree = new ByteBuffer(this.mData.buffer.subarray(headerOffset))
     }
     readTree() {
         this.startReadTag(this.mRoot)

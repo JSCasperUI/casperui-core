@@ -1,18 +1,17 @@
-const {ByteBufferOutputStream} = require("./ByteBufferOutputStream");
+import {ByteBufferOutput} from "@rMaker/io/ByteBufferOutput";
 
-const TREE_DIRECTION = {
+export const TREE_DIRECTION = {
     LINE:0,
     INSIDE_LINE:0x40,
     INSIDE_BACK:0x80,
     BACK:0xC0,
 }
-module.exports.TDIR = TREE_DIRECTION
 
 const HEADER = [0xCA,0xBB]
 const RESERVED_TYPES = [7,8,11,12,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31];
 const DYNAMIC_TYPE_MASK = 0xFFFFD9FF
 const FORMAT_VERSION = 1
-const DYNAMIC_TYPE = {
+export const DYNAMIC_TYPE = {
     UINT_16       : 0,
     UINT_32       : 1,
     UINT_64       : 2,
@@ -20,40 +19,42 @@ const DYNAMIC_TYPE = {
     FLOAT_64      : 4,
     SVG_PATH      : 5,
     IDENTIFIER    : 6,
+    LANG_ID       : 7,
 }
 
 
 const TYPE_MASK = 0xFF_FF_D9_FF
-module.exports.DYNAMIC_TYPE = DYNAMIC_TYPE
 
 
-class Dictionary {
-    constructor(extension) {
+export class Dictionary {
+    private tags = ["#t"]
+    private keys:string[] = ["#t","#l","#i"]
+    private values:Buffer[] = []
+    private valuesMap = new Map()
+    private keysMap = new Map([["#t",0],["#l",1],["#i",2]])
+    private tagsMap = new Map()
+    private treeBuffer = new ByteBufferOutput()
+    private fileSize: number = 0;
+    constructor(private extension:string) {
         this.extension = extension
-        this.tags = ["#t"]
-        this.keys = []
-        this.values = []
-        this.valuesMap = new Map()
-        this.keysMap = new Map()
-        this.tagsMap = new Map()
-        this.treeBuffer = new ByteBufferOutputStream()
+
 
     }
 
-    writeTag(tag) {
+    writeTag(tag:number) {
         this.treeBuffer.writeVarInt(tag)
     }
 
-    writeAttributesLengthAndDirection(size, dir) {
-        this.treeBuffer.writeByte(size | dir)
+    writeAttributesLengthAndDirection(size:number, dir:number) {
+        this.treeBuffer.uint8(size | dir)
     }
 
-    writeAttribute(key, value) {
+    writeAttribute(key:number, value:number) {
         this.treeBuffer.writeVarInt(key)
         this.treeBuffer.writeVarInt(value)
     }
 
-    writeDataArray(output, items) {
+    writeDataArray(output:ByteBufferOutput, items:any[]) {
         for (let i = 0; i < items.length; i++) {
             output.writeVarInt(items[i].length);
             output.writeBytes(items[i]);
@@ -62,9 +63,9 @@ class Dictionary {
 
     createIndexedBuffer() {
 
-        let output = new ByteBufferOutputStream()
+        let output = new ByteBufferOutput()
         output.writeBytes(HEADER)
-        output.writeByte(FORMAT_VERSION)
+        output.uint8(FORMAT_VERSION)
 
 
         output.writeVarInt(this.tags.length)   //Tags count
@@ -78,7 +79,7 @@ class Dictionary {
         output.writeBytes(this.treeBuffer.toByteArray())
         return output.toByteArray()
     }
-    tag(value) {
+    tag(value:string):number {
         if (value === "#text"){
             return 0
         }
@@ -94,9 +95,9 @@ class Dictionary {
         return index
     }
 
-    key(value) {
+    key(value:string):number {
         if (this.keysMap.has(value)){
-            return this.keysMap.get(value)
+            return this.keysMap.get(value)!
         }
         this.fileSize += value.length + 1
         this.keys.push(value)
@@ -107,10 +108,10 @@ class Dictionary {
     }
 
 
-    value(mValue) {
+    value(mValue:string):number {
         let tValue = Buffer.from(mValue)
         if (this.valuesMap.has(mValue)){
-            return this.valuesMap.get(mValue)
+            return this.valuesMap.get(mValue)!
         }
 
         this.values.push(tValue)
@@ -118,10 +119,14 @@ class Dictionary {
         return this.values.length - 1
     }
 
-    valueTyped(type,mValue) {
+    valueTyped(type:number,mValue:any) {
         if (type === DYNAMIC_TYPE.IDENTIFIER){
             let tmp = Buffer.alloc(2)
-            tmp.writeUInt16BE(mValue)
+            tmp.writeUInt16LE(mValue)
+            mValue = tmp
+        }else if  (type === DYNAMIC_TYPE.LANG_ID){
+            let tmp = Buffer.alloc(2)
+            tmp.writeUInt16LE(mValue)
             mValue = tmp
         }
 
@@ -137,4 +142,3 @@ class Dictionary {
     }
 }
 
-module.exports.Dictionary = Dictionary

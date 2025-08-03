@@ -92,12 +92,7 @@ export class FragmentManager {
         }
     }
 
-    /**
-     * @param {number} containerId
-     * @param {JFragment} fragment
-     * @param {View|null} container
-     */
-    pushFragment(containerId, fragment, container = null) {
+    pushFragment(containerId:number, fragment:JFragment, container:View|null = null) {
         if (!fragment) return;
         let memory = this.mManager.getFragmentMemory()
 
@@ -159,7 +154,6 @@ export class FragmentManager {
 
     swapInContainer(oldFragment:JFragment, newFragment:JFragment, container:View|null = null) {
         let memory = this.mManager.getFragmentMemory()
-
 
         let oldView = oldFragment.getFragmentView()
         let index = container.indexView(oldView)

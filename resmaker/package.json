@@ -1,12 +1,17 @@
 {
   "name": "casperui_resource_maker",
   "version": "1.0.0",
-  "index": "src/main.js",
+  "type": "module",
   "scripts": {
-    "run": "node src/main.js",
-    "build": "ncc build src/main.js -o dist"
+    "build": "tsc && tsc-alias",
+    "run": "node ./dist/app.js"
   },
+  "dependencies": {
+    "tsc-alias": "^1.8.16",
+    "typescript": "^5.5.3"
+  },
+
   "devDependencies": {
-    "@vercel/ncc": "^0.38.1"
+    "@types/node": "^24.0.13"
   }
 }

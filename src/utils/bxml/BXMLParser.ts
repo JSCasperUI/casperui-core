@@ -1,5 +1,5 @@
-import {ByteBufferOffset} from "@casperui/core/io/ByteBufferOffset";
 import {BXNode} from "@casperui/core/utils/bxml/BXNode";
+import {ByteBuffer} from "@casperui/core/io/ByteBuffer";
 
 const DIR_LINE = 0x00
 const DIR_INSIDE_LINE = 0x40
@@ -14,30 +14,26 @@ const DYNAMIC_TYPE = {
     FLOAT_64      : 4,
     SVG_PATH      : 5,
     IDENTIFIER    : 6,
+    LANG_ID       : 7,
 }
 const TYPE_MASK = 0xFF_FF_D9_FF
 export class BXMLParser {
-    private mData:ByteBufferOffset
-    private mTree:ByteBufferOffset
+    private data:ByteBuffer
     private mTags:Array<string>
     private mKeys:Array<string>
     private mValues:Array<string|number>
 
     private mRoot:BXNode = { tag: "root", isText: false, children: [], attrs: {} };
 
+    private offset = 0
 
 
-
-    constructor(data:ByteBufferOffset) {
-        this.mData = data
-        this.mTags = []
-        this.mKeys = []
-        this.mValues = []
-        this.mTree = undefined
+    constructor(data:ByteBuffer) {
+        this.data = data
         this.initBXMLParser()
     }
     initBXMLParser(){
-        const data = this.mData
+        const data = this.data
 
         data.setPosition(3)
 
@@ -51,55 +47,60 @@ export class BXMLParser {
         this.mKeys = new Array(keySize)
         this.mValues = new Array(valueSize)
         for (let i = 0; i < tagSize; i++) {
-            size = data.readIndex()
-            this.mTags[i] = data.readString(size)
+            this.mTags[i] = data.readVarIntString()
         }
         for (let i = 0; i < keySize; i++) {
-            size = data.readIndex()
-            this.mKeys[i] = data.readString(size)
+            this.mKeys[i] = data.readVarIntString()
         }
         for (let i = 0; i < valueSize; i++) {
             size = data.readIndex()
-            let type = data.get(data.pos)
+            let type = data.get(data.offset)
             if (type < 8) {
                 if (type === DYNAMIC_TYPE.IDENTIFIER) {
-                    data.positionOffset(1)
+                    data.inc()
+                    this.mValues[i] = data.read16BE()
+                }else if (type === DYNAMIC_TYPE.LANG_ID) {
+                    data.inc()
                     this.mValues[i] = data.read16BE()
                 }
             }else{
                 this.mValues[i] = data.readString(size)
             }
         }
-        let headerOffset = data.position()
-        this.mTree = new ByteBufferOffset(data, headerOffset, data.size - (headerOffset))
+        this.mTags[0] ="#t"
+
+
+        this.offset = data.position()
     }
     readTree() {
+        this.data.setPosition(this.offset)
         this.startReadTag(this.mRoot)
         return this.mRoot.children[0]
     }
     startReadTag(node:BXNode,depth = 1){
-        if (!this.mTree.hasRemaining()){
+        if (!this.data.hasRemaining()){
             return false
         }
 
-        const tree = this.mTree
+        const tree = this.data
 
         while (tree.hasRemaining()){
-            let tagIndex = tree.readIndex()
-            let isTextNode = tagIndex === 0
+            let tagIndex = this.data.readIndex()
             let tag = this.mTags[tagIndex]
-            let child = {tag:tag,isText:isTextNode,attrs:null,children:[]} as BXNode
             let atrAndDir = tree.read8BE()
-            let dir = atrAndDir & 0xC0
-            let attributeSize = atrAndDir & 0x3f
+            const dir = atrAndDir & 0xC0
+            const attributeSize = atrAndDir & 0x3f
+            let child = {tag:tag,isText:tagIndex === 0,attrs:null,children:[]} as BXNode
+
             node.children.push(child)
             if (attributeSize > 0) {
                 child.attrs = {}
                 for (let i = 0; i < attributeSize; i++) {
-                    let name = this.mKeys[tree.readIndex()]
-                    child.attrs[name] = this.mValues[tree.readIndex()]
+                    let name = this.mKeys[this.data.readIndex()]
+                    child.attrs[name] = this.mValues[this.data.readIndex()]
                 }
             }
+
             switch (dir) {
                 case DIR_INSIDE_BACK:{
                     return this.startReadTag(child, depth + 1)
@@ -112,6 +113,7 @@ export class BXMLParser {
                     while (this.startReadTag(child, ld)) {}
                 }
             }
+
         }
         return true
     }

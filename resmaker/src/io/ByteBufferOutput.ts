@@ -1,10 +1,14 @@
-class ByteBufferOutputStream {
+
+
+export class ByteBufferOutput {
+    private buffer: Buffer;
+    private offset: number;
     constructor(size = 1024) {
         this.buffer = Buffer.allocUnsafe(size);
         this.offset = 0;
     }
 
-    ensureCapacity(length) {
+    ensureCapacity(length:number) {
         const requiredLength = this.offset + length;
         if (requiredLength > this.buffer.length) {
             let newLength = requiredLength + (1024 * 32);
@@ -14,7 +18,7 @@ class ByteBufferOutputStream {
         }
     }
 
-    writeVarInt(value) {
+    writeVarInt(value:number) {
         if (value < 0 || value > 0x7FFF) {
             throw new Error("Value out of range for VarInt");
         }
@@ -29,30 +33,47 @@ class ByteBufferOutputStream {
             this.offset+=1
         }
     }
-
-
-    writeUINT16(value) {
+    uint8(value:number) {
         this.ensureCapacity(2);
-        this.buffer.writeUInt16BE(value, this.offset);
+        this.buffer.writeUInt8(value, this.offset++);
+    }
+    uint16(value:number) {
+        this.ensureCapacity(2);
+        this.buffer.writeUInt16LE(value, this.offset);
         this.offset += 2;
     }
-
-    writeUINT32(value) {
+    uint32(value:number) {
         this.ensureCapacity(4);
-        this.buffer.writeUInt32BE(value, this.offset);
+        this.buffer.writeUInt32LE(value, this.offset);
         this.offset += 4;
     }
 
-    writeByte(value) {
-        this.ensureCapacity(1);
-        this.buffer[this.offset++] = value;
-    }
 
-    writeBytes(values) {
+    writeBytes(values:Buffer|string|number[]) {
         const dataBuffer = Buffer.isBuffer(values) ? values : Buffer.from(values);
         this.ensureCapacity(dataBuffer.length);
         dataBuffer.copy(this.buffer, this.offset);
         this.offset += dataBuffer.length;
+    }
+
+    writeStringWithLength8(value: string) {
+        let uString = Buffer.from(value, "utf8");
+        this.ensureCapacity(uString.length + 1);
+        if (uString.length>255){
+            throw new Error(`Value out of range for StringWithLength ${uString.length} ${uString}`);
+        }
+        this.buffer.writeUInt8(uString.length, this.offset);
+        this.offset += 1;
+        uString.copy(this.buffer, this.offset);
+        this.offset += uString.length;
+    }
+    writeStringWithLength(value: string) {
+        let uString = Buffer.from(value, "utf8");
+        this.ensureCapacity(uString.length + 2);
+        this.buffer.writeUInt16LE(uString.length, this.offset);
+        this.offset += 2;
+        uString.copy(this.buffer, this.offset);
+        this.offset += uString.length;
     }
 
     toByteArray() {
@@ -65,4 +86,3 @@ class ByteBufferOutputStream {
 }
 
 
-module.exports.ByteBufferOutputStream = ByteBufferOutputStream
