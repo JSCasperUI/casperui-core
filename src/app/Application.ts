@@ -5,7 +5,7 @@ import {Resources} from "@casperui/core/content/Resources";
 import {Activity} from "@casperui/core/app/Activity";
 
 
-export class Application  extends ContextWrapper {
+export class Application extends ContextWrapper {
     private mainActivity:Activity
     private mApplicationContext:Context
     private mResources:Resources

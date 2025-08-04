@@ -9,18 +9,21 @@ import {BXMLInflater} from "@casperui/core/view/inflater/BXMLInflater";
 
 export class Activity extends ContextWrapper implements ILiveManager, IFragmentManager, IParentView {
 
-    private liveManager:LiveManager = new LiveManager();
-    private fragmentMemory:FragmentMemory
-    private fragmentManager:FragmentManager
-    private window:View
-    private root:View
-    private inflater:BXMLInflater
+    private liveManager: LiveManager = new LiveManager();
+    private fragmentMemory: FragmentMemory
+    private fragmentManager: FragmentManager
+    private window: View
+    private root: View
+    private inflater: BXMLInflater
+    innerBinders: any;
+
+
     constructor() {
         super();
         this.fragmentMemory = createFragmentMemory()
-        this.fragmentManager = new FragmentManager(this,true)
-        this.root = new View(this,document.body)
-        this.window = new View(this,document.body)
+        this.fragmentManager = new FragmentManager(this, true)
+        this.root = new View(this, document.body)
+        this.window = new View(this, document.body)
         this.inflater = new BXMLInflater(this)
     }
 
@@ -28,51 +31,47 @@ export class Activity extends ContextWrapper implements ILiveManager, IFragmentM
         return this.inflater
     }
 
-    getLiveManager(){
+    getLiveManager() {
         return this.liveManager;
     }
 
-    getRootView():View{
+    getRootView(): View {
         return this.root
     }
 
-    getWindowView():View{
+    getWindowView(): View {
         return this.window
     }
 
-    createActivity(){
+    createActivity() {
         this.onCreate()
         this.fragmentManager.attachFragmentManager()
         this.liveManager.activate()
     }
-    onCreate(){
 
-    }
-    onLayout(){
-    }
+    onCreate() {}
 
-    byId(id:number):View{
+    onLayout() {}
+
+    byId(id: number): View {
         return this.root.byId(id)
     }
 
-
-    getLayoutInflater():BXMLInflater{
+    getLayoutInflater(): BXMLInflater {
         return this.inflater
     }
 
-
-    setContentView(layoutId:number){
+    setContentView(layoutId: number) {
         (this.root.mNode as HTMLElement).innerHTML = "";
-        this.inflater.inflate(layoutId,false,this.root);
+        this.inflater.inflate(layoutId, false, this.root);
         this.onLayout()
     }
 
-    addAttachEventListener(listener:any){
+    addAttachEventListener(listener: any) {
         listener()
     }
 
-
-    getView():View{
+    getView(): View {
         return this.root
     }
 
@@ -83,8 +82,6 @@ export class Activity extends ContextWrapper implements ILiveManager, IFragmentM
     getFragmentManager(): FragmentManager {
         return this.fragmentManager;
     }
-
-    innerBinders: any;
 
     getParentView(): IParentView | null {
         return this;

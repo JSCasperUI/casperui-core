@@ -3,6 +3,7 @@
 import fs from "fs";
 import {configArray} from "@rMaker/utils/Config";
 import {MainCompiler} from "@rMaker/MainCompiler";
+import {watchDirectory} from "@rMaker/utils/FileWatcher";
 
 console.log("=== CasperUI MainCompiler ===");
 console.log("This tool scans and packs resources into a binary file.");
@@ -39,8 +40,7 @@ const includePath = args.include_path || false;
 let debounceTimer: any = 0;
 if (watch) {
     for (let i = 0; i < config.configs!.length; i++) {
-        // @ts-ignore
-        watchDirectory(config!.configs[i].resourceDir, function () {
+        watchDirectory(config!.configs[i].resourceDir!, function () {
 
             clearTimeout(debounceTimer);
 

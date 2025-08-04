@@ -4,7 +4,7 @@
   "type": "module",
   "scripts": {
     "build": "tsc && tsc-alias",
-    "run": "node ./dist/app.js"
+    "run": "node ./dist/main.js"
   },
   "dependencies": {
     "tsc-alias": "^1.8.16",

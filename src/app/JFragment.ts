@@ -6,12 +6,10 @@ import {FragmentManager} from "@casperui/core/app/FragmentManager";
 import {Activity} from "@casperui/core/app/Activity";
 import {IParentView, View} from "@casperui/core/view/View";
 import {BXMLInflater} from "@casperui/core/view/inflater/BXMLInflater";
-import {ViewAttributes} from "@casperui/core/view/ViewAttributes";
 import {PostAction} from "@casperui/core/space/PostAction";
 import {ContextWrapper} from "@casperui/core/content/ContextWrapper";
 
 export type FragmentResizeHandler = (newWidth:number, newHeight:number) => void;
-
 
 export abstract class JFragment extends ContextWrapper implements ILiveManager, IFragmentManager,IParentView {
 
@@ -19,6 +17,7 @@ export abstract class JFragment extends ContextWrapper implements ILiveManager, 
     static readonly POST_A_DETACHED = 2;
     static readonly POST_ATTACH = 3;
     static readonly POST_DETACH = 4;
+    innerBinders: any;
 
 
     private fragmentMemory = createFragmentMemory();
@@ -163,7 +162,6 @@ export abstract class JFragment extends ContextWrapper implements ILiveManager, 
         return this.fragmentMemory;
     }
 
-    innerBinders: any;
 
     onSizeChangeListener(handler:FragmentResizeHandler){
         if (this.resizeObserver){

@@ -30,6 +30,9 @@ export class View extends ViewNode implements IParentView {
     private _textCache: string = null
     private mParentView?: IParentView;
 
+    private _top: number = 0;
+    private _translateY: number = 0;
+
 
     static CLICK = "click"
     static MOUSE_OVER = "mouseover"
@@ -227,30 +230,6 @@ export class View extends ViewNode implements IParentView {
         return node;
     }
 
-    // byId(id: number): View | null {
-    //     if (this.id === id) return this;
-    //
-    //     const stack = View._searchStack;
-    //     let sp = 0;
-    //     stack[sp++] = this;
-    //
-    //     while (sp > 0) {
-    //         const node = stack[--sp];
-    //         const children = node.mChildren;
-    //
-    //         for (let i = children.length; i-- > 0;) {
-    //             const child = children[i];
-    //             if (child.mType === NodeType.ELEMENT) {
-    //                 if (child.id === id) return child;
-    //                 stack[sp++] = child;
-    //             }
-    //         }
-    //     }
-    //
-    //     return null;
-    // }
-
-
     getChildren(): Array<View> {
         return this.mChildren
     }
@@ -403,12 +382,6 @@ export class View extends ViewNode implements IParentView {
         return parseFloat(v.replace("px", ""))
     }
 
-    // setTop(value:number){
-    //     (this.mNode as HTMLElement).style.top = `${value}px`
-    // }
-
-    private _top: number = 0;
-    private _translateY: number = 0;
 
     setTop(value: number) {
         this._top = value;

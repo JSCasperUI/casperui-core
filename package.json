@@ -1,10 +1,11 @@
 {
   "name": "@casperui/core",
-  "version": "0.0.9",
+  "version": "0.0.10",
   "description": "",
   "files": [
     "dist/**/*",
     "resmaker/dist/*",
+    "resmaker/package.json",
     "*.map"
   ],
   "scripts": {
@@ -13,7 +14,7 @@
     "release_pack": "npm run build && npm pack"
   },
   "bin": {
-    "resmaker": "./resmaker/dist/index.js"
+    "resmaker": "./resmaker/dist/main.js"
   },
   "typesVersions": {
     "*": {
@@ -93,10 +94,10 @@
       "require": "./dist/graphics/Rect.js",
       "types": "./dist/graphics/Rect.d.ts"
     },
-    "./io/ByteBufferOffset": {
-      "import": "./dist/io/ByteBufferOffset.js",
-      "require": "./dist/io/ByteBufferOffset.js",
-      "types": "./dist/io/ByteBufferOffset.d.ts"
+    "./io/ByteBuffer": {
+      "import": "./dist/io/ByteBuffer.js",
+      "require": "./dist/io/ByteBuffer.js",
+      "types": "./dist/io/ByteBuffer.d.ts"
     },
     "./live/ILiveManager": {
       "import": "./dist/live/ILiveManager.js",
@@ -143,6 +144,11 @@
       "require": "./dist/space/utils.js",
       "types": "./dist/space/utils.d.ts"
     },
+    "./utils/Locale": {
+      "import": "./dist/utils/Locale.js",
+      "require": "./dist/utils/Locale.js",
+      "types": "./dist/utils/Locale.d.ts"
+    },
     "./utils/ResourceReader": {
       "import": "./dist/utils/ResourceReader.js",
       "require": "./dist/utils/ResourceReader.js",
@@ -177,6 +183,11 @@
       "import": "./dist/view/inflater/BXMLInflater.js",
       "require": "./dist/view/inflater/BXMLInflater.js",
       "types": "./dist/view/inflater/BXMLInflater.d.ts"
+    },
+    "./view/inflater/BXMLSvgInflater": {
+      "import": "./dist/view/inflater/BXMLSvgInflater.js",
+      "require": "./dist/view/inflater/BXMLSvgInflater.js",
+      "types": "./dist/view/inflater/BXMLSvgInflater.d.ts"
     },
     "./view/inflater/WidgetRegistrar": {
       "import": "./dist/view/inflater/WidgetRegistrar.js",
