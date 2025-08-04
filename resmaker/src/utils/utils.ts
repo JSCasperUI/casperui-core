@@ -9,7 +9,7 @@ export function generateSnakeBindingName(filePath: string): string {
         throw new Error("Путь должен содержать layout/...");
     }
 
-    const relativeParts = parts.slice(layoutIndex); // включая layout
+    const relativeParts = parts.slice(layoutIndex+1);
     const fileName = relativeParts.at(-1)!;
     const fileBase = fileName.replace(/\.[^.]+$/, ''); // без .html
 

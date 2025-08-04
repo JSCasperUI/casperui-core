@@ -36,26 +36,23 @@ export class AutoBinding {
         this.interface_name = generatePascalBindingName(filePath)
         this.function_name = generateSnakeBindingName(filePath)
     }
-
-    makeResult(idFilePath?:string):AutoBindingResult {
-        return {
-            path:this.getFilePath(idFilePath),
-            code:this.getAutoBindScript()
-        }
+    getFileName(){
+        return this.function_name+".ts";
     }
+
+
     addSelectByIdPath(varName: string, path: number[], type: string = "View") {
         this.autoBinds.push({name: varName, type: type, path: path}); // или запиши куда нужно
     }
 
-    private getFilePath(idFilePath?:string):string {
-        return ""
-    }
 
 
-    private getAutoBindScript(): string {
+
+     getAutoBindScript(): string {
         const lines: string[] = [];
 
         // 1. Интерфейс
+
         lines.push(`export interface ${this.interface_name} {`);
         for (const bind of this.autoBinds) {
             lines.push(`\t${bind.name}: ${bind.type}`);
@@ -68,10 +65,28 @@ export class AutoBinding {
         lines.push(`\treturn {`);
         for (const bind of this.autoBinds) {
             const pathStr = `[${bind.path.join(',')}]`;
-            lines.push(`\t\t${bind.name}: v.byPath(${pathStr}) as ${bind.type},`);
+            if (bind.path.length>0){
+                lines.push(`\t\t${bind.name}: v.byPath(${pathStr}),`);
+            }else{
+                lines.push(`\t\t${bind.name}: v,`);
+            }
         }
         lines.push(`\t};`);
         lines.push(`}`);
+
+
+         //3.
+         lines.push(`export function ${this.function_name}_i(x:${this.interface_name},v: View):void {`);
+         for (const bind of this.autoBinds) {
+             const pathStr = `[${bind.path.join(',')}]`;
+             if (bind.path.length>0){
+                 lines.push(`\tx.${bind.name} = v.byPath(${pathStr})`);
+             }else{
+                 lines.push(`\tx.${bind.name} = v`);
+             }
+
+         }
+         lines.push(`}`);
 
         return lines.join('\n');
     }

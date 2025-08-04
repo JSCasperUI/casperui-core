@@ -72,7 +72,7 @@ export class FragmentManager {
             return
         }
         if (!container) {
-            container = this.mManager.getFragmentView().byId(containerId)
+            container = this.mManager.getView().byId(containerId)
         }
 
         if (oldFragment != null) {
@@ -84,8 +84,8 @@ export class FragmentManager {
             fragment.onCreated()
         }
 
-        container.addView(fragment.getFragmentView());
-        fragment.getFragmentView().setParentView(this.mManager as unknown as IParentView)
+        container.addView(fragment.getView());
+        fragment.getView().setParentView(this.mManager as unknown as IParentView)
         fragment.setParentFrame(new WeakRef(this.mManager))
         if (this.isAttached) {
             fragment.attach()
@@ -105,7 +105,7 @@ export class FragmentManager {
         memory.set(containerId, fragment)
 
         if (!container) {
-            container = this.mManager.getFragmentView().byId(containerId)
+            container = this.mManager.getView().byId(containerId)
         }
 
         if (!fragment.isFragmentCreated()) {
@@ -114,8 +114,8 @@ export class FragmentManager {
         }
         // fragment.getFragmentView().id = containerId
 
-        container.addView(fragment.getFragmentView());
-        fragment.getFragmentView().setParentView(this.mManager as unknown as IParentView)
+        container.addView(fragment.getView());
+        fragment.getView().setParentView(this.mManager as unknown as IParentView)
         fragment.setParentFrame(new WeakRef(this.mManager))
         if (this.isAttached) {
             fragment.attach()
@@ -145,9 +145,9 @@ export class FragmentManager {
             memory.delete(containerId)
             oldFragment.detachFragment()
             if (!container) {
-                container = this.mManager.getFragmentView().byId(containerId)
+                container = this.mManager.getView().byId(containerId)
             }
-            container.removeView(oldFragment.getFragmentView())
+            container.removeView(oldFragment.getView())
         }
     }
 
@@ -155,15 +155,15 @@ export class FragmentManager {
     swapInContainer(oldFragment:JFragment, newFragment:JFragment, container:View|null = null) {
         let memory = this.mManager.getFragmentMemory()
 
-        let oldView = oldFragment.getFragmentView()
+        let oldView = oldFragment.getView()
         let index = container.indexView(oldView)
 
         if (index >= 0) {
             oldFragment.detachFragment()
 
             container.removeView(oldView)
-            container.addView(newFragment.getFragmentView(), index)
-            newFragment.getFragmentView().setParentView(this.mManager as unknown as IParentView)
+            container.addView(newFragment.getView(), index)
+            newFragment.getView().setParentView(this.mManager as unknown as IParentView)
             newFragment.attach()
         }
 

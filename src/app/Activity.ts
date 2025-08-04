@@ -72,7 +72,7 @@ export class Activity extends ContextWrapper implements ILiveManager, IFragmentM
     }
 
 
-    getFragmentView():View{
+    getView():View{
         return this.root
     }
 

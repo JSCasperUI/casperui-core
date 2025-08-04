@@ -5,6 +5,7 @@ import {StringPool} from "@rMaker/resources/StringPool";
 import {MainCompiler} from "@rMaker/MainCompiler";
 import {IDMapper} from "@rMaker/resources/IDMapper";
 import {FilesIDArray, IDArrayMake} from "@rMaker/resources/FilesIDArray";
+import {AutoBinding} from "@rMaker/binder/AutoBinding";
 
 export class Resource {
     private filesIdArray: FilesIDArray;
@@ -12,6 +13,7 @@ export class Resource {
     private variableIdMapper = new IDMapper("id")
     languageResource: StringPool
     files: string[] = [];
+    private autoBinds:AutoBinding[] = []
 
     constructor(private config: ResourceConfig, private resourceMaker: MainCompiler) {
         this.languageResource = new StringPool(this, resourceMaker.getLangMapper());
@@ -22,6 +24,22 @@ export class Resource {
             this.filesIdArray = IDArrayMake("R")
         }
         this.files = []
+    }
+    pushBinging(autoBindings: AutoBinding) {
+        this.autoBinds.push(autoBindings)
+    }
+    storeBindings(){
+
+        if (!this.config.output?.id) return
+
+        const dirPath = path.dirname(this.config.output?.id!);
+        const bindingsPath = path.join(dirPath, "bind.ts");
+
+        let out = `import {View} from "@casperui/core/view/View";\n`
+        for (const autoBind of this.autoBinds) {
+            out+=autoBind.getAutoBindScript()+"\n"
+        }
+        fs.writeFileSync(bindingsPath,out)
     }
 
     getIdFilePath():string | undefined {

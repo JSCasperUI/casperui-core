@@ -136,8 +136,7 @@ export abstract class JFragment extends ContextWrapper implements ILiveManager, 
 
     }
 
-
-    getFragmentView():View{
+    getView():View{
         return this.baseView
     }
 
@@ -174,7 +173,7 @@ export abstract class JFragment extends ContextWrapper implements ILiveManager, 
             if (this.isFragmentAttached())
                 handler(entries[0].contentRect.width,entries[0].contentRect.height)
         })
-        this.resizeObserver.observe(this.getFragmentView().getElement());
+        this.resizeObserver.observe(this.getView().getElement());
     }
 
     getParentView(): IParentView | null {

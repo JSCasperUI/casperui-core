@@ -16,8 +16,10 @@ export class CasperBinary {
 
     constructor(private fileName: string, private res: Resource) {
         this.selfDictionary = new Dictionary("xml")
-        this.autoBinds = new AutoBinding(this.fileName)
         this.varIdMapper = res.getVarIdMapper()
+
+        this.autoBinds = new AutoBinding(this.fileName)
+        res.pushBinging(this.autoBinds)
     }
 
     getBindings(): AutoBinding {

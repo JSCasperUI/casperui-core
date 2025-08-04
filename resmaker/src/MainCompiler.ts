@@ -3,7 +3,6 @@ import path from "path";
 
 import {ResourceConfig} from "@rMaker/utils/Config";
 import {StringPool} from "@rMaker/resources/StringPool";
-import { generatePascalBindingName, generateSnakeBindingName} from "@rMaker/utils/utils";
 import {Resource} from "@rMaker/resources/Resource";
 import {CSSMerge} from "@rMaker/resources/CSSMerge";
 import {ByteBufferOutput} from "@rMaker/io/ByteBufferOutput";
@@ -56,6 +55,7 @@ export class MainCompiler {
     makeIDFiles() {
         for (let i = 0; i < this.mConfigs.length; i++) {
             this.mConfigs[i].makeIDFile()
+            this.mConfigs[i].storeBindings()
         }
     }
 
@@ -102,7 +102,7 @@ export class MainCompiler {
                 if (file.endsWith("xml") || file.endsWith("html")) {
                     let bin = new CasperBinary(file, config)
                     byteData = bin.html2CaperBinary(byteData.toString(), file)
-                    console.log(bin.getBindings().makeResult(config.getIdFilePath()))
+
                 } else if (file.endsWith("svg")) {
                     let bin = new SVGBinarize("svg", null!)
                     byteData = bin.html2CaperBinary(byteData.toString(), file)

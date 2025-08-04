@@ -10,6 +10,6 @@ export function createFragmentMemory():FragmentMemory {
 
 export interface IFragmentManager {
     getFragmentMemory():FragmentMemory
-    getFragmentView():View
+    getView():View
     getFragmentManager():FragmentManager
 }
