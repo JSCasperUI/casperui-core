@@ -6,7 +6,7 @@ import {Activity} from "@casperui/core/app/Activity";
 
 
 export class Application extends ContextWrapper {
-    private mainActivity:Activity
+    private mainActivity:Activity = undefined
     private mApplicationContext:Context
     private mResources:Resources
     private resLoading: Promise<void>;
@@ -14,7 +14,6 @@ export class Application extends ContextWrapper {
     constructor() {
         super();
 
-        this.mainActivity = undefined
         this.mApplicationContext = new ContextWrapper()
         this.mResources = new BinaryResources()
 

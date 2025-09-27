@@ -2,144 +2,142 @@ const decoder = new TextDecoder();
 
 
 export class ByteBuffer {
-    public offset: number = 0;
-    private view: DataView;
-    buffer: Uint8Array;
+    private _offset: number = 0;
+    private dView: DataView;
+    buff: Uint8Array;
 
     constructor(data:ArrayBuffer | Uint8Array | DataView) {
         if (data instanceof DataView) {
-            this.view = data;
-            this.buffer = new Uint8Array(data.buffer, data.byteOffset, data.byteLength);
+            this.dView = data;
+            this.buff = new Uint8Array(data.buffer, data.byteOffset, data.byteLength);
         } else if (data instanceof Uint8Array) {
-            this.buffer = data;
-            this.view = new DataView(data.buffer, data.byteOffset, data.byteLength);
+            this.buff = data;
+            this.dView = new DataView(data.buffer, data.byteOffset, data.byteLength);
         }else {
-            this.buffer = new Uint8Array(data);
-            this.view = new DataView(data);
+            this.buff = new Uint8Array(data);
+            this.dView = new DataView(data);
         }
     }
     getSize(): number {
-        return this.buffer.byteLength;
+        return this.buff.byteLength;
     }
     getDataView(): DataView {
-        return this.view;
+        return this.dView;
     }
 
     getUInt8Array():Uint8Array{
-        return this.buffer;
+        return this.buff;
     }
 
     readUInt32Array(items:number):Uint32Array{
-        let oldPos = this.offset;
-        this.offset+= items << 2
-        return new Uint32Array(this.view.buffer, this.view.byteOffset+oldPos, items);
+        let oldPos = this._offset;
+        this._offset+= items << 2
+        return new Uint32Array(this.dView.buffer, this.dView.byteOffset+oldPos, items);
     }
     getUInt32ArrayC(offset:number,items:number):Uint32Array{
-        return new Uint32Array(this.view.buffer, this.view.byteOffset+offset, items);
+        return new Uint32Array(this.dView.buffer, this.dView.byteOffset+offset, items);
     }
 
 
-    get(i:number):number {
-        return this.view.getUint8(i)
+    getByIndex(i:number):number {
+        return this.dView.getUint8(i)
     }
 
     read8BE():number {
-        return this.view.getUint8(this.offset++)
-    }
-    read():number {
-        return this.view.getUint8(this.offset++)
+        return this.dView.getUint8(this._offset++)
     }
 
+
     read16LE():number {
-        let out = this.view.getUint16(this.offset, true)
-        this.offset += 2
+        let out = this.dView.getUint16(this._offset, true)
+        this._offset += 2
         return out
     }
     read16BE():number {
-        let out = this.view.getUint16(this.offset, true)
-        this.offset += 2
+        let out = this.dView.getUint16(this._offset, true)
+        this._offset += 2
         return out
     }
     read24LE():number {
-        let tmp = this.offset
-        this.offset += 3
-        return this.view.getUint32(tmp, true) >> 8
+        let tmp = this._offset
+        this._offset += 3
+        return this.dView.getUint32(tmp, true) >> 8
     }
     read24BE():number {
-        let tmp = this.offset
-        this.offset += 3
-        return this.view.getUint32(tmp, true) >> 8
+        let tmp = this._offset
+        this._offset += 3
+        return this.dView.getUint32(tmp, true) >> 8
     }
 
     read32LE():number {
-        let out = this.view.getUint32(this.offset, true)
-        this.offset += 4
+        let out = this.dView.getUint32(this._offset, true)
+        this._offset += 4
         return out
     }
 
     read32BE():number {
-        let out = this.view.getUint32(this.offset, true)
-        this.offset += 4
+        let out = this.dView.getUint32(this._offset, true)
+        this._offset += 4
         return out
     }
 
     readIndex():number {
-        let out = this.view.getUint8(this.offset)
+        let out = this.dView.getUint8(this._offset)
         if (out > 127) {
-            out = this.view.getUint16(this.offset, false) & 0x7FFF
-            this.offset += 2
+            out = this.dView.getUint16(this._offset, false) & 0x7FFF
+            this._offset += 2
             return out
         }
-        this.offset += 1
+        this._offset++
         return out
     }
 
 
-    setPosition(i:number) {
-        this.offset = i
+    setBufferPosition(i:number) {
+        this._offset = i
     }
 
-    position():number {
-        return this.offset
+    getBufferPosition():number {
+        return this._offset
     }
 
     toUTFString():string{
-        this.reset()
+        this.resetBytePosition()
         return this.readString(-1)
     }
 
     readVarIntString():string{
         const size = this.readIndex()
-        const start = this.offset;
+        const start = this._offset;
         const end = start + size;
-        this.offset = end;
-        return decoder.decode(this.buffer.subarray(start, end));
+        this._offset = end;
+        return decoder.decode(this.buff.subarray(start, end));
     }
     readString(size: number): string {
         if (size === -1) {
-            return decoder.decode(this.view);
+            return decoder.decode(this.dView);
         }
-        const start = this.offset;
+        const start = this._offset;
         const end = start + size;
-        this.offset = end;
-        return decoder.decode( this.buffer.subarray(start, end));
+        this._offset = end;
+        return decoder.decode( this.buff.subarray(start, end));
     }
     readStringRange(start:number, size:number):string {
-        return decoder.decode(new DataView(this.view.buffer, this.view.byteOffset + start, size))
+        return decoder.decode(new DataView(this.dView.buffer, this.dView.byteOffset + start, size))
     }
     inc(){
-        this.offset++
+        this._offset++
     }
     positionOffset(i:number) {
-        this.offset += i
+        this._offset += i
     }
 
-    reset() {
-        this.offset = 0
+    resetBytePosition() {
+        this._offset = 0
     }
 
     hasRemaining():boolean {
-        return this.offset !== this.buffer.byteLength
+        return this._offset !== this.buff.byteLength
     }
 }
 

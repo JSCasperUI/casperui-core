@@ -4,14 +4,13 @@ export class ResourceReader {
 
     private mData:ArrayBuffer
     private mFiles:Array<ByteBuffer>
-    private mNames:Array<string>
+    private mNames:Array<string>  = []
     private fBuf:ByteBuffer
 
     constructor(mData:ArrayBuffer) {
 
         this.mData = mData
 
-        this.mNames = []
         this.fBuf = new ByteBuffer(mData)
         this.initResources()
 

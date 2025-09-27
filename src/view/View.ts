@@ -4,6 +4,15 @@ import {ViewAttributes} from "@casperui/core/view/ViewAttributes";
 import {IFragmentManager} from "@casperui/core/app/IFragmentManager";
 import {BXMLSvgInflater} from "@casperui/core/view/inflater/BXMLSvgInflater";
 import {NodeType} from "@casperui/core/view/nodes/NodeType";
+import {
+    ACTIVE, CLICK,
+    EMPTY_STRING,
+    MOUSE_DOUBLE_CLICK, MOUSE_DOWN, MOUSE_MOVE,
+    MOUSE_OUT,
+    MOUSE_OVER,
+    NONE, POSTFIX_PX,
+    SNAKE_ANIM, TAG_DIV
+} from "@casperui/core/space/Constants";
 
 export type ViewTag = string | Element
 
@@ -34,21 +43,12 @@ export class View extends ViewNode implements IParentView {
     private _translateY: number = 0;
 
 
-    static CLICK = "click"
-    static MOUSE_OVER = "mouseover"
-    static MOUSE_DOUBLE_CLICK = "dblclick"
-    static MOUSE_MOVE = "mousemove"
-    static MOUSE_OUT = "mouseout"
-    static MOUSE_DOWN = "mousedown"
-    static MOUSE_UP = "mouseup"
-
-
     constructor(context: Context, tag?: ViewTag, attr?: ViewAttributes) {
         if (!tag) {
-            super("div")
+            super(TAG_DIV)
         } else {
             if (tag instanceof Element) {
-                super("div")
+                super(TAG_DIV)
                 this.mNode = tag
             } else {
                 super(tag)
@@ -168,8 +168,6 @@ export class View extends ViewNode implements IParentView {
             this.mChildren[i].setParentView(null)
         }
 
-        // const node = this.mNode as HTMLElement;
-        // while (node.firstChild) node.removeChild(node.firstChild);
 
         this.mChildren.length = 0; // быстрее, чем присваивать []
         (this.mNode as HTMLElement).innerHTML = ""
@@ -201,7 +199,7 @@ export class View extends ViewNode implements IParentView {
         }
         return out
     }
-    private static _searchStack: View[] = [];
+
     byId(id: number): View | null {
         if (this.id === id)
             return this
@@ -220,8 +218,8 @@ export class View extends ViewNode implements IParentView {
         return null
     }
 
-    byPath( path: number[]): View | null {
-        if (path.length === 0 ) return this
+    byPath(path: number[]): View | null {
+        if (path.length === 0) return this
         let node = this as View;
         for (const i of path) {
             if (!node.mChildren[i]) return null;
@@ -239,17 +237,17 @@ export class View extends ViewNode implements IParentView {
     }
 
     activate() {
-        this.addClass("active")
+        this.addClass(ACTIVE)
     }
 
     deactivate() {
-        this.removeClass("active")
+        this.removeClass(ACTIVE)
     }
 
     handleViewError() {
-        this.removeClass("e_snake")
+        this.removeClass(SNAKE_ANIM)
         setTimeout(() => {
-            this.addClass("e_snake")
+            this.addClass(SNAKE_ANIM)
         }, 1)
 
     }
@@ -259,7 +257,7 @@ export class View extends ViewNode implements IParentView {
     }
 
     setWidth(width: number) {
-        (this.mNode as HTMLElement).style.width = `${width}px`
+        (this.mNode as HTMLElement).style.width = width + POSTFIX_PX
     }
 
     getHeight() {
@@ -267,14 +265,14 @@ export class View extends ViewNode implements IParentView {
     }
 
     setHeight(height: number) {
-        (this.mNode as HTMLElement).style.height = `${height}px`
+        (this.mNode as HTMLElement).style.height = height + POSTFIX_PX
     }
 
     setOpacity(value: number) {
         if (value === 1) {
-            (this.mNode as HTMLElement).style.opacity = ''
+            (this.mNode as HTMLElement).style.opacity = EMPTY_STRING
         } else {
-            (this.mNode as HTMLElement).style.opacity = `${value}`
+            (this.mNode as HTMLElement).style.opacity = value.toString()
         }
     }
 
@@ -283,14 +281,14 @@ export class View extends ViewNode implements IParentView {
     }
 
     getVisibility(): boolean {
-        return (this.mNode as HTMLElement).style.display !== "none";
+        return (this.mNode as HTMLElement).style.display !== NONE;
     }
 
     setVisibility(value: boolean) {
         if (value) {
-            (this.mNode as HTMLElement).style.display = "";
+            (this.mNode as HTMLElement).style.display = EMPTY_STRING;
         } else {
-            (this.mNode as HTMLElement).style.display = "none";
+            (this.mNode as HTMLElement).style.display = NONE;
         }
     }
 
@@ -346,32 +344,43 @@ export class View extends ViewNode implements IParentView {
         this.addClass(setClass)
     }
 
-    getValue() {
-        return (this.mNode as HTMLInputElement).value
-    }
+
 
     setSafeValue(value: any) {
         if (value === undefined || value === null) {
-            this.setValue("")
+            this.setValue(EMPTY_STRING)
         } else {
             this.setValue(value)
         }
     }
 
-    setValue(value: string) {
+    show() {
+        this.setVisibility(true);
+    }
+
+    hide() {
+        this.setVisibility(false);
+    }
+
+    toggle(visible?: boolean) {
+        this.setVisibility(visible ?? !this.getVisibility());
+    }
+    getValue():string {
+        return (this.mNode as HTMLInputElement).value
+    }
+    setValue(value: string):void {
         (this.mNode as HTMLInputElement).value = value
     }
 
-    setBoolValue(value: boolean) {
+    setChecked(value: boolean) {
         (this.mNode as HTMLInputElement).checked = value
     }
-
     isChecked(): boolean {
         return (this.mNode as HTMLInputElement).checked
     }
 
     setLeft(value: number) {
-        (this.mNode as HTMLElement).style.left = `${value}px`
+        (this.mNode as HTMLElement).style.left = value + POSTFIX_PX
     }
 
     getLeft(): number {
@@ -379,13 +388,13 @@ export class View extends ViewNode implements IParentView {
         if (v.length === 0) {
             return 0
         }
-        return parseFloat(v.replace("px", ""))
+        return parseFloat(v.replace(POSTFIX_PX, EMPTY_STRING))
     }
 
 
     setTop(value: number) {
         this._top = value;
-        (this.mNode as HTMLElement).style.top = value + "px";
+        (this.mNode as HTMLElement).style.top = value + POSTFIX_PX;
     }
 
     getTop(): number {
@@ -406,16 +415,20 @@ export class View extends ViewNode implements IParentView {
         if (v.length === 0) {
             return 0
         }
-        return parseFloat(v.replace("px", ""))
+        return parseFloat(v.replace(POSTFIX_PX, EMPTY_STRING))
     }
 
 
     setOnClickListener(func: FEvent) {
-        this.makeSafeEvent("click", func)
+        this.makeSafeEvent(CLICK, func)
     }
 
     vEvent(event: string, func: FEvent) {
         this.makeSafeEvent(event, func)
+    }
+
+    html(content: string) {
+        (this.mNode as HTMLElement).innerHTML = content;
     }
 
 
@@ -437,49 +450,44 @@ export class View extends ViewNode implements IParentView {
     getStyle(): CSSStyleDeclaration {
         return (this.mNode as HTMLElement).style
     }
+    setStyle(key:string, value:string):void {
+        (this.mNode as HTMLElement).style[key] = value;
+    }
+
+    hasClass(className: string): boolean {
+        return (this.mNode as HTMLElement).classList.contains(className);
+    }
 
     onMouseOverListener(func: FEvent) {
-        this.makeSafeEvent("mouseover", func)
+        this.makeSafeEvent(MOUSE_OVER, func)
     }
 
     onMouseDoubleClickListener(func: FEvent) {
-        this.makeSafeEvent("dblclick", func)
+        this.makeSafeEvent(MOUSE_DOUBLE_CLICK, func)
     }
 
 
     onMouseOutListener(func: FEvent) {
-        this.makeSafeEvent("mouseout", func)
+        this.makeSafeEvent(MOUSE_OUT, func)
     }
 
 
     onMouseMoveListener(func: FEvent) {
-        this.makeSafeEvent("mousemove", func)
+        this.makeSafeEvent(MOUSE_MOVE, func)
     }
 
     onMouseClickListener(func: FEvent) {
-        this.makeSafeEvent("click", func)
+        this.makeSafeEvent(CLICK, func)
     }
 
 
     onMouseDownListener(func: FEvent) {
-        this.makeSafeEvent("mousedown", func)
+        this.makeSafeEvent(MOUSE_DOWN, func)
     }
 
-
-    setOnMouseOver(func: FEvent) {
-
-        this.makeSafeEvent("mouseover", func)
-
-    }
-
-
-    setOnMouseOut(func: FEvent) {
-        this.makeSafeEvent("mouseout", func)
-
-    }
 
     setOnFastClickListener(func: FEvent) {
-        this.makeSafeEvent("mousedown", func)
+        this.makeSafeEvent(MOUSE_DOWN, func)
     }
 
     setParameter(name: string, value: any) {
@@ -490,13 +498,7 @@ export class View extends ViewNode implements IParentView {
         return (this.mNode as HTMLElement).getAttribute(name)
     }
 
-    getParent() {
-        return null
-    }
 
-    setSVGContent(svg: string) {
-        (this.mNode as HTMLElement).innerHTML = svg
-    }
 
     setSVGById(id: number) {
         if (this.mCurrentSVGContentId === id) return;
@@ -508,12 +510,12 @@ export class View extends ViewNode implements IParentView {
         if (!svgElement) {
             svgElement = BXMLSvgInflater.inflate(id, this.mContext)
         }
-        node.innerHTML = "";
+        node.innerHTML = EMPTY_STRING;
         node.appendChild(svgElement.cloneNode(true));
     }
 
     setImageSrc(url: string) {
-        (this.mNode as HTMLImageElement).src = url// `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svgString)}`
+        (this.mNode as HTMLImageElement).src = url
     }
 
     getScrollY(): number {

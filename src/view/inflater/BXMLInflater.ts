@@ -5,6 +5,7 @@ import {View} from "@casperui/core/view/View";
 import {ViewNode} from "@casperui/core/view/nodes/ViewNode";
 import {NodeType} from "@casperui/core/view/nodes/NodeType";
 import {WidgetRegistrar} from "@casperui/core/view/inflater/WidgetRegistrar";
+import {TAG_SCRIPT, TAG_STYLE, TAG_SVG} from "@casperui/core/space/Constants";
 
 
 export class BXMLInflater {
@@ -58,11 +59,11 @@ export class BXMLInflater {
         }
 
         switch (node.tag) {
-            case "style":
+            case TAG_STYLE:
                 return new ViewNode(NodeType.STYLE, node.children[0].attrs["#t"] as string)
-            case "script":
+            case TAG_SCRIPT:
                 return new ViewNode(NodeType.SCRIPT, node.children[0].attrs["#t"] as string)
-            case "svg": {
+            case TAG_SVG: {
                 let nd = new ViewNode(NodeType.SVG, "")
                 for (const key in node.attrs) {
                     (nd.mNode as HTMLElement).setAttribute(key, node.attrs[key] as string);

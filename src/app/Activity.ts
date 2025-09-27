@@ -5,25 +5,23 @@ import {ContextWrapper} from "@casperui/core/content/ContextWrapper";
 import {LiveManager} from "@casperui/core/live/LiveManager";
 import {IParentView, View} from "@casperui/core/view/View";
 import {BXMLInflater} from "@casperui/core/view/inflater/BXMLInflater";
+import {JFragment} from "@casperui/core/app/JFragment";
 
 
 export class Activity extends ContextWrapper implements ILiveManager, IFragmentManager, IParentView {
 
     private liveManager: LiveManager = new LiveManager();
-    private fragmentMemory: FragmentMemory
+    private fragmentMemory: FragmentMemory = createFragmentMemory()
     private fragmentManager: FragmentManager
-    private window: View
-    private root: View
+    private windowView: View
     private inflater: BXMLInflater
     innerBinders: any;
 
 
     constructor() {
         super();
-        this.fragmentMemory = createFragmentMemory()
         this.fragmentManager = new FragmentManager(this, true)
-        this.root = new View(this, document.body)
-        this.window = new View(this, document.body)
+        this.windowView = new View(this, document.body)
         this.inflater = new BXMLInflater(this)
     }
 
@@ -35,12 +33,10 @@ export class Activity extends ContextWrapper implements ILiveManager, IFragmentM
         return this.liveManager;
     }
 
-    getRootView(): View {
-        return this.root
-    }
+
 
     getWindowView(): View {
-        return this.window
+        return this.windowView
     }
 
     createActivity() {
@@ -54,7 +50,11 @@ export class Activity extends ContextWrapper implements ILiveManager, IFragmentM
     onLayout() {}
 
     byId(id: number): View {
-        return this.root.byId(id)
+        return this.windowView.byId(id)
+    }
+
+    byPath(path: number[]): View | null {
+        return this.windowView.byPath(path)
     }
 
     getLayoutInflater(): BXMLInflater {
@@ -62,8 +62,8 @@ export class Activity extends ContextWrapper implements ILiveManager, IFragmentM
     }
 
     setContentView(layoutId: number) {
-        (this.root.mNode as HTMLElement).innerHTML = "";
-        this.inflater.inflate(layoutId, false, this.root);
+        (this.windowView.mNode as HTMLElement).innerHTML = "";
+        this.windowView.addView(this.inflater.inflate(layoutId, false));
         this.onLayout()
     }
 
@@ -72,13 +72,16 @@ export class Activity extends ContextWrapper implements ILiveManager, IFragmentM
     }
 
     getView(): View {
-        return this.root
+        return this.windowView
     }
 
     getFragmentMemory(): FragmentMemory {
         return this.fragmentMemory
     }
 
+    replaceFragment(id:number, fragment:JFragment){
+        this.fragmentManager.replaceFragment(id, fragment)
+    }
     getFragmentManager(): FragmentManager {
         return this.fragmentManager;
     }

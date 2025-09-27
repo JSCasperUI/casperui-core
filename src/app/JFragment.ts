@@ -58,6 +58,11 @@ export abstract class JFragment extends ContextWrapper implements ILiveManager, 
         return this.fragmentManager
     }
 
+    replaceFragment(id:number, fragment:JFragment){
+        this.fragmentManager.replaceFragment(id, fragment)
+    }
+
+
 
     abstract onCreateView(inflater:BXMLInflater,container:View):View
 

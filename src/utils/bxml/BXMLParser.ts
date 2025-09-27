@@ -35,7 +35,7 @@ export class BXMLParser {
     initBXMLParser(){
         const data = this.data
 
-        data.setPosition(3)
+        data.setBufferPosition(3)
 
         let tagSize = data.readIndex()
         let keySize = data.readIndex()
@@ -54,7 +54,7 @@ export class BXMLParser {
         }
         for (let i = 0; i < valueSize; i++) {
             size = data.readIndex()
-            let type = data.get(data.offset)
+            let type = data.getByIndex(data.getBufferPosition())
             if (type < 8) {
                 if (type === DYNAMIC_TYPE.IDENTIFIER) {
                     data.inc()
@@ -70,10 +70,10 @@ export class BXMLParser {
         this.mTags[0] ="#t"
 
 
-        this.offset = data.position()
+        this.offset = data.getBufferPosition()
     }
     readTree() {
-        this.data.setPosition(this.offset)
+        this.data.setBufferPosition(this.offset)
         this.startReadTag(this.mRoot)
         return this.mRoot.children[0]
     }

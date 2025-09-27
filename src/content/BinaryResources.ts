@@ -6,13 +6,13 @@ import {Locale} from "@casperui/core/utils/Locale";
 export class BinaryResources extends Resources {
 
     setLocale(value: string): void {
-        this.locale.setLanguage(value);
+        this.localeStrings.setLanguage(value);
     }
 
     private mResourceReader:ResourceReader
     private mSvgBlobsCache = {}
     private mCache = {}
-    private locale: Locale;
+    private localeStrings: Locale;
     constructor() {
         super();
         this.mResourceReader = null
@@ -22,19 +22,19 @@ export class BinaryResources extends Resources {
 
     initResources(dataFile:ArrayBuffer) {
         this.mResourceReader = new ResourceReader(dataFile)
-        this.locale = new Locale(this.mResourceReader.getLangFile())
+        this.localeStrings = new Locale(this.mResourceReader.getLangFile())
     }
 
 
     getBufferById(id:number):ByteBuffer {
         let out = this.mResourceReader.getFileByIndex(id)
-        out.reset()
+        out.resetBytePosition()
         return out
     }
 
 
     getString(id: number): string {
-        return this.locale.getString(id);
+        return this.localeStrings.getString(id);
     }
 
     getDataString(id:number,cache = true):string{

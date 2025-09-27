@@ -31,6 +31,7 @@ export class Resource {
     storeBindings(){
 
         if (!this.config.output?.id) return
+        if (!this.isPrimary()) return;
 
         const dirPath = path.dirname(this.config.output?.id!);
         const bindingsPath = path.join(dirPath, "bind.ts");
@@ -85,7 +86,10 @@ export class Resource {
 
     makeIDFile() {
         if (this.config.output?.id) {
-            fs.writeFileSync(this.config.output?.id, this.createFileID())
+            let path = this.config.output.id!
+            if (!this.isPrimary())
+                path = this.config.widget?.id!
+            fs.writeFileSync(path, this.createFileID())
         }
     }
 

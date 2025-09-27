@@ -14,6 +14,7 @@ export interface ResourceConfig {
     },
     widget?: {
         name: string,// Resource widget name
+        id?: string,
     }
     sub_resources?: string[]
 
@@ -52,6 +53,10 @@ function def(value: string | undefined, def: string): string {
         if (!config.output) {
             config.output = {}
         }
+        if (config.widget && config.widget.id){
+            config.widget.id = path.join(directory,  config.widget.id)
+        }
+
         config.output.id = path.join(directory, def(config.output.id, defaultConfig.output.id))
         if (config.output.binaryFile){
             config.output.binaryFile = path.join(directory, config.output.binaryFile)

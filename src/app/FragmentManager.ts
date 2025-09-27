@@ -75,7 +75,7 @@ export class FragmentManager {
 
         if (oldFragment != null) {
             oldFragment.detachFragment()
-            container.removeView(oldFragment.getFragmentView())
+            container.removeView(oldFragment.getView())
         }
         if (!fragment.isFragmentCreated()) {
             fragment.startCreatingView()

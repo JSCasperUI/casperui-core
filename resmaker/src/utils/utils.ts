@@ -26,21 +26,27 @@ export function generatePascalBindingName(filePath: string): string {
         throw new Error("Путь должен содержать layout/...");
     }
 
-    const relativeParts = parts.slice(layoutIndex + 1); // только под layout
+    const relativeParts = parts.slice(layoutIndex + 1);
     const fileName = relativeParts.at(-1)!;
-    const fileBase = fileName.replace(/\.[^.]+$/, ''); // без .html
+    const fileBase = fileName.replace(/\.[^.]+$/, '');
 
-    const pascal = fileBase.split(/[_\-]/).map(p => p[0].toUpperCase() + p.slice(1)).join('');
+    // PascalCase для имени файла с учётом _ и -
+    const pascal = fileBase
+        .split(/[_\-]/)
+        .map(p => p.charAt(0).toUpperCase() + p.slice(1))
+        .join('');
 
-    // теперь идём от самого глубокого к layout
+    // Аббревиатура из папок с учётом _ и -
     const abbr = relativeParts
-        .slice(0, -1)             // только папки
+        .slice(0, -1)
         .reverse()
-        .map(d => d[0].toUpperCase())
+        .map(d => d.split(/[_\-]/).map(w => w[0].toUpperCase()+ w.slice(1)).join(''))
         .join('');
 
     return `I${pascal}${abbr}`;
 }
+
+
 
 
 export function convertTagToLowerCase(tag:string) {
