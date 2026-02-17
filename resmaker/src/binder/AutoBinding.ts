@@ -3,6 +3,7 @@ import {generatePascalBindingName, generateSnakeBindingName} from "@rMaker/utils
 
 export interface BindItem {
     name: string,
+    id: number,
     type: string,
     path: number[]
 }
@@ -41,8 +42,8 @@ export class AutoBinding {
     }
 
 
-    addSelectByIdPath(varName: string, path: number[], type: string = "View") {
-        this.autoBinds.push({name: varName, type: type, path: path}); // или запиши куда нужно
+    addSelectByIdPath(varName: string, path: number[], type: string = "View",index:number) {
+        this.autoBinds.push({name: varName, type: type, path: path,id:index}); // или запиши куда нужно
     }
 
 
@@ -66,7 +67,8 @@ export class AutoBinding {
         for (const bind of this.autoBinds) {
             const pathStr = `[${bind.path.join(',')}]`;
             if (bind.path.length>0){
-                lines.push(`\t\t${bind.name}: v.byPath(${pathStr}),`);
+                // lines.push(`\t\t${bind.name}: v.byPath(${pathStr}),`);
+                lines.push(`\t\t${bind.name}: v.byId(${bind.id}),`);
             }else{
                 lines.push(`\t\t${bind.name}: v,`);
             }
@@ -80,7 +82,7 @@ export class AutoBinding {
          for (const bind of this.autoBinds) {
              const pathStr = `[${bind.path.join(',')}]`;
              if (bind.path.length>0){
-                 lines.push(`\tx.${bind.name} = v.byPath(${pathStr})`);
+                 lines.push(`\tx.${bind.name} = v.byId(${bind.id})`);
              }else{
                  lines.push(`\tx.${bind.name} = v`);
              }

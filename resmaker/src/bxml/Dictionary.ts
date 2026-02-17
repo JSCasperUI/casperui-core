@@ -131,7 +131,7 @@ export class Dictionary {
         }
 
         let tValue = Buffer.concat([Buffer.from([type]),Buffer.from(mValue)])
-        let strVal = tValue.toString()
+        let strVal = tValue.toString("hex") // to string = bad toString("hex") good
         if (this.valuesMap.has(strVal)){
             return this.valuesMap.get(strVal)
         }

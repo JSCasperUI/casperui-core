@@ -79,9 +79,10 @@ export class CasperBinary {
                 if (node.type === DYNAMIC_TYPE.IDENTIFIER) {
                     key = this.selfDictionary.key("#i")!
                     let indexOfVariable = this.varIdMapper.getIdByName(content)
+
                     value = this.selfDictionary.valueTyped(DYNAMIC_TYPE.IDENTIFIER, indexOfVariable)
                     const path = node.__path!;
-                    this.autoBinds.addSelectByIdPath(content, path);
+                    this.autoBinds.addSelectByIdPath(content, path,"View",indexOfVariable);
                 } else if (node.type === DYNAMIC_TYPE.LANG_ID) {
                     key = this.selfDictionary.key("#l")!
                     let indexOfVariable = this.res.languageResource.getIdByName(content)
@@ -106,8 +107,12 @@ export class CasperBinary {
                     throw Error(`Invalid identifier [${aKey}="${node.attrs[aKey]}"] allow only(A-z 0-9 and _) \n    at (${this.fileName}:${node.line}:0)`)
                 }
                 const path = node.__path!;
-                this.autoBinds.addSelectByIdPath(node.attrs[aKey], path);
                 let indexOfVariable = this.varIdMapper.getIdByName(node.attrs[aKey])
+                console.log(node.attrs[aKey],"->",indexOfVariable)
+                if (node.attrs[aKey] == "city_latitude"){
+                    console.log("123")
+                }
+                this.autoBinds.addSelectByIdPath(node.attrs[aKey], path,"View",indexOfVariable);
                 value = this.selfDictionary.valueTyped(DYNAMIC_TYPE.IDENTIFIER, indexOfVariable)
             } else {
                 value = this.selfDictionary.value(node.attrs[aKey])

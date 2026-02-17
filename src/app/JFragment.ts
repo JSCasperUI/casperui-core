@@ -168,7 +168,7 @@ export abstract class JFragment extends ContextWrapper implements ILiveManager, 
     }
 
 
-    onSizeChangeListener(handler:FragmentResizeHandler){
+    setSizeChangeListener(handler:FragmentResizeHandler){
         if (this.resizeObserver){
             this.resizeObserver.disconnect()
         }

@@ -31,6 +31,7 @@ export class View extends ViewNode implements IParentView {
 
     static svgCache: Map<number, Element> = new Map();
     static __classListTemp: string[] = [];
+
     private id: number = -1
     private mContext: Context
     private mChildren: Array<View> = []
@@ -68,6 +69,7 @@ export class View extends ViewNode implements IParentView {
 
     setId(id: number) {
         this.id = id
+        return this;
     }
 
 
@@ -77,6 +79,7 @@ export class View extends ViewNode implements IParentView {
 
     inflateSelf(id: number, cache: boolean) {
         this.mContext.getInflater().inflate(id, cache, this, true)
+        return this;
     }
 
     getFragmentManager(): IFragmentManager {
@@ -108,6 +111,7 @@ export class View extends ViewNode implements IParentView {
         });
 
         observer.observe(document.body, {childList: true, subtree: true});
+        return this;
     }
 
 
@@ -141,6 +145,7 @@ export class View extends ViewNode implements IParentView {
             //     node.setAttribute(key,attrs[key])
             // }
         }
+        return this;
     }
 
     replaceSelf(newView: View) {
@@ -160,6 +165,7 @@ export class View extends ViewNode implements IParentView {
         }
         this.mChildren.splice(index, 0, view);
         this.mNode.insertBefore(view.mNode, this.mNode.childNodes[index])
+        return this;
     }
 
     removeAllViews() {
@@ -171,6 +177,7 @@ export class View extends ViewNode implements IParentView {
 
         this.mChildren.length = 0; // быстрее, чем присваивать []
         (this.mNode as HTMLElement).innerHTML = ""
+        return this;
     }
 
     removeView(content: View) {
@@ -181,6 +188,7 @@ export class View extends ViewNode implements IParentView {
         content.setParentView(null)
         this.mChildren.splice(index, 1);
         this.mNode.removeChild(content.mNode)
+        return this;
 
     }
 
@@ -238,10 +246,12 @@ export class View extends ViewNode implements IParentView {
 
     activate() {
         this.addClass(ACTIVE)
+        return this;
     }
 
     deactivate() {
         this.removeClass(ACTIVE)
+        return this;
     }
 
     handleViewError() {
@@ -249,6 +259,8 @@ export class View extends ViewNode implements IParentView {
         setTimeout(() => {
             this.addClass(SNAKE_ANIM)
         }, 1)
+
+        return this;
 
     }
 
@@ -258,6 +270,7 @@ export class View extends ViewNode implements IParentView {
 
     setWidth(width: number) {
         (this.mNode as HTMLElement).style.width = width + POSTFIX_PX
+        return this;
     }
 
     getHeight() {
@@ -266,6 +279,7 @@ export class View extends ViewNode implements IParentView {
 
     setHeight(height: number) {
         (this.mNode as HTMLElement).style.height = height + POSTFIX_PX
+        return this;
     }
 
     setOpacity(value: number) {
@@ -274,6 +288,7 @@ export class View extends ViewNode implements IParentView {
         } else {
             (this.mNode as HTMLElement).style.opacity = value.toString()
         }
+        return this;
     }
 
     getOpacity() {
@@ -290,6 +305,7 @@ export class View extends ViewNode implements IParentView {
         } else {
             (this.mNode as HTMLElement).style.display = NONE;
         }
+        return this;
     }
 
     setTextContent(text: string) {
@@ -301,6 +317,7 @@ export class View extends ViewNode implements IParentView {
             this._textCache = text
             this.mNode.textContent = text;
         }
+        return this;
     }
 
 
@@ -329,19 +346,23 @@ export class View extends ViewNode implements IParentView {
             (this.mNode as HTMLElement).classList.add(...View.__classListTemp);
             // View.__classListTemp.length = 0;
         }
+        return this;
     }
 
     addClass(className: string) {
         (this.mNode as HTMLElement).classList.add(className)
+        return this;
     }
 
     removeClass(className: string) {
         (this.mNode as HTMLElement).classList.remove(className)
+        return this;
     }
 
     swapClass(removeClass: string, setClass: string) {
         this.removeClass(removeClass)
         this.addClass(setClass)
+        return this;
     }
 
 
@@ -352,28 +373,34 @@ export class View extends ViewNode implements IParentView {
         } else {
             this.setValue(value)
         }
+        return this;
     }
 
     show() {
         this.setVisibility(true);
+        return this;
     }
 
     hide() {
         this.setVisibility(false);
+        return this;
     }
 
     toggle(visible?: boolean) {
         this.setVisibility(visible ?? !this.getVisibility());
+        return this;
     }
     getValue():string {
         return (this.mNode as HTMLInputElement).value
     }
-    setValue(value: string):void {
+    setValue(value: string) {
         (this.mNode as HTMLInputElement).value = value
+        return this
     }
 
     setChecked(value: boolean) {
         (this.mNode as HTMLInputElement).checked = value
+        return this
     }
     isChecked(): boolean {
         return (this.mNode as HTMLInputElement).checked
@@ -381,6 +408,7 @@ export class View extends ViewNode implements IParentView {
 
     setLeft(value: number) {
         (this.mNode as HTMLElement).style.left = value + POSTFIX_PX
+        return this;
     }
 
     getLeft(): number {
@@ -395,6 +423,7 @@ export class View extends ViewNode implements IParentView {
     setTop(value: number) {
         this._top = value;
         (this.mNode as HTMLElement).style.top = value + POSTFIX_PX;
+        return this;
     }
 
     getTop(): number {
@@ -404,6 +433,7 @@ export class View extends ViewNode implements IParentView {
     setTranslateY(value: number) {
         this._translateY = value;
         (this.mNode as HTMLElement).style.transform = `translateY(${value}px)`;
+        return this;
     }
 
     getTranslateY(): number {
@@ -421,14 +451,17 @@ export class View extends ViewNode implements IParentView {
 
     setOnClickListener(func: FEvent) {
         this.makeSafeEvent(CLICK, func)
+        return this;
     }
 
     vEvent(event: string, func: FEvent) {
         this.makeSafeEvent(event, func)
+        return this;
     }
 
     html(content: string) {
         (this.mNode as HTMLElement).innerHTML = content;
+        return this;
     }
 
 
@@ -445,13 +478,15 @@ export class View extends ViewNode implements IParentView {
             }
         };
         this.mNode.addEventListener(type, this["_old_fn_" + type]);
+        return this;
     }
 
     getStyle(): CSSStyleDeclaration {
         return (this.mNode as HTMLElement).style
     }
-    setStyle(key:string, value:string):void {
+    setStyle(key:string, value:string) {
         (this.mNode as HTMLElement).style[key] = value;
+        return this;
     }
 
     hasClass(className: string): boolean {
@@ -460,38 +495,46 @@ export class View extends ViewNode implements IParentView {
 
     onMouseOverListener(func: FEvent) {
         this.makeSafeEvent(MOUSE_OVER, func)
+        return this;
     }
 
     onMouseDoubleClickListener(func: FEvent) {
         this.makeSafeEvent(MOUSE_DOUBLE_CLICK, func)
+        return this;
     }
 
 
     onMouseOutListener(func: FEvent) {
         this.makeSafeEvent(MOUSE_OUT, func)
+        return this;
     }
 
 
     onMouseMoveListener(func: FEvent) {
         this.makeSafeEvent(MOUSE_MOVE, func)
+        return this;
     }
 
     onMouseClickListener(func: FEvent) {
         this.makeSafeEvent(CLICK, func)
+        return this;
     }
 
 
     onMouseDownListener(func: FEvent) {
         this.makeSafeEvent(MOUSE_DOWN, func)
+        return this;
     }
 
 
     setOnFastClickListener(func: FEvent) {
         this.makeSafeEvent(MOUSE_DOWN, func)
+        return this;
     }
 
     setParameter(name: string, value: any) {
         (this.mNode as HTMLElement).setAttribute(name, value)
+        return this;
     }
 
     getParameter(name: string): string {
@@ -509,13 +552,16 @@ export class View extends ViewNode implements IParentView {
         let svgElement = View.svgCache.get(id);
         if (!svgElement) {
             svgElement = BXMLSvgInflater.inflate(id, this.mContext)
+            View.svgCache.set(id, svgElement)
         }
         node.innerHTML = EMPTY_STRING;
         node.appendChild(svgElement.cloneNode(true));
+        return this;
     }
 
     setImageSrc(url: string) {
         (this.mNode as HTMLImageElement).src = url
+        return this;
     }
 
     getScrollY(): number {
@@ -524,6 +570,7 @@ export class View extends ViewNode implements IParentView {
 
     setScrollY(value: number) {
         (this.mNode as HTMLElement).scrollTop = value;
+        return this;
     }
 
     getScrollX(): number {
@@ -532,6 +579,7 @@ export class View extends ViewNode implements IParentView {
 
     setScrollX(value: number) {
         (this.mNode as HTMLElement).scrollLeft = value
+        return this;
     }
 
     getParentView(): IParentView {
@@ -542,8 +590,9 @@ export class View extends ViewNode implements IParentView {
         return false;
     }
 
-    setParentView(parentView?: IParentView): void {
+    setParentView(parentView?: IParentView) {
         this.mParentView = parentView;
+        return this;
     }
 
 
