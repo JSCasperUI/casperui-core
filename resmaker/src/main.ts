@@ -32,7 +32,7 @@ const args = parseArgs(process.argv.slice(2));
 
 
 let configPath = process.cwd()
-configPath = "C:\\Users\\syste\\WebstormProjects\\INCONETServicePanel"
+// configPath = `C:\\Users\\syxme\\WebstormProjects\\INCONETServicePanel`
 let config = configArray(configPath)
 //--folder=C:\Users\syxme\IdeaProjects\INETLightCity\src\jsMain\resources\res --out=C:\Users\syxme\IdeaProjects\CasperUIResourceMakerJS\out.dat --idfile=C:\Users\syxme\IdeaProjects\CasperUIResourceMakerJS\R.ts
 
@@ -51,7 +51,7 @@ if (watch) {
                 } catch (e) {
                     console.error(e);
                 }
-            }, 500);
+            }, 1000);
         })
     }
 }

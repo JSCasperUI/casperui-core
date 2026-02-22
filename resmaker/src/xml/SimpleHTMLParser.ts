@@ -24,7 +24,7 @@ function isEmptyChar(char: string) {
 
 export const DEPTH = 1
 export const ELEMENT = 2
-export const EOF = 3
+export const EOF = -1
 
 
 interface Token {
@@ -69,7 +69,8 @@ export class SimpleHTMLParser {
     }
 
 
-    mNext() {
+    mNext_old() {
+        console.log("mNext",this.inputStreamIndex,this.mInput.length )
         if (this.skipNext) {
             this.skipNext = false
             return true
@@ -95,7 +96,26 @@ export class SimpleHTMLParser {
         }
         return false
     }
+    mNext(): boolean {
+        if (this.skipNext) {
+            this.skipNext = false;
+            return true;
+        }
+        if (this.inputStreamIndex < this.mInput.length) {
+            const c = this.mInput[this.inputStreamIndex++];
 
+            if (c === '\n') {
+                this.line++;
+                this.start = -1;
+            }
+            this.start++;
+            this.position++;
+            this.symbol = c;
+            return true;
+        }
+        this.symbol = TAG_EOF;
+        return false;
+    }
     nextToken(isCommentWaiting = false) {
         if (this.skipNextToken) {
             this.skipNextToken = false
@@ -107,6 +127,11 @@ export class SimpleHTMLParser {
             this.currentToken.value = ""
 
             switch (this.symbol) {
+                case TAG_EOF:{
+                    this.currentToken.type = this.symbol
+                    this.currentToken.value = this.symbol.toString()
+                    return this.currentToken
+                }
                 case TAG_OPEN:
                 case TAG_CLOSE:
                 case TAG_EQ:
@@ -122,7 +147,7 @@ export class SimpleHTMLParser {
                 }
                 case TAG_QSTRING: {
                     let out = ""
-                    while (this.mNext() && this.symbol !== '"') {
+                    while (this.mNext() && this.symbol !== '"' && this.symbol !== TAG_EOF) {
                         out += this.symbol
                     }
                     this.currentToken.type = TAG_QSTRING
@@ -140,7 +165,7 @@ export class SimpleHTMLParser {
                         if (isEmptyChar(this.symbol)) {
                             p++
                         }
-                        while (this.mNext() && this.symbol !== TAG_OPEN) {
+                        while (this.mNext() && this.symbol !== TAG_OPEN && (this.symbol as any) !== TAG_EOF) {
                             if (isEmptyChar(this.symbol)) {
                                 p++
                             }
@@ -158,7 +183,7 @@ export class SimpleHTMLParser {
                         return this.currentToken
                     } else if (isLetterOrDigit(this.symbol)) {
                         let out = this.symbol
-                        while (this.mNext() && (isLetterOrDigit(this.symbol) || this.symbol === '.' || this.symbol === '_' || this.symbol === '-')) {
+                        while (this.mNext() && (isLetterOrDigit(this.symbol) || this.symbol === '.' || this.symbol === '_' || this.symbol === '-') ) {
                             out += this.symbol
                         }
                         this.currentToken.type = TAG_STRING
@@ -291,7 +316,7 @@ export class SimpleHTMLParser {
             this.fullTag = {name: this.currentToken.value, attributes: [], content: "", line: this.currentToken.line,start:0};
             if (this.fullTag.name === "script") {
             }
-            while (this.nextToken().type !== TAG_CLOSE && this.currentToken.type !== TAG_SLASH) {
+            while (this.nextToken().type !== TAG_CLOSE && this.currentToken.type !== TAG_SLASH && this.currentToken.type !== TAG_EOF) {
                 this.parseAttrs();
             }
             if (this.currentToken.type === TAG_SLASH) {

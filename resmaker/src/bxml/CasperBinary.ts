@@ -108,10 +108,10 @@ export class CasperBinary {
                 }
                 const path = node.__path!;
                 let indexOfVariable = this.varIdMapper.getIdByName(node.attrs[aKey])
-                console.log(node.attrs[aKey],"->",indexOfVariable)
-                if (node.attrs[aKey] == "city_latitude"){
-                    console.log("123")
-                }
+                // console.log(node.attrs[aKey],"->",indexOfVariable)
+                // if (node.attrs[aKey] == "city_latitude"){
+                //     console.log("123")
+                // }
                 this.autoBinds.addSelectByIdPath(node.attrs[aKey], path,"View",indexOfVariable);
                 value = this.selfDictionary.valueTyped(DYNAMIC_TYPE.IDENTIFIER, indexOfVariable)
             } else {

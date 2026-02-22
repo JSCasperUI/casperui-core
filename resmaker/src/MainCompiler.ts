@@ -11,8 +11,6 @@ import {SVGBinarize} from "@rMaker/bxml/SVGBinarize";
 import {IDMapper} from "@rMaker/resources/IDMapper";
 
 
-
-
 const CASPER_FS = {
     VERSION: 1,
     HEADER: "CFS",
@@ -37,7 +35,8 @@ export class MainCompiler {
         this.rootPath = rootPath
         this.isWithFileNames = false
     }
-    getLangMapper():IDMapper {
+
+    getLangMapper(): IDMapper {
         return this.lang
     }
 
@@ -61,13 +60,15 @@ export class MainCompiler {
 
     saveCSS(file: string) {
         let out = this.cssMerge.compileOutput(path.basename(file))
-        if (out){
+        if (out) {
             fs.writeFileSync(file, out.cssContent)
             fs.writeFileSync(file + ".map", out.sourceMap)
         }
     }
 
     makeBinaryFile() {
+
+
         let output = new ByteBufferOutput()
         let filesHeader = new ByteBufferOutput()
         let dataBuffer = new ByteBufferOutput()
@@ -102,6 +103,7 @@ export class MainCompiler {
                 if (file.endsWith("xml") || file.endsWith("html")) {
                     let bin = new CasperBinary(file, config)
                     byteData = bin.html2CaperBinary(byteData.toString(), file)
+
 
                 } else if (file.endsWith("svg")) {
                     let bin = new SVGBinarize("svg", null!)
@@ -145,6 +147,7 @@ export class MainCompiler {
         let bSize = Math.round(originalFileSizes / 1024.0)
         let tSize = Math.round(output.size() / 1024.0)
         console.log(`${bSize} -> ${tSize}`)
+
         return output.toByteArray()
     }
 

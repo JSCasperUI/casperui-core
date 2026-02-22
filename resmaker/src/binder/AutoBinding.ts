@@ -24,44 +24,54 @@ export interface BindItem {
 // }
 
 export interface AutoBindingResult {
-    path:string,
-    code:string
+    path: string,
+    code: string
 }
 
 export class AutoBinding {
-    private interface_name:string
-    private function_name:string
+    private interface_name: string
+    private function_name: string
     private autoBinds: BindItem[] = [];
     private id: string;
 
-    constructor(filePath:string) {
+    constructor(filePath: string) {
         this.interface_name = generatePascalBindingName(filePath)
         this.function_name = generateSnakeBindingName(filePath)
         this.id = generateBindingID(filePath)
     }
-    getFileName(){
-        return this.function_name+".ts";
+
+    getID(): string {
+        return this.id;
+    }
+    getFileName() {
+        return this.function_name + ".ts";
+    }
+
+    getFunctionName() {
+        return this.function_name
     }
 
 
-    addSelectByIdPath(varName: string, path: number[], type: string = "View",index:number) {
-        this.autoBinds.push({name: varName, type: type, path: path,id:index}); // или запиши куда нужно
+    addSelectByIdPath(varName: string, path: number[], type: string = "View", index: number) {
+        this.autoBinds.push({name: varName, type: type, path: path, id: index}); // или запиши куда нужно
     }
 
 
-    getAutoBindMap(){
+    getAutoBindMap() {
         return `[${this.id}]:${this.interface_name};`
         // type LayoutBindMap = {
         //     [R.layout.widgets.split_info_panel.popup]: SplitInfoPanelPopupBind;
         // };
     }
 
-     getAutoBindScript(): string {
+    getAutoBindScript(): string {
         const lines: string[] = [];
 
         // 1. Интерфейс
 
         lines.push(`export interface ${this.interface_name} {`);
+
+        lines.push(`\troot: View`);
         for (const bind of this.autoBinds) {
             lines.push(`\t${bind.name}: ${bind.type}`);
         }
@@ -69,16 +79,16 @@ export class AutoBinding {
         lines.push('');
 
 
-
         // 2. Функция биндинга
         lines.push(`export function ${this.function_name}(v: View): ${this.interface_name} {`);
         lines.push(`\treturn {`);
+        lines.push(`\t\troot: v,`);
         for (const bind of this.autoBinds) {
-            const pathStr = `[${bind.path.join(',')}]`;
-            if (bind.path.length>0){
+            // const pathStr = `[${bind.path.join(',')}]`;
+            if (bind.path.length > 0) {
                 // lines.push(`\t\t${bind.name}: v.byPath(${pathStr}),`);
                 lines.push(`\t\t${bind.name}: v.byId(${bind.id}),`);
-            }else{
+            } else {
                 lines.push(`\t\t${bind.name}: v,`);
             }
         }
@@ -86,18 +96,18 @@ export class AutoBinding {
         lines.push(`}`);
 
 
-         //3.
-         lines.push(`export function ${this.function_name}_i(x:${this.interface_name},v: View):void {`);
-         for (const bind of this.autoBinds) {
-             const pathStr = `[${bind.path.join(',')}]`;
-             if (bind.path.length>0){
-                 lines.push(`\tx.${bind.name} = v.byId(${bind.id})`);
-             }else{
-                 lines.push(`\tx.${bind.name} = v`);
-             }
+        // 3.
+        lines.push(`export function ${this.function_name}_i(x:${this.interface_name},v: View):void {`);
+        for (const bind of this.autoBinds) {
+            const pathStr = `[${bind.path.join(',')}]`;
+            if (bind.path.length > 0) {
+                lines.push(`\tx.${bind.name} = v.byId(${bind.id})`);
+            } else {
+                lines.push(`\tx.${bind.name} = v`);
+            }
 
-         }
-         lines.push(`}`);
+        }
+        lines.push(`}`);
 
         return lines.join('\n');
     }

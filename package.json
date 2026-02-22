@@ -1,6 +1,6 @@
 {
   "name": "@casperui/core",
-  "version": "0.0.13",
+  "version": "0.0.14",
   "description": "",
   "files": [
     "dist/**/*",
@@ -9,9 +9,10 @@
     "*.map"
   ],
   "scripts": {
+    "build_resmaker": "cd ./resmaker && npm run build",
     "build": "tsc && tsc-alias && npx gen-exports dist -p package.json",
     "resources": "node dev/core/resmaker/src/main.js --include_path",
-    "release_pack": "npm run build && npm pack"
+    "release_pack": "npm run build_resmaker && npm run build && npm pack"
   },
   "bin": {
     "resmaker": "./resmaker/dist/main.js"
@@ -139,16 +140,6 @@
       "require": "./dist/live/ViewModel.js",
       "types": "./dist/live/ViewModel.d.ts"
     },
-    "./utils/Locale": {
-      "import": "./dist/utils/Locale.js",
-      "require": "./dist/utils/Locale.js",
-      "types": "./dist/utils/Locale.d.ts"
-    },
-    "./utils/ResourceReader": {
-      "import": "./dist/utils/ResourceReader.js",
-      "require": "./dist/utils/ResourceReader.js",
-      "types": "./dist/utils/ResourceReader.d.ts"
-    },
     "./space/Constants": {
       "import": "./dist/space/Constants.js",
       "require": "./dist/space/Constants.js",
@@ -164,6 +155,16 @@
       "require": "./dist/space/utils.js",
       "types": "./dist/space/utils.d.ts"
     },
+    "./utils/Locale": {
+      "import": "./dist/utils/Locale.js",
+      "require": "./dist/utils/Locale.js",
+      "types": "./dist/utils/Locale.d.ts"
+    },
+    "./utils/ResourceReader": {
+      "import": "./dist/utils/ResourceReader.js",
+      "require": "./dist/utils/ResourceReader.js",
+      "types": "./dist/utils/ResourceReader.d.ts"
+    },
     "./view/View": {
       "import": "./dist/view/View.js",
       "require": "./dist/view/View.js",
@@ -173,6 +174,11 @@
       "import": "./dist/view/ViewAttributes.js",
       "require": "./dist/view/ViewAttributes.js",
       "types": "./dist/view/ViewAttributes.d.ts"
+    },
+    "./utils/bxml/BXMLNextParser": {
+      "import": "./dist/utils/bxml/BXMLNextParser.js",
+      "require": "./dist/utils/bxml/BXMLNextParser.js",
+      "types": "./dist/utils/bxml/BXMLNextParser.d.ts"
     },
     "./utils/bxml/BXMLParser": {
       "import": "./dist/utils/bxml/BXMLParser.js",
@@ -199,11 +205,6 @@
       "require": "./dist/view/inflater/WidgetRegistrar.js",
       "types": "./dist/view/inflater/WidgetRegistrar.d.ts"
     },
-    "./view/widget/CanvasView": {
-      "import": "./dist/view/widget/CanvasView.js",
-      "require": "./dist/view/widget/CanvasView.js",
-      "types": "./dist/view/widget/CanvasView.d.ts"
-    },
     "./view/nodes/NodeType": {
       "import": "./dist/view/nodes/NodeType.js",
       "require": "./dist/view/nodes/NodeType.js",
@@ -213,6 +214,11 @@
       "import": "./dist/view/nodes/ViewNode.js",
       "require": "./dist/view/nodes/ViewNode.js",
       "types": "./dist/view/nodes/ViewNode.d.ts"
+    },
+    "./view/widget/CanvasView": {
+      "import": "./dist/view/widget/CanvasView.js",
+      "require": "./dist/view/widget/CanvasView.js",
+      "types": "./dist/view/widget/CanvasView.d.ts"
     }
   },
   "author": "",

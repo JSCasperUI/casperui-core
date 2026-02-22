@@ -13,7 +13,7 @@ export class Resource {
     private variableIdMapper = new IDMapper("id")
     languageResource: StringPool
     files: string[] = [];
-    private autoBinds:AutoBinding[] = []
+    private autoBinds: AutoBinding[] = []
 
     constructor(private config: ResourceConfig, private resourceMaker: MainCompiler) {
         this.languageResource = new StringPool(this, resourceMaker.getLangMapper());
@@ -25,10 +25,12 @@ export class Resource {
         }
         this.files = []
     }
+
     pushBinging(autoBindings: AutoBinding) {
         this.autoBinds.push(autoBindings)
     }
-    storeBindings(){
+
+    storeBindings() {
 
         if (!this.config.output?.id) return
         if (!this.isPrimary()) return;
@@ -36,25 +38,49 @@ export class Resource {
         const dirPath = path.dirname(this.config.output?.id!);
         const bindingsPath = path.join(dirPath, "bind.ts");
 
-        let out = `import {View} from "@casperui/core/view/View";\nimport {R} from "./R";\n`
+
+        let out = `import {View} from "@casperui/core/view/View";\nimport {R} from "./R";\nimport {Context} from "@casperui/core/content/Context";\n`
         for (const autoBind of this.autoBinds) {
-            out+=autoBind.getAutoBindScript()+"\n"
+            out += autoBind.getAutoBindScript() + "\n"
         }
-        out+="export type LayoutBindMap = {"
+        out += "export type LayoutBindMap = {"
         for (const autoBind of this.autoBinds) {
-            out+=autoBind.getAutoBindMap()+"\n"
+            out += autoBind.getAutoBindMap() + "\n"
         }
-        out+="};";
-        fs.writeFileSync(bindingsPath,out)
+        out += "};";
+        out = this.storeBindSwitch(out)
+        out += `
+        
+export function inflateBind<L extends keyof LayoutBindMap>(
+    ctx: Context,
+    layout: L,
+    cache?: boolean, root?: View | null, rootNodeReplace?: boolean
+): LayoutBindMap[L] {
+    let v = ctx.getInflater().inflate(layout as any, cache, root, rootNodeReplace) as any
+    return bindById(layout, v) as any;
+}
+        `;
+        fs.writeFileSync(bindingsPath, out)
     }
 
-    getIdFilePath():string | undefined {
+    storeBindSwitch(out: string): string {
+        out += `function bindById(id:number,view:View):any {\nswitch (id){`
+        for (const autoBind of this.autoBinds) {
+            out += `case ${autoBind.getID()}:return ${autoBind.getFunctionName()}(view);\n`
+        }
+        out += "}}";
+        return out
+    }
+
+    getIdFilePath(): string | undefined {
         return this.config.output?.id
     }
-    getVarIdMapper():IDMapper {
+
+    getVarIdMapper(): IDMapper {
         return this.variableIdMapper
     }
-    isPrimary():boolean{
+
+    isPrimary(): boolean {
         return this.config.isPrimaryResource
     }
 
@@ -87,7 +113,7 @@ export class Resource {
         }
         out += "\n}"
         if (level === 0) {
-            out +=" as const;"
+            out += " as const;"
         }
         return out
     }
@@ -122,7 +148,7 @@ export class Resource {
                 if (entry.isFile()) {
                     if (!list.includes(fullPath)) {
                         list.push(fullPath);
-                        if (!entry.name.endsWith(".css") && !entry.name.endsWith(".tsv"))  {
+                        if (!entry.name.endsWith(".css") && !entry.name.endsWith(".tsv")) {
                             idArray.push(IDArrayMake(path.parse(entry.name).name, this.resourceMaker.getNewId()));
                         }
                     }
