@@ -33,7 +33,6 @@ export class View extends ViewNode implements IParentView {
     static svgCache: Map<number, Element> = new Map();
     static __classListTemp: string[] = [];
 
-    private id: number = -1
     private mContext: Context
     private mChildren: Array<View> = []
     private mCurrentSVGContentId: Number = -1;
@@ -220,6 +219,10 @@ export class View extends ViewNode implements IParentView {
                 let current = itm.byId(id)
                 if (current) {
                     return current
+                }
+            }else if (itm.mType === NodeType.TEXT){
+                if (id == itm.id){
+                    return itm
                 }
             }
         }

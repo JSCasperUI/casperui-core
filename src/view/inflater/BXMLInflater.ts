@@ -5,7 +5,7 @@ import {View} from "@casperui/core/view/View";
 import {ViewNode} from "@casperui/core/view/nodes/ViewNode";
 import {NodeType} from "@casperui/core/view/nodes/NodeType";
 import {WidgetRegistrar} from "@casperui/core/view/inflater/WidgetRegistrar";
-import {TAG_SCRIPT, TAG_STYLE, TAG_SVG} from "@casperui/core/space/Constants";
+import {EMPTY_STRING, TAG_SCRIPT, TAG_STYLE, TAG_SVG} from "@casperui/core/space/Constants";
 
 
 export class BXMLInflater {
@@ -51,8 +51,11 @@ export class BXMLInflater {
         if (node.isText) {
             if (node.attrs["#t"])
                 return new ViewNode(NodeType.TEXT, node.attrs["#t"] as string);
-            if (node.attrs["#i"] != undefined)
-                return new ViewNode(NodeType.TEXT, "id:" + node.attrs["#i"].toString());
+            if (node.attrs["#i"] != undefined){
+                let v = new ViewNode(NodeType.TEXT,EMPTY_STRING)
+                v.setID(node.attrs["#i"] as number)
+                return v
+            }
             if (node.attrs["#l"] != undefined) {
                 return new ViewNode(NodeType.TEXT, this.context.getResources().getString(node.attrs["#l"] as number));
             }

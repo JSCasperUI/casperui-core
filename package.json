@@ -1,6 +1,6 @@
 {
   "name": "@casperui/core",
-  "version": "0.0.16",
+  "version": "0.0.17",
   "description": "",
   "files": [
     "dist/**/*",
@@ -50,26 +50,6 @@
       "require": "./dist/app/JFragment.js",
       "types": "./dist/app/JFragment.d.ts"
     },
-    "./content/BinaryResources": {
-      "import": "./dist/content/BinaryResources.js",
-      "require": "./dist/content/BinaryResources.js",
-      "types": "./dist/content/BinaryResources.d.ts"
-    },
-    "./content/Context": {
-      "import": "./dist/content/Context.js",
-      "require": "./dist/content/Context.js",
-      "types": "./dist/content/Context.d.ts"
-    },
-    "./content/ContextWrapper": {
-      "import": "./dist/content/ContextWrapper.js",
-      "require": "./dist/content/ContextWrapper.js",
-      "types": "./dist/content/ContextWrapper.d.ts"
-    },
-    "./content/Resources": {
-      "import": "./dist/content/Resources.js",
-      "require": "./dist/content/Resources.js",
-      "types": "./dist/content/Resources.d.ts"
-    },
     "./graphics/Bitmap": {
       "import": "./dist/graphics/Bitmap.js",
       "require": "./dist/graphics/Bitmap.js",
@@ -100,10 +80,25 @@
       "require": "./dist/graphics/Rect.js",
       "types": "./dist/graphics/Rect.d.ts"
     },
-    "./io/ByteBuffer": {
-      "import": "./dist/io/ByteBuffer.js",
-      "require": "./dist/io/ByteBuffer.js",
-      "types": "./dist/io/ByteBuffer.d.ts"
+    "./content/BinaryResources": {
+      "import": "./dist/content/BinaryResources.js",
+      "require": "./dist/content/BinaryResources.js",
+      "types": "./dist/content/BinaryResources.d.ts"
+    },
+    "./content/Context": {
+      "import": "./dist/content/Context.js",
+      "require": "./dist/content/Context.js",
+      "types": "./dist/content/Context.d.ts"
+    },
+    "./content/ContextWrapper": {
+      "import": "./dist/content/ContextWrapper.js",
+      "require": "./dist/content/ContextWrapper.js",
+      "types": "./dist/content/ContextWrapper.d.ts"
+    },
+    "./content/Resources": {
+      "import": "./dist/content/Resources.js",
+      "require": "./dist/content/Resources.js",
+      "types": "./dist/content/Resources.d.ts"
     },
     "./live/ILiveManager": {
       "import": "./dist/live/ILiveManager.js",
@@ -140,6 +135,11 @@
       "require": "./dist/live/ViewModel.js",
       "types": "./dist/live/ViewModel.d.ts"
     },
+    "./io/ByteBuffer": {
+      "import": "./dist/io/ByteBuffer.js",
+      "require": "./dist/io/ByteBuffer.js",
+      "types": "./dist/io/ByteBuffer.d.ts"
+    },
     "./space/Constants": {
       "import": "./dist/space/Constants.js",
       "require": "./dist/space/Constants.js",
@@ -155,16 +155,6 @@
       "require": "./dist/space/utils.js",
       "types": "./dist/space/utils.d.ts"
     },
-    "./utils/Locale": {
-      "import": "./dist/utils/Locale.js",
-      "require": "./dist/utils/Locale.js",
-      "types": "./dist/utils/Locale.d.ts"
-    },
-    "./utils/ResourceReader": {
-      "import": "./dist/utils/ResourceReader.js",
-      "require": "./dist/utils/ResourceReader.js",
-      "types": "./dist/utils/ResourceReader.d.ts"
-    },
     "./view/View": {
       "import": "./dist/view/View.js",
       "require": "./dist/view/View.js",
@@ -175,20 +165,15 @@
       "require": "./dist/view/ViewAttributes.js",
       "types": "./dist/view/ViewAttributes.d.ts"
     },
-    "./utils/bxml/BXMLNextParser": {
-      "import": "./dist/utils/bxml/BXMLNextParser.js",
-      "require": "./dist/utils/bxml/BXMLNextParser.js",
-      "types": "./dist/utils/bxml/BXMLNextParser.d.ts"
+    "./utils/Locale": {
+      "import": "./dist/utils/Locale.js",
+      "require": "./dist/utils/Locale.js",
+      "types": "./dist/utils/Locale.d.ts"
     },
-    "./utils/bxml/BXMLParser": {
-      "import": "./dist/utils/bxml/BXMLParser.js",
-      "require": "./dist/utils/bxml/BXMLParser.js",
-      "types": "./dist/utils/bxml/BXMLParser.d.ts"
-    },
-    "./utils/bxml/BXNode": {
-      "import": "./dist/utils/bxml/BXNode.js",
-      "require": "./dist/utils/bxml/BXNode.js",
-      "types": "./dist/utils/bxml/BXNode.d.ts"
+    "./utils/ResourceReader": {
+      "import": "./dist/utils/ResourceReader.js",
+      "require": "./dist/utils/ResourceReader.js",
+      "types": "./dist/utils/ResourceReader.d.ts"
     },
     "./view/inflater/BXMLInflater": {
       "import": "./dist/view/inflater/BXMLInflater.js",
@@ -219,6 +204,16 @@
       "import": "./dist/view/widget/CanvasView.js",
       "require": "./dist/view/widget/CanvasView.js",
       "types": "./dist/view/widget/CanvasView.d.ts"
+    },
+    "./utils/bxml/BXMLParser": {
+      "import": "./dist/utils/bxml/BXMLParser.js",
+      "require": "./dist/utils/bxml/BXMLParser.js",
+      "types": "./dist/utils/bxml/BXMLParser.d.ts"
+    },
+    "./utils/bxml/BXNode": {
+      "import": "./dist/utils/bxml/BXNode.js",
+      "require": "./dist/utils/bxml/BXNode.js",
+      "types": "./dist/utils/bxml/BXNode.d.ts"
     }
   },
   "author": "",

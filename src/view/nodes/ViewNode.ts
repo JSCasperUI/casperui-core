@@ -7,6 +7,12 @@ export class ViewNode {
     mNode: Node
     static WIDGET_TAG = "WTAG"
 
+    protected id: number = -1
+
+    setID(n: number) {
+        this.id  = n
+    }
+
     constructor(type: NodeType | string, content?: string) {
         this.mType = NodeType.ELEMENT;
         if (typeof type === "string") {
