@@ -13,6 +13,9 @@ export class ViewNode {
         this.id  = n
     }
 
+    setTextContent(text: string) {
+        this.mNode.textContent = text;
+    }
     constructor(type: NodeType | string, content?: string) {
         this.mType = NodeType.ELEMENT;
         if (typeof type === "string") {

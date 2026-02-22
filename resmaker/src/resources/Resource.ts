@@ -85,9 +85,9 @@ export function inflateBind<L extends keyof LayoutBindMap>(
         return this.config.isPrimaryResource
     }
 
-    createFileID() {
+    createFileID(isJs:boolean = false) {
 
-        return this.createIDObject(this.filesIdArray)
+        return this.createIDObject(this.filesIdArray,isJs)
     }
 
     createIDArray() {
@@ -99,7 +99,7 @@ export function inflateBind<L extends keyof LayoutBindMap>(
     }
 
 
-    createIDObject(dirId: FilesIDArray, level = 0): string {
+    createIDObject(dirId: FilesIDArray,isJs:boolean = false, level = 0): string {
         let out = `${dirId.name}:{\n`
         if (level === 0) {
             out = `export const ${dirId.name} = {\n${this.createIDArray()},\n${this.languageResource.toStringMap()},\n`
@@ -109,11 +109,11 @@ export function inflateBind<L extends keyof LayoutBindMap>(
             if (ch.fieldId !== -1) {
                 out += `\t${ch.name}:${ch.fieldId},\n`
             } else {
-                out += `${this.createIDObject(ch, level + 1)},\n`
+                out += `${this.createIDObject(ch,isJs, level + 1)},\n`
             }
         }
         out += "\n}"
-        if (level === 0) {
+        if (level === 0 && !isJs) {
             out += " as const;"
         }
         return out
@@ -121,10 +121,14 @@ export function inflateBind<L extends keyof LayoutBindMap>(
 
     makeIDFile() {
         if (this.config.output?.id) {
+            let isJS = false
             let path = this.config.output.id!
-            if (!this.isPrimary())
+            if (!this.isPrimary()){
+                isJS = true
                 path = this.config.widget?.id!
-            fs.writeFileSync(path, this.createFileID())
+
+            }
+            fs.writeFileSync(path, this.createFileID(isJS))
         }
     }
 
