@@ -13,6 +13,7 @@ import {
     NONE, POSTFIX_PX,
     SNAKE_ANIM, TAG_DIV
 } from "@casperui/core/space/Constants";
+import {Rect} from "@casperui/core/graphics/Rect";
 
 export type ViewTag = string | Element
 
@@ -119,9 +120,8 @@ export class View extends ViewNode implements IParentView {
     }
 
     appendAttributes(attrs: any) {
-        if (!this.mNode) {
-            return
-        }
+        if (!this.mNode) return
+        if (!attrs) return
         const node = this.mNode as HTMLElement;
         let keys = Object.keys(attrs)
         for (let i = 0; i < keys.length; i++) {
@@ -366,7 +366,6 @@ export class View extends ViewNode implements IParentView {
     }
 
 
-
     setSafeValue(value: any) {
         if (value === undefined || value === null) {
             this.setValue(EMPTY_STRING)
@@ -390,9 +389,11 @@ export class View extends ViewNode implements IParentView {
         this.setVisibility(visible ?? !this.getVisibility());
         return this;
     }
-    getValue():string {
+
+    getValue(): string {
         return (this.mNode as HTMLInputElement).value
     }
+
     setValue(value: string) {
         (this.mNode as HTMLInputElement).value = value
         return this
@@ -402,6 +403,7 @@ export class View extends ViewNode implements IParentView {
         (this.mNode as HTMLInputElement).checked = value
         return this
     }
+
     isChecked(): boolean {
         return (this.mNode as HTMLInputElement).checked
     }
@@ -484,7 +486,8 @@ export class View extends ViewNode implements IParentView {
     getStyle(): CSSStyleDeclaration {
         return (this.mNode as HTMLElement).style
     }
-    setStyle(key:string, value:string) {
+
+    setStyle(key: string, value: string) {
         (this.mNode as HTMLElement).style[key] = value;
         return this;
     }
@@ -542,7 +545,6 @@ export class View extends ViewNode implements IParentView {
     }
 
 
-
     setSVGById(id: number) {
         if (this.mCurrentSVGContentId === id) return;
 
@@ -593,6 +595,11 @@ export class View extends ViewNode implements IParentView {
     setParentView(parentView?: IParentView) {
         this.mParentView = parentView;
         return this;
+    }
+
+    getViewportRect(): Rect {
+        let rect = this.getElement().getBoundingClientRect();
+        return new Rect(rect.x, rect.y, rect.x + rect.width, rect.y + rect.height);
     }
 
 

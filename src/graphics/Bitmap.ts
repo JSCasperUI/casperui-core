@@ -69,7 +69,7 @@ export class Bitmap {
     setPixelsDitry(data:ImageData,rect:Rect){
         if (this.image instanceof OffscreenCanvas){
             const ctx = this.image.getContext('2d');
-            ctx.putImageData(data,0,0,rect.mLeft,rect.mTop,rect.getWidth(),rect.getHeight());
+            ctx.putImageData(data,0,0,rect.left,rect.top,rect.getWidth(),rect.getHeight());
         }
     }
 

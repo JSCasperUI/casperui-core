@@ -17,6 +17,22 @@ export function generateSnakeBindingName(filePath: string): string {
 
     return `bind_${pathParts.join('_')}`;
 }
+export function generateBindingID(filePath: string): string {
+    const parts = filePath.replace(/\\/g, '/').split('/');
+
+    const layoutIndex = parts.findIndex(p => p.toLowerCase() === "layout");
+    if (layoutIndex === -1 || layoutIndex >= parts.length - 1) {
+        throw new Error("Путь должен содержать layout/...");
+    }
+
+    const relativeParts = parts.slice(layoutIndex);
+    const fileName = relativeParts.at(-1)!;
+    const fileBase = fileName.replace(/\.[^.]+$/, ''); // без .html
+
+    const pathParts = [...relativeParts.slice(0, -1), fileBase];
+
+    return `R.${pathParts.join(".")}`;
+}
 
 export function generatePascalBindingName(filePath: string): string {
     const parts = filePath.replace(/\\/g, '/').split('/');

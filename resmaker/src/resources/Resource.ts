@@ -36,10 +36,15 @@ export class Resource {
         const dirPath = path.dirname(this.config.output?.id!);
         const bindingsPath = path.join(dirPath, "bind.ts");
 
-        let out = `import {View} from "@casperui/core/view/View";\n`
+        let out = `import {View} from "@casperui/core/view/View";\nimport {R} from "./R";\n`
         for (const autoBind of this.autoBinds) {
             out+=autoBind.getAutoBindScript()+"\n"
         }
+        out+="export type LayoutBindMap = {"
+        for (const autoBind of this.autoBinds) {
+            out+=autoBind.getAutoBindMap()+"\n"
+        }
+        out+="};";
         fs.writeFileSync(bindingsPath,out)
     }
 
@@ -81,6 +86,9 @@ export class Resource {
             }
         }
         out += "\n}"
+        if (level === 0) {
+            out +=" as const;"
+        }
         return out
     }
 

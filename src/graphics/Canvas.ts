@@ -54,7 +54,7 @@ export class Canvas {
     clipStart(rect: Rect) {
         this.ctx2D.save();
         this.ctx2D.beginPath();
-        this.ctx2D.rect(rect.mLeft, rect.mTop, rect.getWidth(), rect.getHeight()); // Определяем область отсечения
+        this.ctx2D.rect(rect.left, rect.top, rect.getWidth(), rect.getHeight()); // Определяем область отсечения
         this.ctx2D.clip();
     }
 
@@ -115,20 +115,20 @@ export class Canvas {
         if (src) {
             this.ctx2D.drawImage(
                 bitmap.getCanvas(),
-                src.mLeft,
-                src.mTop,
+                src.left,
+                src.top,
                 src.getWidth(),
                 src.getHeight(),
-                dst.mLeft,
-                dst.mTop,
+                dst.left,
+                dst.top,
                 dst.getWidth(),
                 dst.getHeight()
             );
         } else {
             this.ctx2D.drawImage(
                 bitmap.getCanvas(),
-                dst.mLeft,
-                dst.mTop,
+                dst.left,
+                dst.top,
                 dst.getWidth(),
                 dst.getHeight()
             );
@@ -138,15 +138,15 @@ export class Canvas {
     drawRoundRect(rect: Rect, rx: number, ry: number, paint: Paint) {
         paint.applyToContext(this.ctx2D)
         this.ctx2D.beginPath();
-        this.ctx2D.moveTo(rect.mLeft + rx, rect.mTop);
-        this.ctx2D.lineTo(rect.mRight - rx, rect.mTop);
-        this.ctx2D.quadraticCurveTo(rect.mRight, rect.mTop, rect.mRight, rect.mTop + ry);
-        this.ctx2D.lineTo(rect.mRight, rect.mBottom - ry);
-        this.ctx2D.quadraticCurveTo(rect.mRight, rect.mBottom, rect.mRight - rx, rect.mBottom);
-        this.ctx2D.lineTo(rect.mLeft + rx, rect.mBottom);
-        this.ctx2D.quadraticCurveTo(rect.mLeft, rect.mBottom, rect.mLeft, rect.mBottom - ry);
-        this.ctx2D.lineTo(rect.mLeft, rect.mTop + ry);
-        this.ctx2D.quadraticCurveTo(rect.mLeft, rect.mTop, rect.mLeft + rx, rect.mTop);
+        this.ctx2D.moveTo(rect.left + rx, rect.top);
+        this.ctx2D.lineTo(rect.right - rx, rect.top);
+        this.ctx2D.quadraticCurveTo(rect.right, rect.top, rect.right, rect.top + ry);
+        this.ctx2D.lineTo(rect.right, rect.bottom - ry);
+        this.ctx2D.quadraticCurveTo(rect.right, rect.bottom, rect.right - rx, rect.bottom);
+        this.ctx2D.lineTo(rect.left + rx, rect.bottom);
+        this.ctx2D.quadraticCurveTo(rect.left, rect.bottom, rect.left, rect.bottom - ry);
+        this.ctx2D.lineTo(rect.left, rect.top + ry);
+        this.ctx2D.quadraticCurveTo(rect.left, rect.top, rect.left + rx, rect.top);
         this.ctx2D.closePath();
         if (paint.isFill) this.ctx2D.fill();
         if (paint.isStroke) this.ctx2D.stroke();
@@ -159,9 +159,9 @@ export class Canvas {
     drawRect(rect: Rect, paint: Paint) {
         paint.applyToContext(this.ctx2D)
         if (paint.isFill)
-            this.ctx2D.fillRect(rect.mLeft, rect.mTop, rect.getWidth(), rect.getHeight());
+            this.ctx2D.fillRect(rect.left, rect.top, rect.getWidth(), rect.getHeight());
         if (paint.isStroke)
-            this.ctx2D.strokeRect(rect.mLeft, rect.mTop, rect.getWidth(), rect.getHeight());
+            this.ctx2D.strokeRect(rect.left, rect.top, rect.getWidth(), rect.getHeight());
     }
 
     drawEllipse(cx: number, cy: number, rx: number, ry: number, paint: Paint) {

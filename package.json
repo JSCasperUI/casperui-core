@@ -89,6 +89,11 @@
       "require": "./dist/graphics/Paint.js",
       "types": "./dist/graphics/Paint.d.ts"
     },
+    "./graphics/Point": {
+      "import": "./dist/graphics/Point.js",
+      "require": "./dist/graphics/Point.js",
+      "types": "./dist/graphics/Point.d.ts"
+    },
     "./graphics/Rect": {
       "import": "./dist/graphics/Rect.js",
       "require": "./dist/graphics/Rect.js",
@@ -134,6 +139,16 @@
       "require": "./dist/live/ViewModel.js",
       "types": "./dist/live/ViewModel.d.ts"
     },
+    "./utils/Locale": {
+      "import": "./dist/utils/Locale.js",
+      "require": "./dist/utils/Locale.js",
+      "types": "./dist/utils/Locale.d.ts"
+    },
+    "./utils/ResourceReader": {
+      "import": "./dist/utils/ResourceReader.js",
+      "require": "./dist/utils/ResourceReader.js",
+      "types": "./dist/utils/ResourceReader.d.ts"
+    },
     "./space/Constants": {
       "import": "./dist/space/Constants.js",
       "require": "./dist/space/Constants.js",
@@ -149,16 +164,6 @@
       "require": "./dist/space/utils.js",
       "types": "./dist/space/utils.d.ts"
     },
-    "./utils/Locale": {
-      "import": "./dist/utils/Locale.js",
-      "require": "./dist/utils/Locale.js",
-      "types": "./dist/utils/Locale.d.ts"
-    },
-    "./utils/ResourceReader": {
-      "import": "./dist/utils/ResourceReader.js",
-      "require": "./dist/utils/ResourceReader.js",
-      "types": "./dist/utils/ResourceReader.d.ts"
-    },
     "./view/View": {
       "import": "./dist/view/View.js",
       "require": "./dist/view/View.js",
@@ -168,11 +173,6 @@
       "import": "./dist/view/ViewAttributes.js",
       "require": "./dist/view/ViewAttributes.js",
       "types": "./dist/view/ViewAttributes.d.ts"
-    },
-    "./utils/bxml/BXMLNextParser": {
-      "import": "./dist/utils/bxml/BXMLNextParser.js",
-      "require": "./dist/utils/bxml/BXMLNextParser.js",
-      "types": "./dist/utils/bxml/BXMLNextParser.d.ts"
     },
     "./utils/bxml/BXMLParser": {
       "import": "./dist/utils/bxml/BXMLParser.js",
@@ -199,6 +199,11 @@
       "require": "./dist/view/inflater/WidgetRegistrar.js",
       "types": "./dist/view/inflater/WidgetRegistrar.d.ts"
     },
+    "./view/widget/CanvasView": {
+      "import": "./dist/view/widget/CanvasView.js",
+      "require": "./dist/view/widget/CanvasView.js",
+      "types": "./dist/view/widget/CanvasView.d.ts"
+    },
     "./view/nodes/NodeType": {
       "import": "./dist/view/nodes/NodeType.js",
       "require": "./dist/view/nodes/NodeType.js",
@@ -208,11 +213,6 @@
       "import": "./dist/view/nodes/ViewNode.js",
       "require": "./dist/view/nodes/ViewNode.js",
       "types": "./dist/view/nodes/ViewNode.d.ts"
-    },
-    "./view/widget/CanvasView": {
-      "import": "./dist/view/widget/CanvasView.js",
-      "require": "./dist/view/widget/CanvasView.js",
-      "types": "./dist/view/widget/CanvasView.d.ts"
     }
   },
   "author": "",

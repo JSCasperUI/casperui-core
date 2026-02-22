@@ -1,4 +1,4 @@
-import {generatePascalBindingName, generateSnakeBindingName} from "@rMaker/utils/utils";
+import {generateBindingID, generatePascalBindingName, generateSnakeBindingName} from "@rMaker/utils/utils";
 
 
 export interface BindItem {
@@ -32,10 +32,12 @@ export class AutoBinding {
     private interface_name:string
     private function_name:string
     private autoBinds: BindItem[] = [];
+    private id: string;
 
     constructor(filePath:string) {
         this.interface_name = generatePascalBindingName(filePath)
         this.function_name = generateSnakeBindingName(filePath)
+        this.id = generateBindingID(filePath)
     }
     getFileName(){
         return this.function_name+".ts";
@@ -47,7 +49,12 @@ export class AutoBinding {
     }
 
 
-
+    getAutoBindMap(){
+        return `[${this.id}]:${this.interface_name};`
+        // type LayoutBindMap = {
+        //     [R.layout.widgets.split_info_panel.popup]: SplitInfoPanelPopupBind;
+        // };
+    }
 
      getAutoBindScript(): string {
         const lines: string[] = [];
@@ -60,6 +67,8 @@ export class AutoBinding {
         }
         lines.push(`}`);
         lines.push('');
+
+
 
         // 2. Функция биндинга
         lines.push(`export function ${this.function_name}(v: View): ${this.interface_name} {`);
