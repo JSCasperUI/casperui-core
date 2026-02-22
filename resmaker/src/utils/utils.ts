@@ -17,7 +17,7 @@ export function generateSnakeBindingName(filePath: string): string {
 
     return `bind_${pathParts.join('_')}`;
 }
-export function generateBindingID(filePath: string): string {
+export function generateBindingID(filePath: string,idStartName:string): string {
     const parts = filePath.replace(/\\/g, '/').split('/');
 
     const layoutIndex = parts.findIndex(p => p.toLowerCase() === "layout");
@@ -31,7 +31,7 @@ export function generateBindingID(filePath: string): string {
 
     const pathParts = [...relativeParts.slice(0, -1), fileBase];
 
-    return `R.${pathParts.join(".")}`;
+    return `${idStartName}.${pathParts.join(".")}`;
 }
 
 export function generatePascalBindingName(filePath: string): string {

@@ -34,10 +34,10 @@ export class AutoBinding {
     private autoBinds: BindItem[] = [];
     private id: string;
 
-    constructor(filePath: string) {
+    constructor(filePath: string,private idStartName: string) {
         this.interface_name = generatePascalBindingName(filePath)
         this.function_name = generateSnakeBindingName(filePath)
-        this.id = generateBindingID(filePath)
+        this.id = generateBindingID(filePath,idStartName)
     }
 
     getID(): string {

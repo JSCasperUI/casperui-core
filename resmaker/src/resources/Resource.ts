@@ -14,18 +14,19 @@ export class Resource {
     languageResource: StringPool
     files: string[] = [];
     private autoBinds: AutoBinding[] = []
-
+    idStartName = "R"
     constructor(private config: ResourceConfig, private resourceMaker: MainCompiler) {
         this.languageResource = new StringPool(this, resourceMaker.getLangMapper());
 
         if (config.widget) {
             this.filesIdArray = IDArrayMake(config.widget.name)
+            this.idStartName = config.widget.name
         } else {
             this.filesIdArray = IDArrayMake("R")
         }
         this.files = []
     }
-
+    getIdStartName(): string {return this.idStartName}
     pushBinging(autoBindings: AutoBinding) {
         this.autoBinds.push(autoBindings)
     }
@@ -39,7 +40,7 @@ export class Resource {
         const bindingsPath = path.join(dirPath, "bind.ts");
 
 
-        let out = `import {View} from "@casperui/core/view/View";\nimport {R} from "./R";\nimport {Context} from "@casperui/core/content/Context";\n`
+        let out = `import {View} from "@casperui/core/view/View";\nimport {${this.idStartName}} from "./R";\nimport {Context} from "@casperui/core/content/Context";\n`
         for (const autoBind of this.autoBinds) {
             out += autoBind.getAutoBindScript() + "\n"
         }
