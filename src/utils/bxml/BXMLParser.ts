@@ -1,5 +1,6 @@
 import {BXNode} from "@casperui/core/utils/bxml/BXNode";
 import {ByteBuffer} from "@casperui/core/io/ByteBuffer";
+import {Resources} from "@casperui/core/content/Resources";
 
 const DIR_LINE = 0x00
 const DIR_INSIDE_LINE = 0x40
@@ -28,7 +29,7 @@ export class BXMLParser {
     private offset = 0
 
 
-    constructor(data:ByteBuffer) {
+    constructor(data:ByteBuffer,private res:Resources) {
         this.data = data
         this.initBXMLParser()
     }
@@ -61,7 +62,7 @@ export class BXMLParser {
                     this.mValues[i] = data.read16BE()
                 }else if (type === DYNAMIC_TYPE.LANG_ID) {
                     data.inc()
-                    this.mValues[i] = data.read16BE()
+                    this.mValues[i] = this.res.getString(data.read16BE())
                 }
             }else{
                 this.mValues[i] = data.readString(size)

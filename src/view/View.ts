@@ -120,7 +120,7 @@ export class View extends ViewNode implements IParentView {
 
     appendAttributes(attrs: any) {
         if (!this.mNode) return
-        if (!attrs) return
+        if (!attrs) return this;
         const node = this.mNode as HTMLElement;
         let keys = Object.keys(attrs)
         for (let i = 0; i < keys.length; i++) {
@@ -220,8 +220,8 @@ export class View extends ViewNode implements IParentView {
                 if (current) {
                     return current
                 }
-            }else if (itm.mType === NodeType.TEXT){
-                if (id == itm.id){
+            } else if (itm.mType === NodeType.TEXT) {
+                if (id == itm.id) {
                     return itm
                 }
             }
@@ -250,6 +250,10 @@ export class View extends ViewNode implements IParentView {
     activate() {
         this.addClass(ACTIVE)
         return this;
+    }
+
+    isActive(): boolean {
+        return this.hasClass(ACTIVE)
     }
 
     deactivate() {
@@ -459,8 +463,8 @@ export class View extends ViewNode implements IParentView {
         return this;
     }
 
-    vEvent(event: string, func: FEvent) {
-        this.makeSafeEvent(event, func)
+    vEvent(event: string, func: FEvent, timeout?: number) {
+        this.makeSafeEvent(event, func, timeout)
         return this;
     }
 
@@ -470,18 +474,31 @@ export class View extends ViewNode implements IParentView {
     }
 
 
-    makeSafeEvent(type: string, func: FEvent) {
+    makeSafeEvent(type: string, func: FEvent, timeout?: number) {
         if (this["_old_fn_" + type]) {
-            this.mNode.removeEventListener(type, this["_old_fn_" + type]); // Удаление предыдущего обработчика
+            this.mNode.removeEventListener(type, this["_old_fn_" + type]);
         }
-        const ref = new WeakRef(func)
-        this["_keeper_" + type] = func
-        this["_old_fn_" + type] = (e) => {
-            let fn = ref.deref()
-            if (fn) {
-                fn(e)
-            }
-        };
+
+        const ref = new WeakRef(func);
+        this["_keeper_" + type] = func;
+
+        if (timeout !== undefined) {
+            let timer: ReturnType<typeof setTimeout>;
+
+            this["_old_fn_" + type] = (e) => {
+                clearTimeout(timer);
+                timer = setTimeout(() => {
+                    let fn = ref.deref();
+                    if (fn) fn(e);
+                }, timeout);
+            };
+        } else {
+            this["_old_fn_" + type] = (e) => {
+                let fn = ref.deref();
+                if (fn) fn(e);
+            };
+        }
+
         this.mNode.addEventListener(type, this["_old_fn_" + type]);
         return this;
     }

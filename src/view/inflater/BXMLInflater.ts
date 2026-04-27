@@ -16,7 +16,6 @@ export class BXMLInflater {
         this.cacheNodes = {}
     }
 
-
     inflate(id: number, cache: boolean = false, root: View | null = null, rootNodeReplace: boolean = false): View {
         let node: BXNode
 
@@ -24,11 +23,11 @@ export class BXMLInflater {
             if (this.cacheNodes[id]) {
                 node = this.cacheNodes[id]
             } else {
-                node = (new BXMLParser(this.context.getResources().getBufferById(id))).readTree()
+                node = (new BXMLParser(this.context.getResources().getBufferById(id),this.context.getResources())).readTree()
                 this.cacheNodes[id] = node
             }
         } else {
-            node = (new BXMLParser(this.context.getResources().getBufferById(id))).readTree()
+            node = (new BXMLParser(this.context.getResources().getBufferById(id),this.context.getResources())).readTree()
         }
         let result = this.inflateChild(node) as View
         if (root) {
@@ -57,7 +56,8 @@ export class BXMLInflater {
                 return v
             }
             if (node.attrs["#l"] != undefined) {
-                return new ViewNode(NodeType.TEXT, this.context.getResources().getString(node.attrs["#l"] as number));
+                // return new ViewNode(NodeType.TEXT, this.context.getResources().getString(node.attrs["#l"] as number));
+                return new ViewNode(NodeType.TEXT, node.attrs["#l"] as string);
             }
         }
 
@@ -77,6 +77,7 @@ export class BXMLInflater {
 
             }
         }
+
 
         let view = WidgetRegistrar.createInstance(node.tag, this.context, node.tag, node.attrs);
 

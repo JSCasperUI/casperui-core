@@ -4,6 +4,10 @@ type Token =
     | { type: "lang"; key: string };
 
 export function parseTemplate(input: string): Token[] {
+
+    if (input.length == 0){
+        return [{ type: "text",value:""}];
+    }
     const tokens: Token[] = [];
     let i = 0;
 

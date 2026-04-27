@@ -175,6 +175,11 @@
       "require": "./dist/view/ViewAttributes.js",
       "types": "./dist/view/ViewAttributes.d.ts"
     },
+    "./utils/bxml/BXMLNextParser": {
+      "import": "./dist/utils/bxml/BXMLNextParser.js",
+      "require": "./dist/utils/bxml/BXMLNextParser.js",
+      "types": "./dist/utils/bxml/BXMLNextParser.d.ts"
+    },
     "./utils/bxml/BXMLParser": {
       "import": "./dist/utils/bxml/BXMLParser.js",
       "require": "./dist/utils/bxml/BXMLParser.js",
@@ -184,16 +189,6 @@
       "import": "./dist/utils/bxml/BXNode.js",
       "require": "./dist/utils/bxml/BXNode.js",
       "types": "./dist/utils/bxml/BXNode.d.ts"
-    },
-    "./view/nodes/NodeType": {
-      "import": "./dist/view/nodes/NodeType.js",
-      "require": "./dist/view/nodes/NodeType.js",
-      "types": "./dist/view/nodes/NodeType.d.ts"
-    },
-    "./view/nodes/ViewNode": {
-      "import": "./dist/view/nodes/ViewNode.js",
-      "require": "./dist/view/nodes/ViewNode.js",
-      "types": "./dist/view/nodes/ViewNode.d.ts"
     },
     "./view/inflater/BXMLInflater": {
       "import": "./dist/view/inflater/BXMLInflater.js",
@@ -214,6 +209,16 @@
       "import": "./dist/view/widget/CanvasView.js",
       "require": "./dist/view/widget/CanvasView.js",
       "types": "./dist/view/widget/CanvasView.d.ts"
+    },
+    "./view/nodes/NodeType": {
+      "import": "./dist/view/nodes/NodeType.js",
+      "require": "./dist/view/nodes/NodeType.js",
+      "types": "./dist/view/nodes/NodeType.d.ts"
+    },
+    "./view/nodes/ViewNode": {
+      "import": "./dist/view/nodes/ViewNode.js",
+      "require": "./dist/view/nodes/ViewNode.js",
+      "types": "./dist/view/nodes/ViewNode.d.ts"
     }
   },
   "author": "",

@@ -24,7 +24,7 @@ export class LiveDataConfig<T> extends LiveData<ValueObject<T>> {
     }
 
 
-    observe(observer: ILiveManager, callback: (value: ValueObject<T>) => void) {
+    observe(observer: ILiveManager, callback: (value: ValueObject<T>,caller:any) => void) {
         super.observe(observer, callback);
     }
 
