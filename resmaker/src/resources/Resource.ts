@@ -50,17 +50,14 @@ export class Resource {
         }
         out += "};";
         out = this.storeBindSwitch(out)
-        out += `
-        
-export function inflateBind<L extends keyof LayoutBindMap>(
+        out += `\nexport function inflateBind<L extends keyof LayoutBindMap>(
     ctx: Context,
     layout: L,
     cache?: boolean, root?: View | null, rootNodeReplace?: boolean
 ): LayoutBindMap[L] {
     let v = ctx.getInflater().inflate(layout as any, cache, root, rootNodeReplace) as any
     return bindById(layout, v) as any;
-}
-        `;
+}`;
         fs.writeFileSync(bindingsPath, out)
     }
 

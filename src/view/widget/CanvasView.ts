@@ -9,6 +9,4 @@ class CanvasView extends View {
 
     }
 
-
-
 }

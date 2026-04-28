@@ -6,16 +6,54 @@ import {ViewNode} from "@casperui/core/view/nodes/ViewNode";
 import {NodeType} from "@casperui/core/view/nodes/NodeType";
 import {WidgetRegistrar} from "@casperui/core/view/inflater/WidgetRegistrar";
 import {EMPTY_STRING, TAG_SCRIPT, TAG_STYLE, TAG_SVG} from "@casperui/core/space/Constants";
+import {Resources} from "@casperui/core/content/Resources";
 
 
 export class BXMLInflater {
 
-    private cacheNodes: Record<number, BXNode>
+    private cacheNodes: Record<number, BXNode> = {}
+    private cacheTemplates: Record<number, BXNode> = {}
+    private res: Resources;
 
-    constructor(private context: Context) {
-        this.cacheNodes = {}
+
+    private findNodeByIdRec(root: BXNode, paramId: number): BXNode | null {
+        const attrs = root.attrs;
+        if (attrs && attrs.id !== undefined && attrs.id === paramId) {
+            return root;
+        }
+        const ch = root.children;
+        for (let i = 0; i < ch.length; i++) {
+            const found = this.findNodeByIdRec(ch[i], paramId);
+            if (found) return found;
+        }
+        return null;
     }
 
+    constructor(private context: Context) {
+        this.res = this.context.getResources()
+    }
+
+    template(id: number, templateId: number): View {
+        let node: BXNode
+        let tid = (id << 16) | templateId
+
+        if (this.cacheTemplates[tid] === undefined) {
+            if (this.cacheNodes[id]) {
+                node = this.cacheNodes[id]
+            } else {
+                node = (new BXMLParser(this.res.getBufferById(id))).readTree()
+                this.cacheNodes[id] = node
+            }
+            node = this.findNodeByIdRec(node, templateId);
+            if (!node) throw new Error(`Template not found: layoutId=${id}, templateId=${templateId}`);
+            this.cacheTemplates[tid] = node
+        } else {
+            node = this.cacheTemplates[tid]
+        }
+        let result = this.inflateChild(node) as View
+
+        return result as View
+    }
 
     inflate(id: number, cache: boolean = false, root: View | null = null, rootNodeReplace: boolean = false): View {
         let node: BXNode

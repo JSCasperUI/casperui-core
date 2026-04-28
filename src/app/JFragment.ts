@@ -9,9 +9,9 @@ import {BXMLInflater} from "@casperui/core/view/inflater/BXMLInflater";
 import {PostAction} from "@casperui/core/space/PostAction";
 import {ContextWrapper} from "@casperui/core/content/ContextWrapper";
 
-export type FragmentResizeHandler = (newWidth:number, newHeight:number) => void;
+export type FragmentResizeHandler = (newWidth: number, newHeight: number) => void;
 
-export abstract class JFragment extends ContextWrapper implements ILiveManager, IFragmentManager,IParentView {
+export abstract class JFragment extends ContextWrapper implements ILiveManager, IFragmentManager, IParentView {
 
     static readonly POST_A_ATTACHED = 1;
     static readonly POST_A_DETACHED = 2;
@@ -24,101 +24,103 @@ export abstract class JFragment extends ContextWrapper implements ILiveManager, 
     private liveManager = new LiveManager();
     private fragmentManager = new FragmentManager(this)
 
-    private resizeObserver:ResizeObserver = null
-    private baseView:View
+    private resizeObserver: ResizeObserver = null
+    private baseView: View
     private isAttached = false
-    private parent:WeakRef<JFragment> = null
+    private parent: WeakRef<JFragment> = null
     private isSingleAttached = false
 
     private postActions = new PostAction<number>()
 
     private attachEventListeners = []
 
-    constructor(context:Context) {
+    constructor(context: Context) {
         super()
         if (context instanceof Activity) {
             this.attachBaseContext(context)
-        }else if (context instanceof JFragment) {
+        } else if (context instanceof JFragment) {
             this.attachBaseContext(context.getBaseContext())
         }
         this.baseView = null;
 
     }
-    ctx():Context{
+
+    ctx(): Context {
         return this.getBaseContext()
     }
 
 
-    getLiveManager(){
+    getLiveManager() {
         return this.liveManager;
     }
 
 
-    getFragmentManager(){
+    getFragmentManager() {
         return this.fragmentManager
     }
 
-    replaceFragment(id:number, fragment:JFragment){
+    replaceFragment(id: number, fragment: JFragment) {
         this.fragmentManager.replaceFragment(id, fragment)
     }
 
 
+    abstract onCreateView(inflater: BXMLInflater, container: View): View
 
-    abstract onCreateView(inflater:BXMLInflater,container:View):View
 
-
-    setParentFrame(parent){
+    setParentFrame(parent) {
         this.parent = parent
 
     }
 
-    getParentFragment():JFragment|null{
-        if (this.parent){
+    getParentFragment(): JFragment | null {
+        if (this.parent) {
             return this.parent.deref()
         }
         return null
     }
 
-    getContext():Context{
+    getContext(): Context {
         return this.getBaseContext();
     }
 
-    getActivity():Activity{
+    getActivity(): Activity {
         return this.getBaseContext() as Activity
     }
 
-    postAttach(func:any){
-        this.postActions.run(JFragment.POST_A_ATTACHED,func)
+    postAttach(func: any) {
+        this.postActions.run(JFragment.POST_A_ATTACHED, func)
     }
-    getPostActions():PostAction<number>{
+
+    getPostActions(): PostAction<number> {
         return this.postActions;
     }
 
-    attach(){
+    attach() {
 
         this.getFragmentManager().attachFragmentManager()
         this.isAttached = true
         this.liveManager.activate()
 
-        if (!this.isSingleAttached){
+        if (!this.isSingleAttached) {
             this.isSingleAttached = true
             this.onAttachSingle()
             this.postActions.doneAction(JFragment.POST_A_ATTACHED)
         }
         this.onAttach()
         this.postActions.doneAction(JFragment.POST_ATTACH)
-        this.attachEventListeners.forEach(listener=>listener())
+        this.attachEventListeners.forEach(listener => listener())
 
     }
-    addAttachEventListener(listener:any){
+
+    addAttachEventListener(listener: any) {
         this.attachEventListeners.push(listener)
     }
 
-    isFragmentAttached(){
+    isFragmentAttached() {
         return this.isAttached
     }
 
-    detachFragment(){
+    detachFragment() {
         this.isAttached = false
         this.getFragmentManager().detachFragmentManager()
         this.onDetach()
@@ -126,25 +128,32 @@ export abstract class JFragment extends ContextWrapper implements ILiveManager, 
         this.postActions.doneAction(JFragment.POST_DETACH)
     }
 
-    protected onAttach(){}
-    protected onAttachSingle(){}
-    protected onDetach(){}
-    onCreated():void{}
+    protected onAttach() {
+    }
 
-    isFragmentCreated(){
+    protected onAttachSingle() {
+    }
+
+    protected onDetach() {
+    }
+
+    onCreated(): void {
+    }
+
+    isFragmentCreated() {
         return this.baseView != null
     }
 
-    startCreatingView(){
+    startCreatingView() {
         this.baseView = this.onCreateView(this.getActivity().getLayoutInflater(), null)
 
     }
 
-    getView():View{
+    getView(): View {
         return this.baseView
     }
 
-    byIds(ids:number[]):View[]{
+    byIds(ids: number[]): View[] {
         let out = []
         for (let i = 0; i < ids.length; i++) {
             out.push(this.byId(ids[i]))
@@ -160,21 +169,18 @@ export abstract class JFragment extends ContextWrapper implements ILiveManager, 
     }
 
 
-
-
-
     getFragmentMemory(): FragmentMemory {
         return this.fragmentMemory;
     }
 
 
-    setSizeChangeListener(handler:FragmentResizeHandler){
-        if (this.resizeObserver){
+    setSizeChangeListener(handler: FragmentResizeHandler) {
+        if (this.resizeObserver) {
             this.resizeObserver.disconnect()
         }
         this.resizeObserver = new ResizeObserver(entries => {
             if (this.isFragmentAttached())
-                handler(entries[0].contentRect.width,entries[0].contentRect.height)
+                handler(entries[0].contentRect.width, entries[0].contentRect.height)
         })
         this.resizeObserver.observe(this.getView().getElement());
     }

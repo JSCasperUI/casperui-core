@@ -19,11 +19,8 @@ export type ViewTag = string | Element
 
 export interface IParentView {
     getParentView(): IParentView | null;
-
     setParentView(parentView?: IParentView): void;
-
     isFragmentView(): boolean;
-
 }
 
 type FEvent = (event: UIEvent) => any

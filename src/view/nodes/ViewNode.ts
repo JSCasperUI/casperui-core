@@ -24,6 +24,7 @@ export class ViewNode {
             } else {
                 if (type === View.WIDGET_TAG) {
 
+
                 } else {
                     this.mNode = document.createElement(type);
                 }

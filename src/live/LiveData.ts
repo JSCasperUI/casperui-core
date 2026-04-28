@@ -71,9 +71,8 @@ export class LiveData<T> {
         }
     }
 
-    removeObserver(observer) {
-        // this.observers.delete(observer);
-        throw new Error("Need ")
+    removeObserver(observer: ILiveManager) {
+
     }
 
     notifyObservers() {
