@@ -62,11 +62,11 @@ export class BXMLInflater {
             if (this.cacheNodes[id]) {
                 node = this.cacheNodes[id]
             } else {
-                node = (new BXMLParser(this.context.getResources().getBufferById(id))).readTree()
+                node = (new BXMLParser(this.context.getResources().getBufferById(id),this.context.getResources())).readTree()
                 this.cacheNodes[id] = node
             }
         } else {
-            node = (new BXMLParser(this.context.getResources().getBufferById(id))).readTree()
+            node = (new BXMLParser(this.context.getResources().getBufferById(id),this.context.getResources())).readTree()
         }
         let result = this.inflateChild(node) as View
         if (root) {
@@ -115,6 +115,7 @@ export class BXMLInflater {
 
             }
         }
+
 
         let view = WidgetRegistrar.createInstance(node.tag, this.context, node.tag, node.attrs);
 

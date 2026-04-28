@@ -8,7 +8,7 @@ export class BXMLSvgInflater {
 
 
     static inflate(id: number, context: Context): Element {
-        let node = (new BXMLParser(context.getResources().getBufferById(id))).readTree()
+        let node = (new BXMLParser(context.getResources().getBufferById(id),context.getResources())).readTree()
         return BXMLSvgInflater.inflateChild(node, true)
     }
 

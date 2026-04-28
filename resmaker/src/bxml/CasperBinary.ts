@@ -7,6 +7,7 @@ import {Resource} from "@rMaker/resources/Resource";
 import {bakePathTree, checkIdentifier, convertTagToLowerCase} from "@rMaker/utils/utils";
 import {IDMapper} from "@rMaker/resources/IDMapper";
 import {AutoBinding} from "@rMaker/binder/AutoBinding";
+import {parseTemplate} from "@rMaker/xml/var";
 
 
 export class CasperBinary {
@@ -115,7 +116,17 @@ export class CasperBinary {
                 this.autoBinds.addSelectByIdPath(node.attrs[aKey], path,"View",indexOfVariable);
                 value = this.selfDictionary.valueTyped(DYNAMIC_TYPE.IDENTIFIER, indexOfVariable)
             } else {
-                value = this.selfDictionary.value(node.attrs[aKey])
+                let valueString = node.attrs[aKey]
+                const parsed = parseTemplate(valueString)[0];
+                // if (!parsed){
+                //     console.log("asd")
+                // }
+                if (parsed.type == "lang") {
+                    let indexOfVariable = this.res.languageResource.getIdByName(parsed.key)
+                    value = this.selfDictionary.valueTyped(DYNAMIC_TYPE.LANG_ID, indexOfVariable)
+                }else{
+                    value = this.selfDictionary.value(node.attrs[aKey])
+                }
             }
 
             this.selfDictionary.writeAttribute(key!, value)
