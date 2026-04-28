@@ -9,6 +9,7 @@ import {ByteBufferOutput} from "@rMaker/io/ByteBufferOutput";
 import {CasperBinary} from "@rMaker/bxml/CasperBinary";
 import {SVGBinarize} from "@rMaker/bxml/SVGBinarize";
 import {IDMapper} from "@rMaker/resources/IDMapper";
+import {CasperCodegen} from "@rMaker/bxml/CasperCodegen";
 
 
 const CASPER_FS = {
@@ -101,7 +102,7 @@ export class MainCompiler {
                 }
 
                 if (file.endsWith("xml") || file.endsWith("html")) {
-                    let bin = new CasperBinary(file, config)
+                    let bin = new CasperCodegen(file, config)
                     byteData = bin.html2CaperBinary(byteData.toString(), file)
 
 

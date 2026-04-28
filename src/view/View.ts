@@ -164,6 +164,13 @@ export class View extends ViewNode implements IParentView {
         return this;
     }
 
+    x(views: View[]): View {
+        for (let i = 0; i < views.length; i++) {
+            this.addView(views[i]);
+        }
+        return this
+    }
+
     removeAllViews() {
 
         for (let i = 0; i < this.mChildren.length; i++) {
@@ -312,6 +319,17 @@ export class View extends ViewNode implements IParentView {
         return this;
     }
 
+    setText(text: string) {
+        if (this._textCache && this._textCache == text) return
+        if (this.mNode.firstChild && this.mNode.childNodes.length === 1 && this.mNode.firstChild.nodeType === 3) {
+            this._textCache = text
+            this.mNode.firstChild.nodeValue = text;
+        } else {
+            this._textCache = text
+            this.mNode.textContent = text;
+        }
+        return this;
+    }
     setTextContent(text: string) {
         if (this._textCache && this._textCache == text) return
         if (this.mNode.firstChild && this.mNode.childNodes.length === 1 && this.mNode.firstChild.nodeType === 3) {
