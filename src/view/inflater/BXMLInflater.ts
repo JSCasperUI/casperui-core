@@ -5,7 +5,7 @@ import {View} from "@casperui/core/view/View";
 import {ViewNode} from "@casperui/core/view/nodes/ViewNode";
 import {NodeType} from "@casperui/core/view/nodes/NodeType";
 import {WidgetRegistrar} from "@casperui/core/view/inflater/WidgetRegistrar";
-import {EMPTY_STRING, TAG_SCRIPT, TAG_STYLE, TAG_SVG} from "@casperui/core/space/Constants";
+import {EMPTY_STRING, TAG_SCRIPT, TAG_STYLE, TAG_SVG, TAG_TEMPLATE} from "@casperui/core/space/Constants";
 import {Resources} from "@casperui/core/content/Resources";
 
 
@@ -41,7 +41,7 @@ export class BXMLInflater {
             if (this.cacheNodes[id]) {
                 node = this.cacheNodes[id]
             } else {
-                node = (new BXMLParser(this.res.getBufferById(id))).readTree()
+                node = (new BXMLParser(this.res.getBufferById(id),this.context.getResources())).readTree()
                 this.cacheNodes[id] = node
             }
             node = this.findNodeByIdRec(node, templateId);
@@ -79,7 +79,6 @@ export class BXMLInflater {
             } else {
                 root.addView(result)
             }
-
         }
         return result as View
     }
@@ -100,6 +99,9 @@ export class BXMLInflater {
         }
 
         switch (node.tag) {
+            case TAG_TEMPLATE:{
+                return null
+            }
             case TAG_STYLE:
                 return new ViewNode(NodeType.STYLE, node.children[0].attrs["#t"] as string)
             case TAG_SCRIPT:
@@ -108,11 +110,8 @@ export class BXMLInflater {
                 let nd = new ViewNode(NodeType.SVG, "")
                 for (const key in node.attrs) {
                     (nd.mNode as HTMLElement).setAttribute(key, node.attrs[key] as string);
-
                 }
-
                 return nd
-
             }
         }
 

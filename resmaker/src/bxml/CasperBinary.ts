@@ -15,6 +15,28 @@ export class CasperBinary {
     private autoBinds: AutoBinding
     private varIdMapper: IDMapper
 
+    static html2XNode(fileData: string) {
+        let parser = new SimpleHTMLParser(fileData)
+        let node = xml2Tree(parser)
+        node.childNodes = transformTextNodes(node.childNodes)
+    }
+    static extractTemplates(nodes: XNode[], out: Record<string, XNode>): XNode[] {
+        const result: XNode[] = []
+
+        for (const node of nodes) {
+            if (node.tag === "template" && node.attrs["id"] !== undefined) {
+                // вырезаем — но сначала рекурсивно чистим его детей
+                node.childNodes = CasperBinary.extractTemplates(node.childNodes, out)
+                out[node.attrs["id"]] = node
+            } else {
+                // не template — оставляем, но рекурсивно чистим детей
+                node.childNodes = CasperBinary.extractTemplates(node.childNodes, out)
+                result.push(node)
+            }
+        }
+
+        return result
+    }
     constructor(private fileName: string, private res: Resource) {
         this.selfDictionary = new Dictionary("xml")
         this.varIdMapper = res.getVarIdMapper()
@@ -36,7 +58,11 @@ export class CasperBinary {
         this.processElement(node)
         return this.selfDictionary.createIndexedBuffer()
     }
-
+    xNode2CaperBinary(node: XNode, fileName: string) {
+        this.fileName = fileName
+        this.processElement(node)
+        return this.selfDictionary.createIndexedBuffer()
+    }
 
     processElement(node: XNode, isLastChild?: boolean, parentTag?: string) {
         isLastChild = isLastChild === undefined ? true : isLastChild

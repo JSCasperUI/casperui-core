@@ -70,7 +70,6 @@ export class BXMLParser {
         }
         this.mTags[0] ="#t"
 
-
         this.offset = data.getBufferPosition()
     }
     readTree() {

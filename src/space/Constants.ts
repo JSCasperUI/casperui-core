@@ -14,6 +14,7 @@ export const  TAG_DIV = "div"
 export const  TAG_SVG = "svg"
 export const  TAG_SCRIPT = "script"
 export const  TAG_STYLE = "style"
+export const  TAG_TEMPLATE = "template"
 export const  ELEMENT_SVG_URI = "http://www.w3.org/2000/svg"
 export const  ELEMENT_SVG_XLINK_NS = "http://www.w3.org/1999/xlink";
 export const  WIDGET_TAG = "WTAG"
