@@ -102,7 +102,7 @@ export class MainCompiler {
                 }
 
                 if (file.endsWith("xml") || file.endsWith("html")) {
-                    let bin = new CasperCodegen(file, config)
+                    let bin = new CasperCodegen(file, config,filesCount -1 )
                     byteData = bin.html2CaperBinary(byteData.toString(), file)
 
 

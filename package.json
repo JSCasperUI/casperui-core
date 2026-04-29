@@ -25,31 +25,6 @@
     }
   },
   "exports": {
-    "./content/BinaryResources": {
-      "import": "./dist/content/BinaryResources.js",
-      "require": "./dist/content/BinaryResources.js",
-      "types": "./dist/content/BinaryResources.d.ts"
-    },
-    "./content/Context": {
-      "import": "./dist/content/Context.js",
-      "require": "./dist/content/Context.js",
-      "types": "./dist/content/Context.d.ts"
-    },
-    "./content/ContextWrapper": {
-      "import": "./dist/content/ContextWrapper.js",
-      "require": "./dist/content/ContextWrapper.js",
-      "types": "./dist/content/ContextWrapper.d.ts"
-    },
-    "./content/Resources": {
-      "import": "./dist/content/Resources.js",
-      "require": "./dist/content/Resources.js",
-      "types": "./dist/content/Resources.d.ts"
-    },
-    "./io/ByteBuffer": {
-      "import": "./dist/io/ByteBuffer.js",
-      "require": "./dist/io/ByteBuffer.js",
-      "types": "./dist/io/ByteBuffer.d.ts"
-    },
     "./app/Activity": {
       "import": "./dist/app/Activity.js",
       "require": "./dist/app/Activity.js",
@@ -75,35 +50,30 @@
       "require": "./dist/app/JFragment.js",
       "types": "./dist/app/JFragment.d.ts"
     },
-    "./graphics/Bitmap": {
-      "import": "./dist/graphics/Bitmap.js",
-      "require": "./dist/graphics/Bitmap.js",
-      "types": "./dist/graphics/Bitmap.d.ts"
+    "./io/ByteBuffer": {
+      "import": "./dist/io/ByteBuffer.js",
+      "require": "./dist/io/ByteBuffer.js",
+      "types": "./dist/io/ByteBuffer.d.ts"
     },
-    "./graphics/Canvas": {
-      "import": "./dist/graphics/Canvas.js",
-      "require": "./dist/graphics/Canvas.js",
-      "types": "./dist/graphics/Canvas.d.ts"
+    "./content/BinaryResources": {
+      "import": "./dist/content/BinaryResources.js",
+      "require": "./dist/content/BinaryResources.js",
+      "types": "./dist/content/BinaryResources.d.ts"
     },
-    "./graphics/Matrix": {
-      "import": "./dist/graphics/Matrix.js",
-      "require": "./dist/graphics/Matrix.js",
-      "types": "./dist/graphics/Matrix.d.ts"
+    "./content/Context": {
+      "import": "./dist/content/Context.js",
+      "require": "./dist/content/Context.js",
+      "types": "./dist/content/Context.d.ts"
     },
-    "./graphics/Paint": {
-      "import": "./dist/graphics/Paint.js",
-      "require": "./dist/graphics/Paint.js",
-      "types": "./dist/graphics/Paint.d.ts"
+    "./content/ContextWrapper": {
+      "import": "./dist/content/ContextWrapper.js",
+      "require": "./dist/content/ContextWrapper.js",
+      "types": "./dist/content/ContextWrapper.d.ts"
     },
-    "./graphics/Point": {
-      "import": "./dist/graphics/Point.js",
-      "require": "./dist/graphics/Point.js",
-      "types": "./dist/graphics/Point.d.ts"
-    },
-    "./graphics/Rect": {
-      "import": "./dist/graphics/Rect.js",
-      "require": "./dist/graphics/Rect.js",
-      "types": "./dist/graphics/Rect.d.ts"
+    "./content/Resources": {
+      "import": "./dist/content/Resources.js",
+      "require": "./dist/content/Resources.js",
+      "types": "./dist/content/Resources.d.ts"
     },
     "./live/ILiveManager": {
       "import": "./dist/live/ILiveManager.js",
@@ -155,6 +125,36 @@
       "require": "./dist/space/utils.js",
       "types": "./dist/space/utils.d.ts"
     },
+    "./graphics/Bitmap": {
+      "import": "./dist/graphics/Bitmap.js",
+      "require": "./dist/graphics/Bitmap.js",
+      "types": "./dist/graphics/Bitmap.d.ts"
+    },
+    "./graphics/Canvas": {
+      "import": "./dist/graphics/Canvas.js",
+      "require": "./dist/graphics/Canvas.js",
+      "types": "./dist/graphics/Canvas.d.ts"
+    },
+    "./graphics/Matrix": {
+      "import": "./dist/graphics/Matrix.js",
+      "require": "./dist/graphics/Matrix.js",
+      "types": "./dist/graphics/Matrix.d.ts"
+    },
+    "./graphics/Paint": {
+      "import": "./dist/graphics/Paint.js",
+      "require": "./dist/graphics/Paint.js",
+      "types": "./dist/graphics/Paint.d.ts"
+    },
+    "./graphics/Point": {
+      "import": "./dist/graphics/Point.js",
+      "require": "./dist/graphics/Point.js",
+      "types": "./dist/graphics/Point.d.ts"
+    },
+    "./graphics/Rect": {
+      "import": "./dist/graphics/Rect.js",
+      "require": "./dist/graphics/Rect.js",
+      "types": "./dist/graphics/Rect.d.ts"
+    },
     "./utils/Locale": {
       "import": "./dist/utils/Locale.js",
       "require": "./dist/utils/Locale.js",
@@ -175,6 +175,11 @@
       "require": "./dist/view/ViewAttributes.js",
       "types": "./dist/view/ViewAttributes.d.ts"
     },
+    "./utils/bxml/BinaryAttributePair": {
+      "import": "./dist/utils/bxml/BinaryAttributePair.js",
+      "require": "./dist/utils/bxml/BinaryAttributePair.js",
+      "types": "./dist/utils/bxml/BinaryAttributePair.d.ts"
+    },
     "./utils/bxml/BXMLParser": {
       "import": "./dist/utils/bxml/BXMLParser.js",
       "require": "./dist/utils/bxml/BXMLParser.js",
@@ -184,6 +189,11 @@
       "import": "./dist/utils/bxml/BXNode.js",
       "require": "./dist/utils/bxml/BXNode.js",
       "types": "./dist/utils/bxml/BXNode.d.ts"
+    },
+    "./utils/bxml/LayoutContext": {
+      "import": "./dist/utils/bxml/LayoutContext.js",
+      "require": "./dist/utils/bxml/LayoutContext.js",
+      "types": "./dist/utils/bxml/LayoutContext.d.ts"
     },
     "./view/inflater/BXMLInflater": {
       "import": "./dist/view/inflater/BXMLInflater.js",

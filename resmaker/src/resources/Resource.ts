@@ -4,8 +4,9 @@ import {ResourceConfig} from "@rMaker/utils/Config";
 import {StringPool} from "@rMaker/resources/StringPool";
 import {MainCompiler} from "@rMaker/MainCompiler";
 import {IDMapper} from "@rMaker/resources/IDMapper";
-import {FilesIDArray, IDArrayMake} from "@rMaker/resources/FilesIDArray";
+import {FilesIDArray, IDArrayMake, LayoutItemMake} from "@rMaker/resources/FilesIDArray";
 import {AutoBinding} from "@rMaker/binder/AutoBinding";
+import {generateSnakeBindingName} from "@rMaker/utils/utils";
 
 export class Resource {
     private filesIdArray: FilesIDArray;
@@ -40,24 +41,24 @@ export class Resource {
         const bindingsPath = path.join(dirPath, "bind.ts");
 
 
-        let out = `import {View} from "@casperui/core/view/View";\nimport {${this.idStartName}} from "./R";\nimport {Context} from "@casperui/core/content/Context";\n`
+        let out = ` import {View} from "@casperui/core/view/View";\nimport {Context} from "@casperui/core/content/Context";\nimport {_getLayCTX} from "@casperui/core/utils/bxml/LayoutContext";\n`
         for (const autoBind of this.autoBinds) {
             out += autoBind.getAutoBindScript() + "\n"
         }
-        out += "export type LayoutBindMap = {"
-        for (const autoBind of this.autoBinds) {
-            out += autoBind.getAutoBindMap() + "\n"
-        }
-        out += "};";
-        out = this.storeBindSwitch(out)
-        out += `\nexport function inflateBind<L extends keyof LayoutBindMap>(
-    ctx: Context,
-    layout: L,
-    cache?: boolean, root?: View | null, rootNodeReplace?: boolean
-): LayoutBindMap[L] {
-    let v = ctx.getInflater().inflate(layout as any, cache, root, rootNodeReplace) as any
-    return bindById(layout, v) as any;
-}`;
+//         out += "export type LayoutBindMap = {"
+//         for (const autoBind of this.autoBinds) {
+//             out += autoBind.getAutoBindMap() + "\n"
+//         }
+//         out += "};";
+//         out = this.storeBindSwitch(out)
+//         out += `\nexport function inflateBind<L extends keyof LayoutBindMap>(
+//     ctx: Context,
+//     layout: L,
+//     cache?: boolean, root?: View | null, rootNodeReplace?: boolean
+// ): LayoutBindMap[L] {
+//     let v = ctx.getInflater().inflate(layout as any, cache, root, rootNodeReplace) as any
+//     return bindById(layout, v) as any;
+// }`;
         fs.writeFileSync(bindingsPath, out)
     }
 
@@ -99,7 +100,7 @@ export class Resource {
     createIDObject(dirId: FilesIDArray,isJs:boolean = false, level = 0): string {
         let out = `${dirId.name}:{\n`
         if (level === 0) {
-            out = `export const ${dirId.name} = {\n${this.createIDArray()},\n${this.languageResource.toStringMap()},\n`
+            out = `import * as UI from "./bind"\nexport const ${dirId.name} = {\n${this.createIDArray()},\n${this.languageResource.toStringMap()},\n`
         }
 
         for (const ch of dirId.child) {
@@ -151,7 +152,13 @@ export class Resource {
                     if (!list.includes(fullPath)) {
                         list.push(fullPath);
                         if (!entry.name.endsWith(".css") && !entry.name.endsWith(".tsv")) {
-                            idArray.push(IDArrayMake(path.parse(entry.name).name, this.resourceMaker.getNewId()));
+                            if (entry.name.toLowerCase().endsWith(".html")){
+                                this.resourceMaker.getNewId()
+                                idArray.push(LayoutItemMake(path.parse(entry.name).name,"UI."+generateSnakeBindingName(fullPath) ));
+                            }else{
+                                idArray.push(IDArrayMake(path.parse(entry.name).name, this.resourceMaker.getNewId()));
+
+                            }
                         }
                     }
                 } else if (entry.isDirectory()) {

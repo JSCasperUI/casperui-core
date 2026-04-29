@@ -61,9 +61,10 @@ export class Activity extends ContextWrapper implements ILiveManager, IFragmentM
         return this.inflater
     }
 
-    setContentView(layoutId: number) {
+
+    setContentView(layout: View) {
         (this.windowView.mNode as HTMLElement).innerHTML = "";
-        this.windowView.addView(this.inflater.inflate(layoutId, false));
+        this.windowView.addView(layout);
         this.onLayout()
     }
 

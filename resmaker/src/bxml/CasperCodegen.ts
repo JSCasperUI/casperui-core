@@ -9,9 +9,10 @@ import {IDMapper} from "@rMaker/resources/IDMapper";
 import {AutoBinding} from "@rMaker/binder/AutoBinding";
 import {parseTemplate} from "@rMaker/xml/var";
 import {DictionaryCodegen} from "@rMaker/bxml/DictionaryCodegen";
+import {Scope} from "@rMaker/bxml/Scope";
 
 const RESERVED = new Set([
-    "c", "i", "l", "t", "do", "if", "in", "as", "of", "for", "let", "new", "try", "var",
+    "c", "i", "l", "t", "do", "if", "in", "as", "of", "for", "let", "new", "try", "var", "ctx",
     "case", "else", "enum", "null", "this", "true", "void", "with",
     "await", "break", "catch", "class", "const", "false", "super",
     "throw", "while", "yield", "delete", "export", "import", "return",
@@ -19,27 +20,17 @@ const RESERVED = new Set([
     "function", "interface", "continue", "instanceof", "implements"
 ])
 
-function mapToObject(node: Map<string, string>): any {
-    let ret = [] as string[];
 
-    node.forEach((value, key, map) => {
-        ret.push(`${key}:${value}`)
-    })
-    return `{${ret.join(",\n")}}`
-}
+const codeStart = `
+
+`
 
 export class CasperCodegen {
     private selfDictionary: DictionaryCodegen
     private autoBinds: AutoBinding
     private varIdMapper: IDMapper
 
-    static html2XNode(fileData: string) {
-        let parser = new SimpleHTMLParser(fileData)
-        let node = xml2Tree(parser)
-        node.childNodes = transformTextNodes(node.childNodes)
-    }
-
-    constructor(private fileName: string, private res: Resource) {
+    constructor(private fileName: string, private res: Resource, private resourceId: number) {
         this.selfDictionary = new DictionaryCodegen("xml")
         this.varIdMapper = res.getVarIdMapper()
 
@@ -51,108 +42,74 @@ export class CasperCodegen {
         return this.autoBinds
     }
 
-
+    ts = ""
     html2CaperBinary(fileData: string, fileName: string) {
         this.fileName = fileName
         let parser = new SimpleHTMLParser(fileData)
         let node = xml2Tree(parser)
         node.childNodes = transformTextNodes(node.childNodes)
         bakePathTree(node)
-        let idMap = new Map<string, string>();
-
 
         if (fileName.includes("calendar.html")) {
             console.log("asd")
         }
-        this.startProcess(node,"layout")
+        let scope = new Scope(this.autoBinds.getFunctionName())
+        this.startProcess(node, scope)
+        scope.setMainInterfaceName(this.autoBinds.getInterfaceName())
 
-        let code = this.constVarsLines.join("\n") + "\n" + this.codeLines.join("\n")
+
+//         this.ts = `
+// import {View} from "@casperui/core/view/View";
+// import {Context} from "@casperui/core/content/Context";
+// import {_getLayCTX} from "@casperui/core/utils/bxml/LayoutContext";\n`
+        this.ts += scope.getInterfaceBody() + "\n"
+        this.ts += scope.getMainCode(`ctx: Context`, `let [c, t, l, i] = _getLayCTX(ctx, ${this.resourceId});`)
+        // let code = this.interfaces.join("\n") + this.constVarsLines.join("\n") + "\n" + this.codeLines.join("\n")
         if (fileName.includes("calendar.html")) {
             console.log("asd")
         }
+        this.autoBinds.setCode(this.ts)
         return this.selfDictionary.createIndexedBuffer()
     }
 
 
-    private varIndex = 0
-
-    private nextVar(): string {
-        let name: string
-        do {
-            let n = ""
-            let x = ++this.varIndex
-            while (x > 0) {
-                x--
-                n = String.fromCharCode(97 + (x % 26)) + n
-                x = Math.floor(x / 26)
-            }
-            name = n
-        } while (RESERVED.has(name))
-        return name
-    }
-
-
-    constVars = new Map<string, string>();
-    constVarsLines: string[] = []
-    codeLines: string[] = []
     attrIndex = -1
 
 
-    getTagVariable(tag: string): string {
-
-        if (tag === "template") tag = "div"
-        if (!this.constVars.has(tag)) {
-            let varName = this.nextVar()
-            this.constVars.set(tag, varName)
-            this.constVarsLines.push(`let ${varName}="${tag}"`)
-        }
-        return this.constVars.get(tag)!
-    }
-
-    startProcess(node: XNode,functionName:string) {
+    startProcess(node: XNode, scope: Scope, isTopLevel: boolean = false) {
         let tag = convertTagToLowerCase(node.tag)
 
 
-        const rootVar = this.nextVar()
+        const rootVar = scope.nextVar()
 
-        // сохраняем текущий контекст
-        const savedLines = this.codeLines
-        const savedVarIndex = this.varIndex
-        this.codeLines = []
+        let div = scope.getTagVariable(tag)
 
-        let div = this.getTagVariable(tag)
+        scope.addCode(`let ${rootVar}=c(${div},0)`)
 
-        this.codeLines.push(`let ${rootVar}=c(${div},0)`)
+        scope.setId("root", rootVar, "View")
 
-        let funIdMap = new Map<string, string>();
-        funIdMap.set("root",rootVar)
         let child = []
 
         // this.processElement(node, rootVar, tag, funIdMap)
 
         for (let i = 0; i < node.childNodes.length; i++) {
-            let o = this.processElement(node.childNodes[i], rootVar, tag, funIdMap)
+            let o = this.processElement(node.childNodes[i], rootVar, tag, scope)
             if (o) child.push(o)
         }
 
         if (child.length > 0) {
-            this.codeLines.push(`${rootVar}.x([${child.join(",")}])`)
+            scope.addCode(`${rootVar}.x([${child.join(",")}])`)
         }
-        const fnBody = this.codeLines.join("\n")
 
-        this.codeLines = savedLines
-        this.codeLines.push(`let ${functionName}=function(){\n${fnBody}\nreturn ${mapToObject(funIdMap)}\n}`)
+        return scope
 
-        return functionName
     }
-    processElement(node: XNode, parent?: string, parentTag?: string, idMap: Map<string, string>): string | null {
+
+    processElement(node: XNode, parent: string | undefined, parentTag: string | undefined, scope: Scope): string | null {
         parentTag = parentTag === undefined ? "" : parentTag
 
 
         let tag = convertTagToLowerCase(node.tag)
-
-
-
 
 
         if (tag === "#text") {
@@ -162,19 +119,14 @@ export class CasperCodegen {
                 content = minifyCSS(content)
             }
 
-            // this.selfDictionary.writeTag(tagIndex)
-            // this.selfDictionary.writeAttributesLengthAndDirection(1, direct)
-
             let value;
-            if (!content) {
-                content = ""
-            }
+            if (!content) content = ""
 
             if (node.type) {
                 if (node.type === DYNAMIC_TYPE.IDENTIFIER) {
-                    let viewVariableName = this.nextVar()
-                    idMap.set(node.textContent, viewVariableName)
-                    this.codeLines.push(`let ${viewVariableName} = i()`)
+                    let viewVariableName = scope.nextVar()
+                    scope.setId(node.textContent, viewVariableName)
+                    scope.addCode(`let ${viewVariableName} = i()`)
                     return viewVariableName
                 } else if (node.type === DYNAMIC_TYPE.LANG_ID) {
                     let indexOfVariable = this.res.languageResource.getIdByName(content)
@@ -185,13 +137,12 @@ export class CasperCodegen {
             }
 
             // this.selfDictionary.writeAttribute(key, value)
-            return `t(${this.attrIndex})`
+            return `t(${value})`
         }
 
-        let tagVariable = this.getTagVariable(tag)
+        let tagVariable = scope.getTagVariable(tag)
         this.attrIndex++
         this.selfDictionary.writeAttributesLength(Object.keys(node.attrs).length)
-
 
         let isId = false
         let viewVariableName = ""
@@ -202,18 +153,23 @@ export class CasperCodegen {
                 if (!checkIdentifier(node.attrs[aKey])) {
                     throw Error(`Invalid identifier [${aKey}="${node.attrs[aKey]}"] allow only(A-z 0-9 and _) \n    at (${this.fileName}:${node.line}:0)`)
                 }
-                viewVariableName = this.nextVar()
-                idMap.set(node.attrs[aKey], viewVariableName)
-                isId = true
-                const path = node.__path!;
-                let indexOfVariable = this.varIdMapper.getIdByName(node.attrs[aKey])
+                viewVariableName = scope.nextVar()
 
-                this.autoBinds.addSelectByIdPath(node.attrs[aKey], path, "View", indexOfVariable);
+                let idKey = node.attrs[aKey]
+                if (tag === "template") {
+
+                    scope.setId(idKey, viewVariableName, this.getBindings().getInterfaceName() + "_" + idKey)
+
+                } else {
+                    scope.setId(idKey, viewVariableName)
+
+                }
+                isId = true
+                let indexOfVariable = this.varIdMapper.getIdByName(node.attrs[aKey])
                 value = this.selfDictionary.valueTyped(DYNAMIC_TYPE.IDENTIFIER, indexOfVariable)
             } else {
                 let valueString = node.attrs[aKey]
                 const parsed = parseTemplate(valueString)[0];
-
                 if (parsed.type == "lang") {
                     let indexOfVariable = this.res.languageResource.getIdByName(parsed.key)
                     value = this.selfDictionary.valueTyped(DYNAMIC_TYPE.LANG_ID, indexOfVariable)
@@ -224,33 +180,32 @@ export class CasperCodegen {
             this.selfDictionary.writeAttribute(key!, value)
         }
 
-
         if (tag === "template") {
+            let childScope = this.startProcess(node, scope.getNextScope(viewVariableName))
 
+            scope.addCode(childScope.makeCode())
 
-            return this.startProcess(node,viewVariableName)
+            return null
         }
 
         if (isId) {
-
-            this.codeLines.push(`let ${viewVariableName}=c(${tagVariable},${this.attrIndex})`)
+            scope.addCode(`let ${viewVariableName}=c(${tagVariable},${this.attrIndex})`)
             let child = []
             for (let i = 0; i < node.childNodes.length; i++) {
-                let o = this.processElement(node.childNodes[i], viewVariableName, tag, idMap)
+                let o = this.processElement(node.childNodes[i], viewVariableName, tag, scope)
                 if (o)
                     child.push(o);
             }
 
             if (child.length > 0) {
-                this.codeLines.push(`${viewVariableName}.x([${child.join(",")}])`)
+                scope.addCode(`${viewVariableName}.x([${child.join(",")}])`)
             }
 
             return viewVariableName
         } else {
-
             let child = []
             for (let i = 0; i < node.childNodes.length; i++) {
-                let o = this.processElement(node.childNodes[i], "", tag, idMap)
+                let o = this.processElement(node.childNodes[i], "", tag, scope)
                 if (o) child.push(o);
 
             }

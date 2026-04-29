@@ -1,6 +1,5 @@
 import {NodeType} from "@casperui/core/view/nodes/NodeType";
 import {ELEMENT_SVG_URI, TAG_SCRIPT, TAG_STYLE, TAG_SVG} from "@casperui/core/space/Constants";
-import {View} from "@casperui/core/view/View";
 
 export class ViewNode {
     mType: NodeType
@@ -22,7 +21,7 @@ export class ViewNode {
             if (type.startsWith("#") && type === "#t") {
                 this.mNode = document.createTextNode("");
             } else {
-                if (type === View.WIDGET_TAG) {
+                if (type === ViewNode.WIDGET_TAG) {
 
 
                 } else {

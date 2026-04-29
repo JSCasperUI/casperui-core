@@ -164,7 +164,7 @@ export class View extends ViewNode implements IParentView {
         return this;
     }
 
-    x(views: View[]): View {
+    x(views: View[]) {
         for (let i = 0; i < views.length; i++) {
             this.addView(views[i]);
         }

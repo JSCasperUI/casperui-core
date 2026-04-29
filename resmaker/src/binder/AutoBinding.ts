@@ -33,11 +33,16 @@ export class AutoBinding {
     private function_name: string
     private autoBinds: BindItem[] = [];
     private id: string;
+    code = ""
 
     constructor(filePath: string,private idStartName: string) {
         this.interface_name = generatePascalBindingName(filePath)
         this.function_name = generateSnakeBindingName(filePath)
         this.id = generateBindingID(filePath,idStartName)
+    }
+
+    getInterfaceName(): string {
+        return this.interface_name;
     }
 
     getID(): string {
@@ -51,6 +56,9 @@ export class AutoBinding {
         return this.function_name
     }
 
+    setCode(code: string) {
+        this.code = code;
+    }
 
     addSelectByIdPath(varName: string, path: number[], type: string = "View", index: number) {
         this.autoBinds.push({name: varName, type: type, path: path, id: index}); // или запиши куда нужно
@@ -65,6 +73,7 @@ export class AutoBinding {
     }
 
     getAutoBindScript(): string {
+        return this.code
         const lines: string[] = [];
 
         // 1. Интерфейс

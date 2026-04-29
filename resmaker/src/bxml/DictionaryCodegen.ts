@@ -19,6 +19,8 @@ export const DYNAMIC_TYPE = {
 export class DictionaryCodegen {
     private keys:string[] = []
     private values:Buffer[] = []
+
+
     private keysMap = new Map()
     private valuesMap = new Map()
     private treeBuffer = new ByteBufferOutput()
