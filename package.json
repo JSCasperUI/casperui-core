@@ -50,11 +50,6 @@
       "require": "./dist/app/JFragment.js",
       "types": "./dist/app/JFragment.d.ts"
     },
-    "./io/ByteBuffer": {
-      "import": "./dist/io/ByteBuffer.js",
-      "require": "./dist/io/ByteBuffer.js",
-      "types": "./dist/io/ByteBuffer.d.ts"
-    },
     "./content/BinaryResources": {
       "import": "./dist/content/BinaryResources.js",
       "require": "./dist/content/BinaryResources.js",
@@ -74,6 +69,41 @@
       "import": "./dist/content/Resources.js",
       "require": "./dist/content/Resources.js",
       "types": "./dist/content/Resources.d.ts"
+    },
+    "./io/ByteBuffer": {
+      "import": "./dist/io/ByteBuffer.js",
+      "require": "./dist/io/ByteBuffer.js",
+      "types": "./dist/io/ByteBuffer.d.ts"
+    },
+    "./graphics/Bitmap": {
+      "import": "./dist/graphics/Bitmap.js",
+      "require": "./dist/graphics/Bitmap.js",
+      "types": "./dist/graphics/Bitmap.d.ts"
+    },
+    "./graphics/Canvas": {
+      "import": "./dist/graphics/Canvas.js",
+      "require": "./dist/graphics/Canvas.js",
+      "types": "./dist/graphics/Canvas.d.ts"
+    },
+    "./graphics/Matrix": {
+      "import": "./dist/graphics/Matrix.js",
+      "require": "./dist/graphics/Matrix.js",
+      "types": "./dist/graphics/Matrix.d.ts"
+    },
+    "./graphics/Paint": {
+      "import": "./dist/graphics/Paint.js",
+      "require": "./dist/graphics/Paint.js",
+      "types": "./dist/graphics/Paint.d.ts"
+    },
+    "./graphics/Point": {
+      "import": "./dist/graphics/Point.js",
+      "require": "./dist/graphics/Point.js",
+      "types": "./dist/graphics/Point.d.ts"
+    },
+    "./graphics/Rect": {
+      "import": "./dist/graphics/Rect.js",
+      "require": "./dist/graphics/Rect.js",
+      "types": "./dist/graphics/Rect.d.ts"
     },
     "./live/ILiveManager": {
       "import": "./dist/live/ILiveManager.js",
@@ -124,36 +154,6 @@
       "import": "./dist/space/utils.js",
       "require": "./dist/space/utils.js",
       "types": "./dist/space/utils.d.ts"
-    },
-    "./graphics/Bitmap": {
-      "import": "./dist/graphics/Bitmap.js",
-      "require": "./dist/graphics/Bitmap.js",
-      "types": "./dist/graphics/Bitmap.d.ts"
-    },
-    "./graphics/Canvas": {
-      "import": "./dist/graphics/Canvas.js",
-      "require": "./dist/graphics/Canvas.js",
-      "types": "./dist/graphics/Canvas.d.ts"
-    },
-    "./graphics/Matrix": {
-      "import": "./dist/graphics/Matrix.js",
-      "require": "./dist/graphics/Matrix.js",
-      "types": "./dist/graphics/Matrix.d.ts"
-    },
-    "./graphics/Paint": {
-      "import": "./dist/graphics/Paint.js",
-      "require": "./dist/graphics/Paint.js",
-      "types": "./dist/graphics/Paint.d.ts"
-    },
-    "./graphics/Point": {
-      "import": "./dist/graphics/Point.js",
-      "require": "./dist/graphics/Point.js",
-      "types": "./dist/graphics/Point.d.ts"
-    },
-    "./graphics/Rect": {
-      "import": "./dist/graphics/Rect.js",
-      "require": "./dist/graphics/Rect.js",
-      "types": "./dist/graphics/Rect.d.ts"
     },
     "./utils/Locale": {
       "import": "./dist/utils/Locale.js",
@@ -210,6 +210,11 @@
       "require": "./dist/view/inflater/WidgetRegistrar.js",
       "types": "./dist/view/inflater/WidgetRegistrar.d.ts"
     },
+    "./view/widget/CanvasView": {
+      "import": "./dist/view/widget/CanvasView.js",
+      "require": "./dist/view/widget/CanvasView.js",
+      "types": "./dist/view/widget/CanvasView.d.ts"
+    },
     "./view/nodes/NodeType": {
       "import": "./dist/view/nodes/NodeType.js",
       "require": "./dist/view/nodes/NodeType.js",
@@ -219,11 +224,6 @@
       "import": "./dist/view/nodes/ViewNode.js",
       "require": "./dist/view/nodes/ViewNode.js",
       "types": "./dist/view/nodes/ViewNode.d.ts"
-    },
-    "./view/widget/CanvasView": {
-      "import": "./dist/view/widget/CanvasView.js",
-      "require": "./dist/view/widget/CanvasView.js",
-      "types": "./dist/view/widget/CanvasView.d.ts"
     }
   },
   "author": "",

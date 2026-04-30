@@ -74,8 +74,12 @@ export class View extends ViewNode implements IParentView {
         return this.mContext
     }
 
-    inflateSelf(id: number, cache: boolean) {
-        this.mContext.getInflater().inflate(id, cache, this, true)
+
+    replaceNode(newRootNode: View) {
+        this.mNode = newRootNode.mNode
+        for (let i = 0; i < newRootNode.mChildren.length; i++) {
+            this.addView(newRootNode.mChildren[i]);
+        }
         return this;
     }
 
@@ -168,6 +172,7 @@ export class View extends ViewNode implements IParentView {
         for (let i = 0; i < views.length; i++) {
             this.addView(views[i]);
         }
+        this.onViewChildInflated()
         return this
     }
 

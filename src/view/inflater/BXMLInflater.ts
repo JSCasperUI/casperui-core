@@ -30,7 +30,7 @@ export class BXMLInflater {
     }
 
     constructor(private context: Context) {
-        this.res = this.context.getResources()
+
     }
 
     template(id: number, templateId: number): View {

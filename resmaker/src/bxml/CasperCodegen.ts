@@ -50,7 +50,7 @@ export class CasperCodegen {
         node.childNodes = transformTextNodes(node.childNodes)
         bakePathTree(node)
 
-        if (fileName.includes("calendar.html")) {
+        if (fileName.includes("layout\\main.html")) {
             console.log("asd")
         }
         let scope = new Scope(this.autoBinds.getFunctionName())
@@ -65,7 +65,7 @@ export class CasperCodegen {
         this.ts += scope.getInterfaceBody() + "\n"
         this.ts += scope.getMainCode(`ctx: Context`, `let [c, t, l, i] = _getLayCTX(ctx, ${this.resourceId});`)
         // let code = this.interfaces.join("\n") + this.constVarsLines.join("\n") + "\n" + this.codeLines.join("\n")
-        if (fileName.includes("calendar.html")) {
+        if (fileName.includes("layout\\main.html")) {
             console.log("asd")
         }
         this.autoBinds.setCode(this.ts)
@@ -83,8 +83,8 @@ export class CasperCodegen {
         const rootVar = scope.nextVar()
 
         let div = scope.getTagVariable(tag)
-
-        scope.addCode(`let ${rootVar}=c(${div},0)`)
+        let [isId,viewVariableName] = this.makeAttr(tag,node,scope,rootVar)
+        scope.addCode(`let ${rootVar}=c(${div},${this.attrIndex})`)
 
         scope.setId("root", rootVar, "View")
 
@@ -103,6 +103,50 @@ export class CasperCodegen {
 
         return scope
 
+    }
+
+    makeAttr(tag:string,node:XNode,scope:Scope,viewVariableName:string = ""):[boolean,string] {
+        this.attrIndex++
+        this.selfDictionary.writeAttributesLength(Object.keys(node.attrs).length)
+
+        let isId = false
+        for (const aKey in node.attrs) {
+            let key = this.selfDictionary.key(aKey)
+            let value = 0
+            if (aKey === "id") {
+                if (!checkIdentifier(node.attrs[aKey])) {
+                    throw Error(`Invalid identifier [${aKey}="${node.attrs[aKey]}"] allow only(A-z 0-9 and _) \n    at (${this.fileName}:${node.line}:0)`)
+                }
+                if (viewVariableName.length == 0){
+                    viewVariableName = scope.nextVar()
+                }
+
+
+                let idKey = node.attrs[aKey]
+                if (tag === "template") {
+
+                    scope.setId(idKey, viewVariableName, this.getBindings().getInterfaceName() + "_" + idKey)
+
+                } else {
+                    scope.setId(idKey, viewVariableName)
+
+                }
+                isId = true
+                let indexOfVariable = this.varIdMapper.getIdByName(node.attrs[aKey])
+                value = this.selfDictionary.valueTyped(DYNAMIC_TYPE.IDENTIFIER, indexOfVariable)
+            } else {
+                let valueString = node.attrs[aKey]
+                const parsed = parseTemplate(valueString)[0];
+                if (parsed.type == "lang") {
+                    let indexOfVariable = this.res.languageResource.getIdByName(parsed.key)
+                    value = this.selfDictionary.valueTyped(DYNAMIC_TYPE.LANG_ID, indexOfVariable)
+                } else {
+                    value = this.selfDictionary.value(node.attrs[aKey])
+                }
+            }
+            this.selfDictionary.writeAttribute(key!, value)
+        }
+        return [isId, viewVariableName]
     }
 
     processElement(node: XNode, parent: string | undefined, parentTag: string | undefined, scope: Scope): string | null {
@@ -141,44 +185,8 @@ export class CasperCodegen {
         }
 
         let tagVariable = scope.getTagVariable(tag)
-        this.attrIndex++
-        this.selfDictionary.writeAttributesLength(Object.keys(node.attrs).length)
 
-        let isId = false
-        let viewVariableName = ""
-        for (const aKey in node.attrs) {
-            let key = this.selfDictionary.key(aKey)
-            let value = 0
-            if (aKey === "id") {
-                if (!checkIdentifier(node.attrs[aKey])) {
-                    throw Error(`Invalid identifier [${aKey}="${node.attrs[aKey]}"] allow only(A-z 0-9 and _) \n    at (${this.fileName}:${node.line}:0)`)
-                }
-                viewVariableName = scope.nextVar()
-
-                let idKey = node.attrs[aKey]
-                if (tag === "template") {
-
-                    scope.setId(idKey, viewVariableName, this.getBindings().getInterfaceName() + "_" + idKey)
-
-                } else {
-                    scope.setId(idKey, viewVariableName)
-
-                }
-                isId = true
-                let indexOfVariable = this.varIdMapper.getIdByName(node.attrs[aKey])
-                value = this.selfDictionary.valueTyped(DYNAMIC_TYPE.IDENTIFIER, indexOfVariable)
-            } else {
-                let valueString = node.attrs[aKey]
-                const parsed = parseTemplate(valueString)[0];
-                if (parsed.type == "lang") {
-                    let indexOfVariable = this.res.languageResource.getIdByName(parsed.key)
-                    value = this.selfDictionary.valueTyped(DYNAMIC_TYPE.LANG_ID, indexOfVariable)
-                } else {
-                    value = this.selfDictionary.value(node.attrs[aKey])
-                }
-            }
-            this.selfDictionary.writeAttribute(key!, value)
-        }
+        let [isId,viewVariableName] = this.makeAttr(tag,node,scope)
 
         if (tag === "template") {
             let childScope = this.startProcess(node, scope.getNextScope(viewVariableName))
@@ -187,7 +195,6 @@ export class CasperCodegen {
 
             return null
         }
-
         if (isId) {
             scope.addCode(`let ${viewVariableName}=c(${tagVariable},${this.attrIndex})`)
             let child = []
@@ -204,6 +211,7 @@ export class CasperCodegen {
             return viewVariableName
         } else {
             let child = []
+            let selfAttr = this.attrIndex
             for (let i = 0; i < node.childNodes.length; i++) {
                 let o = this.processElement(node.childNodes[i], "", tag, scope)
                 if (o) child.push(o);
@@ -211,10 +219,10 @@ export class CasperCodegen {
             }
 
             if (child.length > 0) {
-                return `c(${tagVariable},${this.attrIndex}).x([${child.join(",")}])`
+                return `c(${tagVariable},${selfAttr}).x([${child.join(",")}])`
             }
 
-            return `c(${tagVariable},${this.attrIndex})`
+            return `c(${tagVariable},${selfAttr})`
         }
 
     }
