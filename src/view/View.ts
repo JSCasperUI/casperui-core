@@ -25,7 +25,7 @@ export interface IParentView {
 
 type FEvent = (event: UIEvent) => any
 
-export class View extends ViewNode implements IParentView {
+export class View<T = string> extends ViewNode implements IParentView {
 
     static svgCache: Map<number, Element> = new Map();
     static __classListTemp: string[] = [];
@@ -218,7 +218,7 @@ export class View extends ViewNode implements IParentView {
 
     byId(id: number): View | null {
         if (this.id === id)
-            return this
+            return this as View
 
         const items = this.mChildren
 
@@ -239,7 +239,7 @@ export class View extends ViewNode implements IParentView {
     }
 
     byPath(path: number[]): View | null {
-        if (path.length === 0) return this
+        if (path.length === 0) return this as View
         let node = this as View;
         for (const i of path) {
             if (!node.mChildren[i]) return null;
@@ -395,7 +395,7 @@ export class View extends ViewNode implements IParentView {
 
     setSafeValue(value: any) {
         if (value === undefined || value === null) {
-            this.setValue(EMPTY_STRING)
+            this.setValue(EMPTY_STRING as T)
         } else {
             this.setValue(value)
         }
@@ -416,16 +416,27 @@ export class View extends ViewNode implements IParentView {
         this.setVisibility(visible ?? !this.getVisibility());
         return this;
     }
+    private _defaultValue: T | undefined
 
-    getValue(): string {
-        return (this.mNode as HTMLInputElement).value
-    }
-
-    setValue(value: string) {
-        (this.mNode as HTMLInputElement).value = value
+    setDefaultValue(value: T) {
+        this._defaultValue = value
         return this
     }
 
+    getValue(): T {
+        return (this.mNode as HTMLInputElement).value as unknown as T
+    }
+
+    setValue(value: T) {
+        (this.mNode as HTMLInputElement).value = String(value)
+        return this
+    }
+    resetValue() {
+        if (this._defaultValue !== undefined) {
+            this.setValue(this._defaultValue)
+        }
+        return this
+    }
     setChecked(value: boolean) {
         (this.mNode as HTMLInputElement).checked = value
         return this
