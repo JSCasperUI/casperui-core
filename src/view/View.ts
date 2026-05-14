@@ -30,12 +30,12 @@ export class View<T = string> extends ViewNode implements IParentView {
     static svgCache: Map<number, Element> = new Map();
     static __classListTemp: string[] = [];
 
-    private mContext: Context
-    private mChildren: Array<View> = []
+    private _ctx: Context
+    private _children: Array<View> = []
     private mCurrentSVGContentId: Number = -1;
     private mIsWaitingDom: boolean = false
     private _textCache: string = null
-    private mParentView?: IParentView;
+    private _parentView?: IParentView;
 
     private _top: number = 0;
     private _translateY: number = 0;
@@ -56,8 +56,19 @@ export class View<T = string> extends ViewNode implements IParentView {
             }
         }
 
-        this.mContext = context
+        this._ctx = context
 
+    }
+
+    private _ref: unknown = null;
+
+    setRef<T>(ref: T) {
+        this._ref = ref;
+        return this;
+    }
+
+    getRef<T = unknown>(): T | null {
+        return this._ref as T | null;
     }
 
     getId(): number {
@@ -71,14 +82,14 @@ export class View<T = string> extends ViewNode implements IParentView {
 
 
     ctx(): Context {
-        return this.mContext
+        return this._ctx
     }
 
 
     replaceNode(newRootNode: View) {
         this.mNode = newRootNode.mNode
-        for (let i = 0; i < newRootNode.mChildren.length; i++) {
-            this.addView(newRootNode.mChildren[i]);
+        for (let i = 0; i < newRootNode._children.length; i++) {
+            this.addView(newRootNode._children[i]);
         }
         return this;
     }
@@ -159,11 +170,11 @@ export class View<T = string> extends ViewNode implements IParentView {
             view.setParentView(this)
         }
         if (index === undefined || index === -1) {
-            this.mChildren.push(view)
+            this._children.push(view)
             this.mNode.appendChild(view.mNode)
             return
         }
-        this.mChildren.splice(index, 0, view);
+        this._children.splice(index, 0, view);
         this.mNode.insertBefore(view.mNode, this.mNode.childNodes[index])
         return this;
     }
@@ -178,12 +189,12 @@ export class View<T = string> extends ViewNode implements IParentView {
 
     removeAllViews() {
 
-        for (let i = 0; i < this.mChildren.length; i++) {
-            this.mChildren[i].setParentView(null)
+        for (let i = 0; i < this._children.length; i++) {
+            this._children[i].setParentView(null)
         }
 
 
-        this.mChildren.length = 0; // быстрее, чем присваивать []
+        this._children.length = 0; // быстрее, чем присваивать []
         (this.mNode as HTMLElement).innerHTML = ""
         return this;
     }
@@ -194,7 +205,7 @@ export class View<T = string> extends ViewNode implements IParentView {
             return
         }
         content.setParentView(null)
-        this.mChildren.splice(index, 1);
+        this._children.splice(index, 1);
         this.mNode.removeChild(content.mNode)
         return this;
 
@@ -220,7 +231,7 @@ export class View<T = string> extends ViewNode implements IParentView {
         if (this.id === id)
             return this as View
 
-        const items = this.mChildren
+        const items = this._children
 
         for (let i = 0; i < items.length; i++) {
             const itm = items[i]
@@ -242,14 +253,14 @@ export class View<T = string> extends ViewNode implements IParentView {
         if (path.length === 0) return this as View
         let node = this as View;
         for (const i of path) {
-            if (!node.mChildren[i]) return null;
-            node = node.mChildren[i];
+            if (!node._children[i]) return null;
+            node = node._children[i];
         }
         return node;
     }
 
     getChildren(): Array<View> {
-        return this.mChildren
+        return this._children
     }
 
     inViewInflated() {
@@ -604,7 +615,7 @@ export class View<T = string> extends ViewNode implements IParentView {
 
         let svgElement = View.svgCache.get(id);
         if (!svgElement) {
-            svgElement = BXMLSvgInflater.inflate(id, this.mContext)
+            svgElement = BXMLSvgInflater.inflate(id, this._ctx)
             View.svgCache.set(id, svgElement)
         }
         node.innerHTML = EMPTY_STRING;
@@ -636,7 +647,7 @@ export class View<T = string> extends ViewNode implements IParentView {
     }
 
     getParentView(): IParentView {
-        return this.mParentView;
+        return this._parentView;
     }
 
     isFragmentView(): boolean {
@@ -644,7 +655,7 @@ export class View<T = string> extends ViewNode implements IParentView {
     }
 
     setParentView(parentView?: IParentView) {
-        this.mParentView = parentView;
+        this._parentView = parentView;
         return this;
     }
 
