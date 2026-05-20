@@ -1,7 +1,6 @@
 export class Matrix {
-    mMatrix: { _12: number; _31: number; _11: number; _22: number; _21: number; _32: number };
+    private mMatrix = { _11: 1, _12: 0, _21: 0, _22: 1, _31: 0, _32: 0 };
     constructor() {
-        this.mMatrix = { _11: 1, _12: 0, _21: 0, _22: 1, _31: 0, _32: 0 };
     }
 
     static M_TEMPLATE = new Float32Array(6);

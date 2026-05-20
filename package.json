@@ -25,26 +25,6 @@
     }
   },
   "exports": {
-    "./content/BinaryResources": {
-      "import": "./dist/content/BinaryResources.js",
-      "require": "./dist/content/BinaryResources.js",
-      "types": "./dist/content/BinaryResources.d.ts"
-    },
-    "./content/Context": {
-      "import": "./dist/content/Context.js",
-      "require": "./dist/content/Context.js",
-      "types": "./dist/content/Context.d.ts"
-    },
-    "./content/ContextWrapper": {
-      "import": "./dist/content/ContextWrapper.js",
-      "require": "./dist/content/ContextWrapper.js",
-      "types": "./dist/content/ContextWrapper.d.ts"
-    },
-    "./content/Resources": {
-      "import": "./dist/content/Resources.js",
-      "require": "./dist/content/Resources.js",
-      "types": "./dist/content/Resources.d.ts"
-    },
     "./app/Activity": {
       "import": "./dist/app/Activity.js",
       "require": "./dist/app/Activity.js",
@@ -69,11 +49,6 @@
       "import": "./dist/app/JFragment.js",
       "require": "./dist/app/JFragment.js",
       "types": "./dist/app/JFragment.d.ts"
-    },
-    "./io/ByteBuffer": {
-      "import": "./dist/io/ByteBuffer.js",
-      "require": "./dist/io/ByteBuffer.js",
-      "types": "./dist/io/ByteBuffer.d.ts"
     },
     "./graphics/Bitmap": {
       "import": "./dist/graphics/Bitmap.js",
@@ -104,6 +79,31 @@
       "import": "./dist/graphics/Rect.js",
       "require": "./dist/graphics/Rect.js",
       "types": "./dist/graphics/Rect.d.ts"
+    },
+    "./content/BinaryResources": {
+      "import": "./dist/content/BinaryResources.js",
+      "require": "./dist/content/BinaryResources.js",
+      "types": "./dist/content/BinaryResources.d.ts"
+    },
+    "./content/Context": {
+      "import": "./dist/content/Context.js",
+      "require": "./dist/content/Context.js",
+      "types": "./dist/content/Context.d.ts"
+    },
+    "./content/ContextWrapper": {
+      "import": "./dist/content/ContextWrapper.js",
+      "require": "./dist/content/ContextWrapper.js",
+      "types": "./dist/content/ContextWrapper.d.ts"
+    },
+    "./content/Resources": {
+      "import": "./dist/content/Resources.js",
+      "require": "./dist/content/Resources.js",
+      "types": "./dist/content/Resources.d.ts"
+    },
+    "./io/ByteBuffer": {
+      "import": "./dist/io/ByteBuffer.js",
+      "require": "./dist/io/ByteBuffer.js",
+      "types": "./dist/io/ByteBuffer.d.ts"
     },
     "./live/ILiveManager": {
       "import": "./dist/live/ILiveManager.js",
@@ -210,6 +210,11 @@
       "require": "./dist/view/inflater/WidgetRegistrar.js",
       "types": "./dist/view/inflater/WidgetRegistrar.d.ts"
     },
+    "./view/widget/CanvasView": {
+      "import": "./dist/view/widget/CanvasView.js",
+      "require": "./dist/view/widget/CanvasView.js",
+      "types": "./dist/view/widget/CanvasView.d.ts"
+    },
     "./view/nodes/NodeType": {
       "import": "./dist/view/nodes/NodeType.js",
       "require": "./dist/view/nodes/NodeType.js",
@@ -219,11 +224,6 @@
       "import": "./dist/view/nodes/ViewNode.js",
       "require": "./dist/view/nodes/ViewNode.js",
       "types": "./dist/view/nodes/ViewNode.d.ts"
-    },
-    "./view/widget/CanvasView": {
-      "import": "./dist/view/widget/CanvasView.js",
-      "require": "./dist/view/widget/CanvasView.js",
-      "types": "./dist/view/widget/CanvasView.d.ts"
     }
   },
   "author": "",

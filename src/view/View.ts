@@ -336,7 +336,7 @@ export class View<T = string> extends ViewNode implements IParentView {
     }
 
     setText(text: string) {
-        if (this._textCache && this._textCache == text) return
+        if (this._textCache && this._textCache == text) return this
         if (this.mNode.firstChild && this.mNode.childNodes.length === 1 && this.mNode.firstChild.nodeType === 3) {
             this._textCache = text
             this.mNode.firstChild.nodeValue = text;
@@ -347,7 +347,7 @@ export class View<T = string> extends ViewNode implements IParentView {
         return this;
     }
     setTextContent(text: string) {
-        if (this._textCache && this._textCache == text) return
+        if (this._textCache && this._textCache == text) return this
         if (this.mNode.firstChild && this.mNode.childNodes.length === 1 && this.mNode.firstChild.nodeType === 3) {
             this._textCache = text
             this.mNode.firstChild.nodeValue = text;

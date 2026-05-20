@@ -1,3 +1,5 @@
+import {Point} from "@casperui/core/graphics/Point";
+
 export class Rect {
     left = 0
     top = 0
