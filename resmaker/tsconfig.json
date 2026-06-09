@@ -13,8 +13,9 @@
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "strict": true,
+    "sourceMap": false,
     "skipLibCheck": true,
-    "outDir": "dist"
+    "outDir": "dist",
   },
   "tsc-alias": {
     "resolveFullPaths": true,

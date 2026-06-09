@@ -4,7 +4,7 @@ import {FragmentManager} from "@casperui/core/app/FragmentManager";
 import {ContextWrapper} from "@casperui/core/content/ContextWrapper";
 import {LiveManager} from "@casperui/core/live/LiveManager";
 import {IParentView, View} from "@casperui/core/view/View";
-import {BXMLInflater} from "@casperui/core/view/inflater/BXMLInflater";
+
 import {JFragment} from "@casperui/core/app/JFragment";
 
 
@@ -14,7 +14,6 @@ export class Activity extends ContextWrapper implements ILiveManager, IFragmentM
     private fragmentMemory: FragmentMemory = createFragmentMemory()
     private fragmentManager: FragmentManager
     private windowView: View
-    private inflater: BXMLInflater
     innerBinders: any;
 
 
@@ -22,12 +21,9 @@ export class Activity extends ContextWrapper implements ILiveManager, IFragmentM
         super();
         this.fragmentManager = new FragmentManager(this, true)
         this.windowView = new View(this, document.body)
-        this.inflater = new BXMLInflater(this)
     }
 
-    getInflater(): BXMLInflater {
-        return this.inflater
-    }
+
 
     getLiveManager() {
         return this.liveManager;
@@ -55,10 +51,6 @@ export class Activity extends ContextWrapper implements ILiveManager, IFragmentM
 
     byPath(path: number[]): View | null {
         return this.windowView.byPath(path)
-    }
-
-    getLayoutInflater(): BXMLInflater {
-        return this.inflater
     }
 
 

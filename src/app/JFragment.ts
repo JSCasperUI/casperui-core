@@ -5,7 +5,7 @@ import {createFragmentMemory, FragmentMemory, IFragmentManager} from "@casperui/
 import {FragmentManager} from "@casperui/core/app/FragmentManager";
 import {Activity} from "@casperui/core/app/Activity";
 import {IParentView, View} from "@casperui/core/view/View";
-import {BXMLInflater} from "@casperui/core/view/inflater/BXMLInflater";
+
 import {PostAction} from "@casperui/core/space/PostAction";
 import {ContextWrapper} from "@casperui/core/content/ContextWrapper";
 
@@ -64,10 +64,10 @@ export abstract class JFragment extends ContextWrapper implements ILiveManager, 
     }
 
 
-    abstract onCreateView(inflater: BXMLInflater, container: View): View
+    abstract onCreateView(): View
 
 
-    setParentFrame(parent) {
+    setParentFrame(parent:any) {
         this.parent = parent
 
     }
@@ -145,7 +145,7 @@ export abstract class JFragment extends ContextWrapper implements ILiveManager, 
     }
 
     startCreatingView() {
-        this.baseView = this.onCreateView(this.getActivity().getLayoutInflater(), null)
+        this.baseView = this.onCreateView()
 
     }
 

@@ -1,21 +1,25 @@
 {
   "name": "@casperui/core",
-  "version": "0.0.19",
+  "version": "0.0.22",
   "description": "",
   "files": [
     "dist/**/*",
     "resmaker/dist/*",
     "resmaker/package.json",
+    "create/dist/*",
+    "create/package.json",
     "*.map"
   ],
   "scripts": {
     "build_resmaker": "cd ./resmaker && npm run build",
+    "build_create": "cd ./create && npm install && npm run build",
     "build": "tsc && tsc-alias && npx gen-exports dist -p package.json",
     "resources": "node dev/core/resmaker/src/main.js --include_path",
-    "release_pack": "npm run build_resmaker && npm run build && npm pack"
+    "release_pack": "npm run build_resmaker && npm run build_create && npm run build && npm pack"
   },
   "bin": {
-    "resmaker": "./resmaker/dist/main.js"
+    "resmaker": "./resmaker/dist/main.js",
+    "casperui-new": "./create/dist/main.js"
   },
   "typesVersions": {
     "*": {
@@ -50,6 +54,31 @@
       "require": "./dist/app/JFragment.js",
       "types": "./dist/app/JFragment.d.ts"
     },
+    "./io/ByteBuffer": {
+      "import": "./dist/io/ByteBuffer.js",
+      "require": "./dist/io/ByteBuffer.js",
+      "types": "./dist/io/ByteBuffer.d.ts"
+    },
+    "./content/BinaryResources": {
+      "import": "./dist/content/BinaryResources.js",
+      "require": "./dist/content/BinaryResources.js",
+      "types": "./dist/content/BinaryResources.d.ts"
+    },
+    "./content/Context": {
+      "import": "./dist/content/Context.js",
+      "require": "./dist/content/Context.js",
+      "types": "./dist/content/Context.d.ts"
+    },
+    "./content/ContextWrapper": {
+      "import": "./dist/content/ContextWrapper.js",
+      "require": "./dist/content/ContextWrapper.js",
+      "types": "./dist/content/ContextWrapper.d.ts"
+    },
+    "./content/Resources": {
+      "import": "./dist/content/Resources.js",
+      "require": "./dist/content/Resources.js",
+      "types": "./dist/content/Resources.d.ts"
+    },
     "./graphics/Bitmap": {
       "import": "./dist/graphics/Bitmap.js",
       "require": "./dist/graphics/Bitmap.js",
@@ -79,31 +108,6 @@
       "import": "./dist/graphics/Rect.js",
       "require": "./dist/graphics/Rect.js",
       "types": "./dist/graphics/Rect.d.ts"
-    },
-    "./content/BinaryResources": {
-      "import": "./dist/content/BinaryResources.js",
-      "require": "./dist/content/BinaryResources.js",
-      "types": "./dist/content/BinaryResources.d.ts"
-    },
-    "./content/Context": {
-      "import": "./dist/content/Context.js",
-      "require": "./dist/content/Context.js",
-      "types": "./dist/content/Context.d.ts"
-    },
-    "./content/ContextWrapper": {
-      "import": "./dist/content/ContextWrapper.js",
-      "require": "./dist/content/ContextWrapper.js",
-      "types": "./dist/content/ContextWrapper.d.ts"
-    },
-    "./content/Resources": {
-      "import": "./dist/content/Resources.js",
-      "require": "./dist/content/Resources.js",
-      "types": "./dist/content/Resources.d.ts"
-    },
-    "./io/ByteBuffer": {
-      "import": "./dist/io/ByteBuffer.js",
-      "require": "./dist/io/ByteBuffer.js",
-      "types": "./dist/io/ByteBuffer.d.ts"
     },
     "./live/ILiveManager": {
       "import": "./dist/live/ILiveManager.js",
@@ -195,11 +199,6 @@
       "require": "./dist/utils/bxml/LayoutContext.js",
       "types": "./dist/utils/bxml/LayoutContext.d.ts"
     },
-    "./view/inflater/BXMLInflater": {
-      "import": "./dist/view/inflater/BXMLInflater.js",
-      "require": "./dist/view/inflater/BXMLInflater.js",
-      "types": "./dist/view/inflater/BXMLInflater.d.ts"
-    },
     "./view/inflater/BXMLSvgInflater": {
       "import": "./dist/view/inflater/BXMLSvgInflater.js",
       "require": "./dist/view/inflater/BXMLSvgInflater.js",
@@ -210,11 +209,6 @@
       "require": "./dist/view/inflater/WidgetRegistrar.js",
       "types": "./dist/view/inflater/WidgetRegistrar.d.ts"
     },
-    "./view/widget/CanvasView": {
-      "import": "./dist/view/widget/CanvasView.js",
-      "require": "./dist/view/widget/CanvasView.js",
-      "types": "./dist/view/widget/CanvasView.d.ts"
-    },
     "./view/nodes/NodeType": {
       "import": "./dist/view/nodes/NodeType.js",
       "require": "./dist/view/nodes/NodeType.js",
@@ -224,6 +218,11 @@
       "import": "./dist/view/nodes/ViewNode.js",
       "require": "./dist/view/nodes/ViewNode.js",
       "types": "./dist/view/nodes/ViewNode.d.ts"
+    },
+    "./view/widget/CanvasView": {
+      "import": "./dist/view/widget/CanvasView.js",
+      "require": "./dist/view/widget/CanvasView.js",
+      "types": "./dist/view/widget/CanvasView.d.ts"
     }
   },
   "author": "",
@@ -235,7 +234,5 @@
     "typescript": "^5.6.2"
   },
   "keywords": [],
-  "dependencies": {
-    "lz4js": "^0.2.0"
-  }
+  "dependencies": {}
 }
