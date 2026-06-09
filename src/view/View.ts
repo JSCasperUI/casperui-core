@@ -14,8 +14,11 @@ import {
     SNAKE_ANIM, TAG_DIV
 } from "@casperui/core/space/Constants";
 import {Rect} from "@casperui/core/graphics/Rect";
+import {LiveData} from "@casperui/core/live/LiveData";
+import {ILiveManager} from "@casperui/core/live/ILiveManager";
 
 export type ViewTag = string | Element
+type LiveBinder<T> = (value: T, caller: any) => void;
 
 export interface IParentView {
     getParentView(): IParentView | null;
@@ -346,17 +349,6 @@ export class View<T = string> extends ViewNode implements IParentView {
         }
         return this;
     }
-    setTextContent(text: string) {
-        if (this._textCache && this._textCache == text) return this
-        if (this.mNode.firstChild && this.mNode.childNodes.length === 1 && this.mNode.firstChild.nodeType === 3) {
-            this._textCache = text
-            this.mNode.firstChild.nodeValue = text;
-        } else {
-            this._textCache = text
-            this.mNode.textContent = text;
-        }
-        return this;
-    }
 
 
     isHovered(): boolean {
@@ -388,15 +380,32 @@ export class View<T = string> extends ViewNode implements IParentView {
     }
 
     addClass(className: string) {
-        (this.mNode as HTMLElement).classList.add(className)
+        className = className.trim();
+
+        if (className.length > 0)
+            (this.mNode as HTMLElement).classList.add(className);
+
+        return this;
+    }
+
+    toggleClass(className: string) {
+        className = className.trim();
+        if (className.length > 0)
+            (this.mNode as HTMLElement).classList.toggle(className);
         return this;
     }
 
     removeClass(className: string) {
-        (this.mNode as HTMLElement).classList.remove(className)
+        className = className.trim();
+
+        if (className.length > 0)
+            (this.mNode as HTMLElement).classList.remove(className);
+
         return this;
     }
-
+    hasClass(className: string): boolean {
+        return (this.mNode as HTMLElement).classList.contains(className);
+    }
     swapClass(removeClass: string, setClass: string) {
         this.removeClass(removeClass)
         this.addClass(setClass)
@@ -500,7 +509,7 @@ export class View<T = string> extends ViewNode implements IParentView {
     }
 
 
-    setOnClickListener(func: FEvent) {
+    onClick(func: FEvent) {
         this.makeSafeEvent(CLICK, func)
         return this;
     }
@@ -554,55 +563,43 @@ export class View<T = string> extends ViewNode implements IParentView {
         return this;
     }
 
-    hasClass(className: string): boolean {
-        return (this.mNode as HTMLElement).classList.contains(className);
-    }
 
-    onMouseOverListener(func: FEvent) {
+
+    onMouseOver(func: FEvent) {
         this.makeSafeEvent(MOUSE_OVER, func)
         return this;
     }
 
-    onMouseDoubleClickListener(func: FEvent) {
+    onDoubleClick(func: FEvent) {
         this.makeSafeEvent(MOUSE_DOUBLE_CLICK, func)
         return this;
     }
 
 
-    onMouseOutListener(func: FEvent) {
+    onMouseOut(func: FEvent) {
         this.makeSafeEvent(MOUSE_OUT, func)
         return this;
     }
 
 
-    onMouseMoveListener(func: FEvent) {
+    onMouseMove(func: FEvent) {
         this.makeSafeEvent(MOUSE_MOVE, func)
         return this;
     }
 
-    onMouseClickListener(func: FEvent) {
-        this.makeSafeEvent(CLICK, func)
-        return this;
-    }
-
-
-    onMouseDownListener(func: FEvent) {
+    onMouseDown(func: FEvent) {
         this.makeSafeEvent(MOUSE_DOWN, func)
         return this;
     }
 
 
-    setOnFastClickListener(func: FEvent) {
-        this.makeSafeEvent(MOUSE_DOWN, func)
-        return this;
-    }
 
-    setParameter(name: string, value: any) {
+    setAttr(name: string, value: any) {
         (this.mNode as HTMLElement).setAttribute(name, value)
         return this;
     }
 
-    getParameter(name: string): string {
+    getAttr(name: string): string {
         return (this.mNode as HTMLElement).getAttribute(name)
     }
 
@@ -662,6 +659,157 @@ export class View<T = string> extends ViewNode implements IParentView {
     getViewportRect(): Rect {
         let rect = this.getElement().getBoundingClientRect();
         return new Rect(rect.x, rect.y, rect.x + rect.width, rect.y + rect.height);
+    }
+
+    private bindLive<TValue>(liveData: LiveData<TValue>, binder: LiveBinder<TValue>) {
+        const view = this;
+        const owner =  this.getFragmentManager() as any as ILiveManager
+
+        liveData.observe(owner, (value, caller) => {
+            binder.call(view, value, caller);
+        });
+
+        return this;
+    }
+
+    bindInputValue(data: LiveData<string>, event: string = "input") {
+        this.bindLive(data, function (value, caller) {
+            if (caller === this) return;
+
+            if (this.getValue() !== value) {
+                this.setValue(value as any);
+            }
+        });
+
+        this.vEvent(event, () => {
+            data.setIfChanged(this.getValue() as unknown as string, this);
+        });
+
+        return this;
+    }
+
+    bindInputChecked(data: LiveData<boolean>, event: string = "change") {
+        this.bindLive(data, function (value, caller) {
+            if (caller === this) return;
+
+            if (this.isChecked() !== value) {
+                this.setChecked(value);
+            }
+        });
+
+        this.vEvent(event, () => {
+            data.setIfChanged(this.isChecked(), this);
+        });
+
+        return this;
+    }
+
+    bindText(data: LiveData<string>) {
+        return this.bindLive(data, function (value) {
+            this.setText(value);
+        });
+    }
+
+    bindValue(data: LiveData<any>) {
+        return this.bindLive(data, function (value) {
+            if (this.getValue() !== value) {
+                this.setValue(value);
+            }
+        });
+    }
+
+    bindSafeValue(data: LiveData<any>) {
+        return this.bindLive(data, function (value) {
+            this.setSafeValue(value);
+        });
+    }
+
+    bindChecked(data: LiveData<boolean>) {
+        return this.bindLive(data, function (value) {
+            if (this.isChecked() !== value) {
+                this.setChecked(value);
+            }
+        });
+    }
+
+    bindVisible(data: LiveData<boolean>) {
+        return this.bindLive(data, function (value) {
+            this.setVisibility(value);
+        });
+    }
+
+    bindHidden(data: LiveData<boolean>) {
+        return this.bindLive(data, function (value) {
+            this.setVisibility(!value);
+        });
+    }
+
+    bindClass(className: string, data: LiveData<boolean>) {
+        return this.bindLive(data, function (value) {
+            if (value) {
+                this.addClass(className);
+            } else {
+                this.removeClass(className);
+            }
+        });
+    }
+
+    bindAttr(name: string, data: LiveData<any>) {
+        return this.bindLive(data, function (value) {
+            if (value === null || value === undefined) {
+                this.getElement().removeAttribute(name);
+            } else {
+                this.setAttr(name, value);
+            }
+        });
+    }
+
+    bindStyle(key: string, data: LiveData<string>) {
+        return this.bindLive(data, function (value) {
+            this.setStyle(key, value);
+        });
+    }
+
+    bindOpacity(data: LiveData<number>) {
+        return this.bindLive(data, function (value) {
+            this.setOpacity(value);
+        });
+    }
+
+    bindImageSrc(data: LiveData<string>) {
+        return this.bindLive(data, function (value) {
+            this.setImageSrc(value);
+        });
+    }
+
+    bindList<I>(data: LiveData<I[]>, renderFn: (item: I) => View, keyFn?: (item: I) => string) {
+        const rowMap = new Map<string, View>()
+
+        return this.bindLive(data, function (items) {
+            if (!keyFn) {
+                this.removeAllViews()
+                items.forEach(item => this.addView(renderFn(item)))
+                return
+            }
+
+            const newKeys = new Set(items.map(keyFn))
+
+            rowMap.forEach((view, key) => {
+                if (!newKeys.has(key)) {
+                    this.removeView(view)
+                    rowMap.delete(key)
+                }
+            })
+
+            items.forEach((item, index) => {
+                const key = keyFn(item)
+                if (!rowMap.has(key)) {
+                    const view = renderFn(item)
+                    rowMap.set(key, view)
+                    this.addView(view, index)
+                }
+            })
+        });
     }
 
 

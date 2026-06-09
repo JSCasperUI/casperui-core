@@ -67,7 +67,7 @@ export abstract class JFragment extends ContextWrapper implements ILiveManager, 
     abstract onCreateView(): View
 
 
-    setParentFrame(parent:any) {
+    setParentFragment(parent:any) {
         this.parent = parent
 
     }

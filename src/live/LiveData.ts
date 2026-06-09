@@ -8,6 +8,7 @@ export class LiveData<T> {
     private mCaller: any = null
     protected mObservers: Map<WeakRef<LiveManager>, WeakRef<ObserverCallback<T>>> = new Map();
     protected mPublishHistory = new Map();
+    private mRawObservers: Set<ObserverCallback<T>> = new Set();
 
     constructor(initialValue: T) {
         this.mValue = initialValue;
@@ -58,8 +59,6 @@ export class LiveData<T> {
 
 
 
-
-
     observe(observer: ILiveManager, callback: ObserverCallback<T>) {
         if (!observer.innerBinders) {
             observer.innerBinders = []
@@ -82,7 +81,16 @@ export class LiveData<T> {
     }
 
     removeObserver(observer: ILiveManager) {
+        const lm = observer.getLiveManager();
 
+        this.mObservers.forEach((callback, mObserver) => {
+            const ref = mObserver.deref();
+
+            if (!ref || ref === lm) {
+                this.mObservers.delete(mObserver);
+                this.mPublishHistory.delete(callback);
+            }
+        });
     }
 
     notifyObservers() {
@@ -99,6 +107,7 @@ export class LiveData<T> {
             }
 
         });
+        this.mRawObservers.forEach(cb => cb(this.getValue(), this.mCaller))
 
 
     }
@@ -117,7 +126,45 @@ export class LiveData<T> {
 
     }
 
+    observeRaw(callback: ObserverCallback<T>) {
+        callback(this.getValue(), null)
+        this.mRawObservers.add(callback)
+    }
+
+    removeRawObserver(callback: ObserverCallback<T>) {
+        this.mRawObservers.delete(callback)
+    }
+
+    map<R>(fn: (value: T) => R): ComputedLiveData<R> {
+        return new ComputedLiveData([this], (v) => fn(v))
+    }
+
     clearPublishHistory() {
         this.mPublishHistory.clear();
     }
+}
+
+export class ComputedLiveData<T> extends LiveData<T> {
+    private readonly mSources: LiveData<any>[]
+    private readonly mRawCallbacks: ObserverCallback<any>[]
+
+    constructor(sources: LiveData<any>[], compute: (...values: any[]) => T) {
+        super(compute(...sources.map(s => s.getValue())))
+        this.mSources = sources
+        this.mRawCallbacks = sources.map((source, i) => {
+            const cb: ObserverCallback<any> = () => {
+                super.setValue(compute(...this.mSources.map(s => s.getValue())))
+            }
+            source.observeRaw(cb)
+            return cb
+        })
+    }
+
+    dispose() {
+        this.mSources.forEach((source, i) => source.removeRawObserver(this.mRawCallbacks[i]))
+    }
+}
+
+export function computed<T>(sources: LiveData<any>[], fn: (...values: any[]) => T): ComputedLiveData<T> {
+    return new ComputedLiveData(sources, fn)
 }

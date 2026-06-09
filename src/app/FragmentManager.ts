@@ -1,12 +1,11 @@
-
 import {IFragmentManager} from "@casperui/core/app/IFragmentManager";
 import {JFragment} from "@casperui/core/app/JFragment";
 import {IParentView, View} from "@casperui/core/view/View";
 
 export class FragmentManager {
-    private isAttached:boolean
+    private isAttached: boolean
 
-    constructor(public manager:IFragmentManager, isRoot = false) {
+    constructor(public manager: IFragmentManager, isRoot = false) {
         this.isAttached = false
     }
 
@@ -52,78 +51,89 @@ export class FragmentManager {
     }
 
 
-
-    replaceFragment(containerId:number, fragment:JFragment, container:View|null = null) {
+    replaceFragment(containerId: number, fragment: JFragment, container: View | null = null) {
         if (!fragment) return;
-        let oldFragment = null
-        let memory = this.manager.getFragmentMemory()
+
+        let oldFragment: JFragment | null = null;
+        const memory = this.manager.getFragmentMemory();
 
         if (memory.has(containerId)) {
-            oldFragment = memory.get(containerId)//.deref()
-            if (!oldFragment) {
-                oldFragment = null
-            }
-        }
-        // memory.set(containerId,new WeakRef(fragment))
-        memory.set(containerId, fragment)
-        if (oldFragment != null && oldFragment === fragment) {
-            return
-        }
-        if (!container) {
-            container = this.manager.getView().byId(containerId)
+            oldFragment = memory.get(containerId) ?? null;
         }
 
-        if (oldFragment != null) {
-            oldFragment.detachFragment()
-            container.removeView(oldFragment.getView())
+        if (oldFragment !== null && oldFragment === fragment) {
+            return;
         }
+
+        memory.set(containerId, fragment);
+
+        if (!container) {
+            container = this.manager.getView().byId(containerId);
+        }
+
+        if (oldFragment !== null) {
+            oldFragment.detachFragment();
+            container.removeView(oldFragment.getView());
+        }
+
         if (!fragment.isFragmentCreated()) {
-            fragment.startCreatingView()
-            fragment.onCreated()
+            fragment.startCreatingView();
+
+            // Важно: root-view должен знать свой fragment до onCreated()
+            fragment.getView().setParentView(fragment as unknown as IParentView);
+
+            fragment.onCreated();
         }
 
         container.addView(fragment.getView());
-        fragment.getView().setParentView(this.manager as unknown as IParentView)
-        fragment.setParentFrame(new WeakRef(this.manager))
+
+        // Важно: addView перезапишет parentView на container,
+        // поэтому возвращаем owner обратно на fragment.
+        fragment.getView().setParentView(fragment as unknown as IParentView);
+
+        fragment.setParentFragment(new WeakRef(this.manager as unknown as JFragment));
+
         if (this.isAttached) {
-            fragment.attach()
+            fragment.attach();
         }
     }
 
-    pushFragment(containerId:number, fragment:JFragment, container:View|null = null) {
+    pushFragment(containerId: number, fragment: JFragment, container: View | null = null) {
         if (!fragment) return;
-        let memory = this.manager.getFragmentMemory()
+
+        const memory = this.manager.getFragmentMemory();
 
         if (memory.has(containerId)) {
             return;
         }
 
-
-        // memory.set(containerId,new WeakRef(fragment))
-        memory.set(containerId, fragment)
+        memory.set(containerId, fragment);
 
         if (!container) {
-            container = this.manager.getView().byId(containerId)
+            container = this.manager.getView().byId(containerId);
         }
 
         if (!fragment.isFragmentCreated()) {
-            fragment.startCreatingView()
-            fragment.onCreated()
+            fragment.startCreatingView();
+
+            fragment.getView().setParentView(fragment as unknown as IParentView);
+
+            fragment.onCreated();
         }
-        // fragment.getFragmentView().id = containerId
 
         container.addView(fragment.getView());
-        fragment.getView().setParentView(this.manager as unknown as IParentView)
-        fragment.setParentFrame(new WeakRef(this.manager))
+
+        fragment.getView().setParentView(fragment as unknown as IParentView);
+
+        fragment.setParentFragment(new WeakRef(this.manager as unknown as JFragment));
+
         if (this.isAttached) {
-            fragment.attach()
+            fragment.attach();
         }
     }
 
 
-
-
-    getIdByFragment(fragment:JFragment):number {
+    getIdByFragment(fragment: JFragment): number {
         let memory = this.manager.getFragmentMemory()
         for (let [key, value] of memory) {
             if (value === fragment) {
@@ -134,8 +144,7 @@ export class FragmentManager {
     }
 
 
-
-    dropFragment(fragmentOld:JFragment, container:View|null = null) {
+    dropFragment(fragmentOld: JFragment, container: View | null = null) {
         let memory = this.manager.getFragmentMemory()
         let containerId = this.getIdByFragment(fragmentOld)
         if (memory.has(containerId)) {
@@ -150,22 +159,31 @@ export class FragmentManager {
     }
 
 
-    swapInContainer(oldFragment:JFragment, newFragment:JFragment, container:View|null = null) {
-        let memory = this.manager.getFragmentMemory()
+    swapInContainer(oldFragment: JFragment, newFragment: JFragment, container: View | null = null) {
+        if (!container) return;
 
-        let oldView = oldFragment.getView()
-        let index = container.indexView(oldView)
+        const oldView = oldFragment.getView();
+        const index = container.indexView(oldView);
 
-        if (index >= 0) {
-            oldFragment.detachFragment()
+        if (index < 0) return;
 
-            container.removeView(oldView)
-            container.addView(newFragment.getView(), index)
-            newFragment.getView().setParentView(this.manager as unknown as IParentView)
-            newFragment.attach()
+        oldFragment.detachFragment();
+
+        if (!newFragment.isFragmentCreated()) {
+            newFragment.startCreatingView();
+            newFragment.getView().setParentView(newFragment as unknown as IParentView);
+            newFragment.onCreated();
         }
 
+        container.removeView(oldView);
+        container.addView(newFragment.getView(), index);
 
+        newFragment.getView().setParentView(newFragment as unknown as IParentView);
+        newFragment.setParentFragment(new WeakRef(this.manager as unknown as JFragment));
+
+        if (this.isAttached) {
+            newFragment.attach();
+        }
     }
 
 }
