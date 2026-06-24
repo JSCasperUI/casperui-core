@@ -239,10 +239,18 @@ export class SimpleHTMLParser {
     }
 
     parseString() {
+        return this.currentToken.value
+    }
+
+    parseAttrName() {
         let out = ""
+        if (this.currentToken.type === TAG_COLON) {
+            out = ":"
+            this.nextToken()
+        }
         out += this.currentToken.value
         if (this.nextToken().type === TAG_COLON) {
-            out += this.currentToken.type
+            out += ":"
             out += this.nextToken().value
         } else {
             this.skipNextToken = true
@@ -251,9 +259,9 @@ export class SimpleHTMLParser {
     }
 
     parseAttrs() {
-        if (this.currentToken.type === TAG_STRING) {
-            while (this.currentToken.type === TAG_STRING) {
-                let name = this.parseString()
+        if (this.currentToken.type === TAG_STRING || this.currentToken.type === TAG_COLON) {
+            while (this.currentToken.type === TAG_STRING || this.currentToken.type === TAG_COLON) {
+                let name = this.parseAttrName()
                 let value = ""
                 if (this.nextToken().type === TAG_EQ) {
                     this.nextToken()

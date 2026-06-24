@@ -41,7 +41,7 @@ export class Resource {
         const bindingsPath = path.join(dirPath, "bind.ts");
 
 
-        let out = ` import {View} from "@casperui/core/view/View";\nimport {Context} from "@casperui/core/content/Context";\nimport {_getLayCTX} from "@casperui/core/utils/bxml/LayoutContext";\n`
+        let out = ` import {View} from "@casperui/core/view/View";\nimport {Context} from "@casperui/core/content/Context";\nimport {_getLayCTX} from "@casperui/core/utils/bxml/LayoutContext";\nimport {LiveData} from "@casperui/core/live/LiveData";\n`
         for (const autoBind of this.autoBinds) {
             out += autoBind.getAutoBindScript() + "\n"
         }
