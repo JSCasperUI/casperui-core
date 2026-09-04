@@ -52,7 +52,7 @@ if (watch) {
                 } catch (e) {
                     console.error(e);
                 }
-            }, 1000);
+            }, 200);
         })
     }
 }

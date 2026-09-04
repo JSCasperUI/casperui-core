@@ -72,8 +72,8 @@ log("")
 log("Next steps:")
 log(`  cd ${projectName}`)
 log("  npm install")
-log("  npm run resources_dev   ← generates src/R.ts and src/bind.ts")
-log("  npm run start\n")
+log("  npm run resources_dev   ← watch res/ → R.ts, bind.ts, res.html")
+log("  npm run start           ← dev server, reloads when resources change\n")
 
 // ─── templates ────────────────────────────────────────────────────────────────
 
@@ -141,9 +141,17 @@ module.exports = (env, argv) => ({
         }],
     },
     devServer: {
-        static: './assets',
+        static: {
+            directory: path.resolve(__dirname, 'assets'),
+            watch: true,
+        },
         port: 9000,
-        hot: true,
+        hot: false,
+        liveReload: true,
+        watchFiles: ['assets/res.html', 'assets/app.css', 'src/R.ts', 'src/bind.ts'],
+        headers: {
+            'Cache-Control': 'no-store',
+        },
     },
     plugins: [
         new HtmlWebpackPlugin({

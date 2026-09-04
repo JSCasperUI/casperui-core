@@ -99,12 +99,16 @@ my-app/
 
 ### Команды
 
+В dev нужны **два процесса**: `resmaker` следит за `res/`, webpack отдаёт страницу и перезагружает её, когда меняются `res.html` / `app.css` / `bind.ts`.
+
 ```bash
-npm run resources_dev      # собрать ресурсы (dev)
-npm run resources_release  # собрать ресурсы (prod)
-npm run start              # dev-сервер
-npm run build              # сборка
+npm run resources_dev      # watch: HTML/CSS/строки → res.html, bind.ts, app.css (~200 мс)
+npm run start              # dev-сервер, liveReload при смене ресурсов
+npm run resources_release  # разовая сборка ресурсов (prod)
+npm run build              # webpack production
 ```
+
+Правка лейаута: сохранил HTML → resmaker пересобрал пакет → страница сама перезагрузилась. Полный reload нужен потому что `res.html` читается один раз при старте `Application`.
 
 ### tsconfig.json
 
