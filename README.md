@@ -926,36 +926,44 @@ this.bind.title.bindText(fullName)
 
 ## 10. Пользовательские виджеты
 
-Виджет — это `View` с собственным лейаутом и логикой.
+Виджет с лейаутом — `Widget(R.layout.*)`, тот же канон что `Screen`: дерево в HTML, ручки в `this.bind`.
+
+Закрытый виджет — содержимое только в его лейауте, снаружи методы. Контейнер — узел `id="content"`, дети из экрана едут туда.
 
 ### Минимальный виджет
 
+```html
+<!-- res/layout/widgets/badge.html -->
+<div id="root" class="badge">
+    <span id="label"></span>
+</div>
+```
+
 ```typescript
-import {View, ViewTag} from "@casperui/core/view/View"
+import {Widget} from "@casperui/core/view/Widget"
 import {Context} from "@casperui/core/content/Context"
+import {ViewTag} from "@casperui/core/view/View"
 import {ViewAttributes} from "@casperui/core/view/ViewAttributes"
 import {R} from "@app/R"
 
-export class Badge extends View {
+export class Badge extends Widget(R.layout.widgets.badge) {
     constructor(context: Context, tag?: ViewTag, attr?: ViewAttributes) {
-        super(context, "span", attr)
-        this.replaceNode(R.layout.widgets.badge(context).root)
-
-        if (attr?.["text"]) {
-            this.byId(R.id.badge_label).setText(attr["text"] as string)
-        }
+        super(context, tag, attr)
+        if (attr?.text) this.setLabel(String(attr.text))
     }
 
     setLabel(text: string) {
-        this.byId(R.id.badge_label).setText(text)
+        this.bind.label.setText(text)
         return this
     }
 }
 ```
 
+`<Badge class="big" text="Новый" />` — `class` остаётся на корне, не теряется. Внутри тега на экране ничего не класть.
+
 ### Регистрация и использование в HTML
 
-`casperui-new widget Badge` дописывает регистрацию в `src/widgets/index.ts`. Вручную:
+`casperui-new widget Badge` создаёт `extends Widget(R.layout.widgets.badge)` и дописывает регистрацию в `src/widgets/index.ts`. Вручную:
 
 ```typescript
 // src/widgets/index.ts
@@ -974,24 +982,20 @@ export function registerWidgets() {
 ### Паттерн: виджет с callback
 
 ```typescript
-export class CheckBoxBlock extends View {
+export class CheckBoxBlock extends Widget(R.layout.widgets.checkbox.main) {
     private mIsChecked = false
     onChange?: (checked: boolean) => void
 
     constructor(context: Context, tag?: ViewTag, attr?: ViewAttributes) {
-        super(context, "div", attr)
-        const bind = R.layout.widgets.checkbox.main(context)
-        this.replaceNode(bind.root)
-
-        if (attr?.["title"]) bind.title.setText(attr["title"] as string)
-
+        super(context, tag, attr)
+        if (attr?.title) this.bind.title.setText(String(attr.title))
         this.onClick(() => this.setBoolValue(!this.mIsChecked))
         this.setBoolValue(false)
     }
 
     setBoolValue(value: boolean) {
         this.mIsChecked = value
-        this.byId(R.id.icon).setSVGById(value ? R.icons.switch_on : R.icons.switch_off)
+        this.bind.icon.setSVGById(value ? R.icons.switch_on : R.icons.switch_off)
         this.onChange?.(this.mIsChecked)
         return this
     }
@@ -1000,6 +1004,8 @@ export class CheckBoxBlock extends View {
     isChecked() { return this.mIsChecked }
 }
 ```
+
+Без своего лейаута виджет остаётся `extends View` — `Widget()` только когда есть HTML.
 
 ### Паттерн: RadioGroup (одиночный выбор)
 
@@ -1028,43 +1034,49 @@ export class RadioGroup extends View {
 }
 ```
 
-### Паттерн: виджет с памятью (localStorage)
+### Паттерн: контейнер со слотом
+
+В лейауте виджета — `id="content"`. Дети из экрана (`<GroupBlock>...</GroupBlock>`) попадают туда сами, `addView` переопределять не нужно.
+
+```html
+<div id="root" class="group-block">
+    <div id="header"></div>
+    <i id="open_icon"></i>
+    <div id="content"></div>
+</div>
+```
 
 ```typescript
-export class GroupBlock extends View {
+export class GroupBlock extends Widget(R.layout.widgets.group_block.main) {
     private memoryKey?: string
     private isOpen = true
 
     constructor(context: Context, tag?: ViewTag, attr?: ViewAttributes) {
-        super(context, "div", attr)
-        const bind = R.layout.widgets.group_block.main(context)
-        this.replaceNode(bind.root)
-
-        if (attr?.["memory"]) {
-            this.memoryKey = "gb_" + attr["memory"]
+        super(context, tag, attr)
+        if (attr?.memory) {
+            this.memoryKey = "gb_" + attr.memory
             const saved = localStorage.getItem(this.memoryKey)
             if (saved !== null) this.isOpen = saved === "1"
         }
-
-        bind.header.onClick(() => {
+        this.bind.header.onClick(() => {
             this.isOpen = !this.isOpen
             this.updateVisibility()
             if (this.memoryKey) localStorage.setItem(this.memoryKey, this.isOpen ? "1" : "0")
         })
-
         this.updateVisibility()
     }
 
     private updateVisibility() {
-        this.byId(R.id.content).toggle(this.isOpen)
-        this.byId(R.id.open_icon).setSVGById(this.isOpen ? R.icons.arrow_down : R.icons.arrow_right)
-    }
-
-    addView(view: View, index?: number) {
-        this.byId(R.id.content).addView(view, index)
-        return this
+        this.bind.content.toggle(this.isOpen)
+        this.bind.open_icon.setSVGById(this.isOpen ? R.icons.arrow_down : R.icons.arrow_right)
     }
 }
+```
+
+```html
+<GroupBlock id="filters" memory="filters">
+    <CheckBoxBlock id="only_active" title="Активные" />
+</GroupBlock>
 ```
 
 ---

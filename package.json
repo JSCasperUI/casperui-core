@@ -149,6 +149,16 @@
       "require": "./dist/live/ViewModel.js",
       "types": "./dist/live/ViewModel.d.ts"
     },
+    "./utils/Locale": {
+      "import": "./dist/utils/Locale.js",
+      "require": "./dist/utils/Locale.js",
+      "types": "./dist/utils/Locale.d.ts"
+    },
+    "./utils/ResourceReader": {
+      "import": "./dist/utils/ResourceReader.js",
+      "require": "./dist/utils/ResourceReader.js",
+      "types": "./dist/utils/ResourceReader.d.ts"
+    },
     "./space/Constants": {
       "import": "./dist/space/Constants.js",
       "require": "./dist/space/Constants.js",
@@ -164,16 +174,6 @@
       "require": "./dist/space/utils.js",
       "types": "./dist/space/utils.d.ts"
     },
-    "./utils/Locale": {
-      "import": "./dist/utils/Locale.js",
-      "require": "./dist/utils/Locale.js",
-      "types": "./dist/utils/Locale.d.ts"
-    },
-    "./utils/ResourceReader": {
-      "import": "./dist/utils/ResourceReader.js",
-      "require": "./dist/utils/ResourceReader.js",
-      "types": "./dist/utils/ResourceReader.d.ts"
-    },
     "./view/View": {
       "import": "./dist/view/View.js",
       "require": "./dist/view/View.js",
@@ -183,6 +183,11 @@
       "import": "./dist/view/ViewAttributes.js",
       "require": "./dist/view/ViewAttributes.js",
       "types": "./dist/view/ViewAttributes.d.ts"
+    },
+    "./view/Widget": {
+      "import": "./dist/view/Widget.js",
+      "require": "./dist/view/Widget.js",
+      "types": "./dist/view/Widget.d.ts"
     },
     "./utils/bxml/BinaryAttributePair": {
       "import": "./dist/utils/bxml/BinaryAttributePair.js",
@@ -204,16 +209,6 @@
       "require": "./dist/utils/bxml/LayoutContext.js",
       "types": "./dist/utils/bxml/LayoutContext.d.ts"
     },
-    "./view/inflater/BXMLSvgInflater": {
-      "import": "./dist/view/inflater/BXMLSvgInflater.js",
-      "require": "./dist/view/inflater/BXMLSvgInflater.js",
-      "types": "./dist/view/inflater/BXMLSvgInflater.d.ts"
-    },
-    "./view/inflater/WidgetRegistrar": {
-      "import": "./dist/view/inflater/WidgetRegistrar.js",
-      "require": "./dist/view/inflater/WidgetRegistrar.js",
-      "types": "./dist/view/inflater/WidgetRegistrar.d.ts"
-    },
     "./view/nodes/NodeType": {
       "import": "./dist/view/nodes/NodeType.js",
       "require": "./dist/view/nodes/NodeType.js",
@@ -223,6 +218,16 @@
       "import": "./dist/view/nodes/ViewNode.js",
       "require": "./dist/view/nodes/ViewNode.js",
       "types": "./dist/view/nodes/ViewNode.d.ts"
+    },
+    "./view/inflater/BXMLSvgInflater": {
+      "import": "./dist/view/inflater/BXMLSvgInflater.js",
+      "require": "./dist/view/inflater/BXMLSvgInflater.js",
+      "types": "./dist/view/inflater/BXMLSvgInflater.d.ts"
+    },
+    "./view/inflater/WidgetRegistrar": {
+      "import": "./dist/view/inflater/WidgetRegistrar.js",
+      "require": "./dist/view/inflater/WidgetRegistrar.js",
+      "types": "./dist/view/inflater/WidgetRegistrar.d.ts"
     },
     "./view/widget/CanvasView": {
       "import": "./dist/view/widget/CanvasView.js",

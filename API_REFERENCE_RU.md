@@ -10,6 +10,7 @@
 - [View](#view)
 - [ViewNode](#viewnode)
 - [Screen](#screen)
+- [Widget](#widget)
 - [JFragment](#jfragment)
 - [FragmentManager](#fragmentmanager)
 - [Activity](#activity)
@@ -436,7 +437,7 @@ container.repeat(model.users, bind.user_row, {
 ### Замена DOM-узла
 
 #### `replaceNode(newRootNode: View): this`
-Заменяет `mNode` этого View на `mNode` из `newRootNode` и переносит его дочерних детей. Используется в виджетах для применения лейаута после `super()`.
+Заменяет `mNode` этого View на `mNode` из `newRootNode` и переносит его дочерних детей. Для виджета с лейаутом используйте `Widget(layout)`, не `replaceNode`.
 
 ---
 
@@ -513,6 +514,35 @@ this.replaceFragment(R.id.content, new ProfileFragment(this))
 ```
 
 Конструктор экрана принимает `Context` (Activity или родительский экран) — он нужен для inflate.
+
+---
+
+## Widget
+
+```typescript
+import {Widget} from "@casperui/core/view/Widget"
+```
+
+Фабрика виджета с лейаутом: inflate в конструкторе, `this.bind` типизирован, атрибуты тега (`class`, `id`, …) наносятся на реальный корень.
+
+```typescript
+export function Widget<B extends { root: View }>(
+    inflate: (ctx: Context) => B
+): new (context: Context, tag?: ViewTag, attr?: ViewAttributes) => View & { readonly bind: B }
+```
+
+Если в лейауте есть `id="content"` и это не корень — `addView` / дети из HTML идут в `bind.content`. Иначе — в корень виджета.
+
+```typescript
+export class Badge extends Widget(R.layout.widgets.badge) {
+    constructor(context: Context, tag?: ViewTag, attr?: ViewAttributes) {
+        super(context, tag, attr)
+        if (attr?.text) this.bind.label.setText(String(attr.text))
+    }
+}
+```
+
+Виджет без своего HTML остаётся `extends View`. Регистрация тега — `registerWidgets()`.
 
 ---
 

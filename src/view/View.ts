@@ -182,11 +182,22 @@ export class View<T = string> extends ViewNode implements IParentView {
         if (index === undefined || index === -1) {
             this._children.push(view)
             this.mNode.appendChild(view.mNode)
-            return
+            return this
         }
         this._children.splice(index, 0, view);
         this.mNode.insertBefore(view.mNode, this.mNode.childNodes[index])
         return this;
+    }
+
+    protected adoptTree(from: View) {
+        const kids = from.getChildren()
+        for (let i = 0; i < kids.length; i++) {
+            const child = kids[i]
+            child.setParentView(this)
+            this._children.push(child)
+        }
+        kids.length = 0
+        return this
     }
 
     x(views: View[]) {

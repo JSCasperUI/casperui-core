@@ -456,17 +456,10 @@ function tplFragmentHtml(className: string): string {
 }
 
 function tplWidgetTs(className: string, rPath: string): string {
-    return `import {View, ViewTag} from "@casperui/core/view/View"
-import {Context} from "@casperui/core/content/Context"
-import {ViewAttributes} from "@casperui/core/view/ViewAttributes"
+    return `import {Widget} from "@casperui/core/view/Widget"
 import {R} from "@app/R"
 
-export class ${className} extends View {
-    constructor(context: Context, tag?: ViewTag, attr?: ViewAttributes) {
-        super(context, "div", attr)
-        const bind = ${rPath}(context)
-        this.replaceNode(bind.root)
-    }
+export class ${className} extends Widget(${rPath}) {
 }
 `
 }
