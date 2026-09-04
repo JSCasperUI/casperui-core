@@ -11,19 +11,6 @@ import {parseTemplate} from "@rMaker/xml/var";
 import {DictionaryCodegen} from "@rMaker/bxml/DictionaryCodegen";
 import {Scope} from "@rMaker/bxml/Scope";
 
-const REACTIVE_ATTRS = new Set([':text', ':bind', ':if', ':hidden', ':else', ':for', ':key', ':click', ':dblclick', ':mouseover', ':mouseout', ':mousedown', ':mouseup', ':mousemove', ':keydown', ':keyup', ':input', ':change', ':focus', ':blur', '_implicit_tpl'])
-const EVENT_ATTRS = new Set([':click', ':dblclick', ':mouseover', ':mouseout', ':mousedown', ':mouseup', ':mousemove', ':keydown', ':keyup', ':input', ':change', ':focus', ':blur'])
-
-function parseForExpr(expr: string): {itemVar: string, collection: string} | null {
-    const match = expr.trim().match(/^(\w+)\s+in\s+(\w+)$/)
-    if (!match) return null
-    return {itemVar: match[1], collection: match[2]}
-}
-
-function toJsExpr(expr: string): string {
-    return expr.replace(/!==|===|!=|==/g, m => m === '==' ? '===' : m === '!=' ? '!==' : m)
-}
-
 const RESERVED = new Set([
     "c", "i", "l", "t", "do", "if", "in", "as", "of", "for", "let", "new", "try", "var", "ctx",
     "case", "else", "enum", "null", "this", "true", "void", "with",
@@ -63,9 +50,6 @@ export class CasperCodegen {
         node.childNodes = transformTextNodes(node.childNodes)
         bakePathTree(node)
 
-        if (fileName.includes("layout\\main.html")) {
-            console.log("asd")
-        }
         let scope = new Scope(this.autoBinds.getFunctionName())
         this.startProcess(node, scope)
         scope.setMainInterfaceName(this.autoBinds.getInterfaceName())
@@ -77,10 +61,6 @@ export class CasperCodegen {
 // import {_getLayCTX} from "@casperui/core/utils/bxml/LayoutContext";\n`
         this.ts += scope.getInterfaceBody() + "\n"
         this.ts += scope.getMainCode(`ctx: Context`, `let [c, t, l, i] = _getLayCTX(ctx, ${this.resourceId});`)
-        // let code = this.interfaces.join("\n") + this.constVarsLines.join("\n") + "\n" + this.codeLines.join("\n")
-        if (fileName.includes("layout\\main.html")) {
-            console.log("asd")
-        }
         this.autoBinds.setCode(this.ts)
         return this.selfDictionary.createIndexedBuffer()
     }
@@ -98,7 +78,6 @@ export class CasperCodegen {
         let div = scope.getTagVariable(tag)
         let [isId,viewVariableName] = this.makeAttr(tag,node,scope,rootVar)
         scope.addCode(`let ${rootVar}=c(${div},${this.attrIndex})`)
-        this.collectDirectives(node, rootVar, scope)
 
         scope.setId("root", rootVar, "View")
 
@@ -121,12 +100,10 @@ export class CasperCodegen {
 
     makeAttr(tag:string,node:XNode,scope:Scope,viewVariableName:string = ""):[boolean,string] {
         this.attrIndex++
-        const binaryAttrCount = Object.keys(node.attrs).filter(k => !REACTIVE_ATTRS.has(k)).length
-        this.selfDictionary.writeAttributesLength(binaryAttrCount)
+        this.selfDictionary.writeAttributesLength(Object.keys(node.attrs).length)
 
         let isId = false
         for (const aKey in node.attrs) {
-            if (REACTIVE_ATTRS.has(aKey)) continue
             let key = this.selfDictionary.key(aKey)
             let value = 0
             if (aKey === "id") {
@@ -163,75 +140,6 @@ export class CasperCodegen {
             this.selfDictionary.writeAttribute(key!, value)
         }
         return [isId, viewVariableName]
-    }
-
-    private collectDirectives(node: XNode, varName: string, scope: Scope) {
-        for (const dir of [':text', ':bind', ':if', ':hidden', ':else'] as const) {
-            if (node.attrs[dir]) {
-                scope.addDirective(varName, dir, node.attrs[dir])
-            }
-        }
-        EVENT_ATTRS.forEach(attr => {
-            if (node.attrs[attr]) {
-                scope.addEvent(varName, attr.slice(1), node.attrs[attr])
-            }
-        })
-        if (node.attrs[':for']) {
-            const parsed = parseForExpr(node.attrs[':for'])
-            if (parsed) {
-                let templateChild = node.childNodes.find(c => convertTagToLowerCase(c.tag) === 'template')
-                if (!templateChild) {
-                    // неявный шаблон — первый элемент-потомок
-                    templateChild = node.childNodes.find(c => c.tag !== '#text')
-                    if (templateChild) {
-                        if (!templateChild.attrs['id']) {
-                            templateChild.attrs['id'] = `_${varName}_tpl`
-                        }
-                        templateChild.attrs['_implicit_tpl'] = 'true'
-                    }
-                }
-                if (templateChild?.attrs?.['id']) {
-                    const {bindings, events} = this.collectItemBindings(templateChild, parsed.itemVar)
-                    scope.addForBinding(
-                        varName,
-                        parsed.collection,
-                        parsed.itemVar,
-                        templateChild.attrs['id'],
-                        node.attrs[':key'] || null,
-                        bindings,
-                        events
-                    )
-                }
-            }
-        }
-    }
-
-    private collectItemBindings(node: XNode, itemVar: string): {bindings: {id: string, expr: string, directive: ':text'|':bind'|':if'|':hidden'|':else'}[], events: {id: string, eventName: string, handlerKey: string}[]} {
-        const bindings: {id: string, expr: string, directive: ':text'|':bind'|':if'|':hidden'|':else'}[] = []
-        const events: {id: string, eventName: string, handlerKey: string}[] = []
-        this.scanItemBindings(node, itemVar, bindings, events)
-        return {bindings, events}
-    }
-
-    private scanItemBindings(node: XNode, itemVar: string, bindings: {id: string, expr: string, directive: ':text'|':bind'|':if'|':hidden'|':else'}[], events: {id: string, eventName: string, handlerKey: string}[]) {
-        const id = node.attrs?.['id']
-        if (id) {
-            for (const dir of [':text', ':bind', ':if', ':hidden', ':else'] as const) {
-                const val = node.attrs?.[dir]
-                if (val && val.includes(itemVar + '.')) {
-                    bindings.push({id, expr: val, directive: dir})
-                }
-            }
-            EVENT_ATTRS.forEach(attr => {
-                const val = node.attrs?.[attr]
-                if (val) {
-                    events.push({id, eventName: attr.slice(1), handlerKey: val})
-                }
-            })
-        }
-        for (const child of node.childNodes || []) {
-            this.scanItemBindings(child, itemVar, bindings, events)
-        }
     }
 
     processElement(node: XNode, parent: string | undefined, parentTag: string | undefined, scope: Scope): string | null {
@@ -273,11 +181,7 @@ export class CasperCodegen {
 
         let [isId,viewVariableName] = this.makeAttr(tag,node,scope)
 
-        if (isId) {
-            this.collectDirectives(node, viewVariableName, scope)
-        }
-
-        if (tag === "template" || node.attrs['_implicit_tpl']) {
+        if (tag === "template") {
             let childScope = this.startProcess(node, scope.getNextScope(viewVariableName))
 
             scope.addCode(childScope.makeCode())

@@ -54,6 +54,11 @@
       "require": "./dist/app/JFragment.js",
       "types": "./dist/app/JFragment.d.ts"
     },
+    "./app/Screen": {
+      "import": "./dist/app/Screen.js",
+      "require": "./dist/app/Screen.js",
+      "types": "./dist/app/Screen.d.ts"
+    },
     "./io/ByteBuffer": {
       "import": "./dist/io/ByteBuffer.js",
       "require": "./dist/io/ByteBuffer.js",

@@ -20,6 +20,13 @@ import {ILiveManager} from "@casperui/core/live/ILiveManager";
 export type ViewTag = string | Element
 type LiveBinder<T> = (value: T, caller: any) => void;
 
+export type RepeatRow = { root: View }
+
+export type RepeatOptions<I, Row extends RepeatRow> = {
+    key?: (item: I) => string | number
+    bind: (row: Row, item: I, index: number) => void
+}
+
 export interface IParentView {
     getParentView(): IParentView | null;
     setParentView(parentView?: IParentView): void;
@@ -782,36 +789,61 @@ export class View<T = string> extends ViewNode implements IParentView {
         });
     }
 
-    bindList<I>(data: LiveData<I[]>, renderFn: (item: I) => View, keyFn?: (item: I) => string) {
-        const rowMap = new Map<string, View>()
+    repeat<I, Row extends RepeatRow>(
+        data: LiveData<I[]>,
+        factory: () => Row,
+        options: RepeatOptions<I, Row>
+    ) {
+        const rowMap = new Map<string, Row>()
 
         return this.bindLive(data, function (items) {
+            const list = items ?? []
+            const keyFn = options.key
+
             if (!keyFn) {
                 this.removeAllViews()
-                items.forEach(item => this.addView(renderFn(item)))
+                rowMap.clear()
+                for (let i = 0; i < list.length; i++) {
+                    const row = factory()
+                    options.bind(row, list[i], i)
+                    this.addView(row.root)
+                }
                 return
             }
 
-            const newKeys = new Set(items.map(keyFn))
+            const nextKeys = new Set<string>()
+            const ordered: Row[] = []
 
-            rowMap.forEach((view, key) => {
-                if (!newKeys.has(key)) {
-                    this.removeView(view)
+            for (let i = 0; i < list.length; i++) {
+                const item = list[i]
+                const key = String(keyFn(item))
+                nextKeys.add(key)
+                let row = rowMap.get(key)
+                if (!row) {
+                    row = factory()
+                    rowMap.set(key, row)
+                }
+                options.bind(row, item, i)
+                ordered.push(row)
+            }
+
+            rowMap.forEach((row, key) => {
+                if (!nextKeys.has(key)) {
+                    this.removeView(row.root)
                     rowMap.delete(key)
                 }
             })
 
-            items.forEach((item, index) => {
-                const key = keyFn(item)
-                if (!rowMap.has(key)) {
-                    const view = renderFn(item)
-                    rowMap.set(key, view)
-                    this.addView(view, index)
+            for (let i = 0; i < ordered.length; i++) {
+                const view = ordered[i].root
+                if (this.getChildren()[i] !== view) {
+                    if (this.hasView(view)) {
+                        this.removeView(view)
+                    }
+                    this.addView(view, i)
                 }
-            })
-        });
+            }
+        })
     }
-
-
 }
 

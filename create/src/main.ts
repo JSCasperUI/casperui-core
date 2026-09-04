@@ -89,7 +89,7 @@ function tplPackageJson(name: string): string {
             resources_release: "resmaker",
         },
         dependencies: {
-            "@casperui/core": "^0.0.19",
+            "@casperui/core": "^0.0.23",
         },
         devDependencies: {
             typescript:           "^5.6.2",
@@ -216,24 +216,17 @@ import {MainFragment} from "@app/view/fragments/MainFragment"
 export class MainActivity extends Activity {
     async onCreate() {
         this.setContentView(R.layout.root(this).root)
-        this.replaceFragment(R.id.app_content, new MainFragment())
+        this.replaceFragment(R.id.app_content, new MainFragment(this))
     }
 }
 `
 }
 
 function tplMainFragment(): string {
-    return `import {JFragment} from "@casperui/core/app/JFragment"
-import {View} from "@casperui/core/view/View"
+    return `import {Screen} from "@casperui/core/app/Screen"
 import {R} from "@app/R"
 
-export class MainFragment extends JFragment {
-    private bind = R.layout.main(this.ctx())
-
-    onCreateView(): View {
-        return this.bind.root
-    }
-
+export class MainFragment extends Screen(R.layout.main) {
     onCreated() {
         this.bind.title.setText("Hello, CasperUI!")
     }

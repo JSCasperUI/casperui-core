@@ -1,7 +1,7 @@
 # CasperUI Core — API Reference (RU)
 
 > Справочник по классам и методам `@casperui/core`.  
-> Основан на исходном коде версии `0.0.19`.
+> Основан на исходном коде версии `0.0.23`.
 
 ---
 
@@ -9,13 +9,15 @@
 
 - [View](#view)
 - [ViewNode](#viewnode)
+- [Screen](#screen)
 - [JFragment](#jfragment)
 - [FragmentManager](#fragmentmanager)
 - [Activity](#activity)
 - [Application](#application)
 - [LiveData\<T\>](#livedatat)
+- [computed / ComputedLiveData](#computed--computedlivedata)
 - [LiveDataObjectId\<T\>](#livedataobjectidt)
-- [MappedLiveData\<T\>](#mappedliveda tat)
+- [MappedLiveData\<T\>](#mappedlivedata)
 - [ViewModel](#viewmodel)
 - [Context / ContextWrapper](#context--contextwrapper)
 - [Resources / BinaryResources](#resources--binaryresources)
@@ -265,35 +267,95 @@ new View(context: Context, tag?: ViewTag, attr?: ViewAttributes)
 
 Все методы ниже используют внутри `makeSafeEvent`, который **заменяет** предыдущий обработчик того же типа при повторном вызове.
 
-#### `setOnClickListener(func: (e: UIEvent) => any): this`
-Подписка на событие `"click"`.
+#### `onClick(func: (e: UIEvent) => any): this`
+Подписка на `"click"`.
 
-#### `setOnFastClickListener(func: (e: UIEvent) => any): this`
-Подписка на `"mousedown"` — срабатывает быстрее клика, до `mouseup`.
-
-#### `onMouseDownListener(func: (e: UIEvent) => any): this`
+#### `onMouseDown(func: (e: UIEvent) => any): this`
 Подписка на `"mousedown"`.
 
-#### `onMouseOverListener(func: (e: UIEvent) => any): this`
+#### `onMouseOver(func: (e: UIEvent) => any): this`
 Подписка на `"mouseover"`.
 
-#### `onMouseOutListener(func: (e: UIEvent) => any): this`
+#### `onMouseOut(func: (e: UIEvent) => any): this`
 Подписка на `"mouseout"`.
 
-#### `onMouseMoveListener(func: (e: UIEvent) => any): this`
+#### `onMouseMove(func: (e: UIEvent) => any): this`
 Подписка на `"mousemove"`.
 
-#### `onMouseDoubleClickListener(func: (e: UIEvent) => any): this`
+#### `onDoubleClick(func: (e: UIEvent) => any): this`
 Подписка на `"dblclick"`.
-
-#### `onMouseClickListener(func: (e: UIEvent) => any): this`
-Подписка на `"click"` (аналог `setOnClickListener`).
 
 #### `vEvent(event: string, func: (e: UIEvent) => any, timeout?: number): this`
 Подписка на произвольное DOM-событие. Если указан `timeout` (мс) — обработчик оборачивается в дебаунс: при повторном событии таймер сбрасывается.
 
 #### `makeSafeEvent(type: string, func: (e: UIEvent) => any, timeout?: number): this`
 Низкоуровневый метод. Снимает предыдущий обработчик этого типа (если был), затем добавляет новый. Callback оборачивается в `WeakRef` — не удерживает ссылку. Ссылка сохраняется в `_keeper_{type}`.
+
+---
+
+### Привязка к LiveData
+
+Подписка живёт, пока экран attached. Вызывать из `onCreated()`. Owner — фрагмент, найденный через `getFragmentManager()`.
+
+#### `bindText(data: LiveData<string>): this`
+`setText` при каждом значении.
+
+#### `bindInputValue(data: LiveData<string>, event?: string): this`
+Двусторонний input. По умолчанию событие `"input"`. Запись в LiveData идёт с `caller = this`, обратный апдейт с тем же caller пропускается.
+
+#### `bindInputChecked(data: LiveData<boolean>, event?: string): this`
+Двусторонний checkbox. По умолчанию `"change"`.
+
+#### `bindValue(data: LiveData<any>): this`
+Односторонний `setValue`.
+
+#### `bindSafeValue(data: LiveData<any>): this`
+Односторонний `setSafeValue` (`null`/`undefined` → `""`).
+
+#### `bindChecked(data: LiveData<boolean>): this`
+Односторонний `setChecked`.
+
+#### `bindVisible(data: LiveData<boolean>): this`
+`setVisibility(value)`.
+
+#### `bindHidden(data: LiveData<boolean>): this`
+`setVisibility(!value)`.
+
+#### `bindClass(className: string, data: LiveData<boolean>): this`
+Добавляет или снимает CSS-класс.
+
+#### `bindAttr(name: string, data: LiveData<any>): this`
+`setAttribute`. `null`/`undefined` снимает атрибут.
+
+#### `bindStyle(key: string, data: LiveData<string>): this`
+`style[key] = value`.
+
+#### `bindOpacity(data: LiveData<number>): this`
+`setOpacity`.
+
+#### `bindImageSrc(data: LiveData<string>): this`
+`src` для `<img>`.
+
+#### `repeat<I, Row extends { root: View }>(data: LiveData<I[]>, factory: () => Row, options: RepeatOptions<I, Row>): this`
+
+Список. `factory` — сгенерированная `<template>`-функция. `options.bind(row, item, index)` вызывается на каждой строке при каждом обновлении массива.
+
+```typescript
+container.repeat(model.users, bind.user_row, {
+    key: u => u.id,
+    bind: (row, user) => {
+        row.name.setText(user.name)
+        row.delete.onClick(() => this.remove(user))
+    }
+})
+```
+
+| `options.key` | Поведение |
+|---|---|
+| нет | очистить контейнер, создать все строки заново |
+| есть | reuse по ключу, перестановка, удаление пропавших; `bind` и на старых строках |
+
+Ключи должны быть уникальны.
 
 ---
 
@@ -425,13 +487,42 @@ import {ViewNode} from "@casperui/core/view/nodes/ViewNode"
 
 ---
 
+## Screen
+
+```typescript
+import {Screen} from "@casperui/core/app/Screen"
+```
+
+Фабрика базового класса экрана: inflate лейаута в конструкторе, `this.bind` типизирован, `onCreateView()` возвращает `bind.root`.
+
+```typescript
+export function Screen<B extends { root: View }>(
+    inflate: (ctx: Context) => B
+): new (context: Context) => JFragment & { readonly bind: B }
+```
+
+```typescript
+export class ProfileFragment extends Screen(R.layout.fragments.profile) {
+    onCreated() {
+        this.bind.title.bindText(this.model.title)
+        this.bind.save.onClick(() => this.model.save())
+    }
+}
+
+this.replaceFragment(R.id.content, new ProfileFragment(this))
+```
+
+Конструктор экрана принимает `Context` (Activity или родительский экран) — он нужен для inflate.
+
+---
+
 ## JFragment
 
 ```typescript
 import {JFragment} from "@casperui/core/app/JFragment"
 ```
 
-Абстрактный класс. Строительный блок UI. Наследует `ContextWrapper`, реализует `ILiveManager`, `IFragmentManager`, `IParentView`.
+Базовый класс экрана. Наследует `ContextWrapper`, реализует `ILiveManager`, `IFragmentManager`, `IParentView`. Для лейаута из `res/layout` используйте `Screen` — он закрывает `onCreateView`.
 
 ### Константы
 
@@ -668,7 +759,7 @@ import {Activity} from "@casperui/core/app/Activity"
 
 ### LiveData
 
-Activity реализует `ILiveManager`, поэтому в ней можно вызывать `liveData.observe(this, callback)`.
+Activity и Screen реализуют `ILiveManager`. Для полей UI используйте `bindText` / `bindInputValue` / `bindVisible` / `repeat`. `observe` — когда готового `bind*` нет.
 
 ---
 
@@ -751,7 +842,7 @@ model.items.update()
 ### Подписка
 
 #### `observe(observer: ILiveManager, callback: (value: T, caller: any) => void): void`
-Подписывает `observer` на изменения. `Activity` и `JFragment` реализуют `ILiveManager`.
+Подписывает `observer` на изменения. `Activity` и `Screen` (`JFragment`) реализуют `ILiveManager`.
 
 - Callback **привязывается** к `observer` через `bind` — `this` внутри callback будет observer.
 - Callback вызывается **сразу** при подписке, если observer активен (`hasActive()`).
@@ -764,8 +855,17 @@ model.count.observe(this, (value, caller) => {
 })
 ```
 
+Для UI предпочтительнее `view.bindText` / `bindInputValue` / `repeat`.
+
+#### `map<R>(fn: (value: T) => R): ComputedLiveData<R>`
+Производное LiveData от одного источника.
+
+```typescript
+this.bind.counter.bindText(model.count.map(n => String(n)))
+```
+
 #### `removeObserver(observer: ILiveManager): void`
-Метод заглушка (не реализован в текущей версии).
+Удаляет подписки данного observer.
 
 ---
 
@@ -779,6 +879,23 @@ model.count.observe(this, (value, caller) => {
 
 #### `clearPublishHistory(): void`
 Сбрасывает историю публикаций. Вызывается перед каждым `notifyObservers()` чтобы каждый observer получил уведомление заново.
+
+---
+
+## computed / ComputedLiveData
+
+```typescript
+import {computed, ComputedLiveData} from "@casperui/core/live/LiveData"
+
+computed(sources, (a, b) => `${a} ${b}`)
+```
+
+Подписывается на источники через `observeRaw`, пересчитывает значение. `dispose()` снимает эти подписки.
+
+```typescript
+const fullName = computed([model.first, model.last], (first, last) => `${first} ${last}`)
+this.bind.title.bindText(fullName)
+```
 
 ---
 

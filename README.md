@@ -1,7 +1,7 @@
 # CasperUI Core — Полное руководство (RU)
 
-> Версия `@casperui/core` 0.0.19  
-> Фреймворк для построения браузерных приложений с архитектурой, вдохновлённой Android SDK.
+> Версия `@casperui/core` 0.0.23  
+> HTML — дерево и `id`. TypeScript — клики и привязка к `LiveData`. Без второго языка в разметке.
 
 ---
 
@@ -18,8 +18,8 @@
     - [{{id}} — именованные текстовые узлы](#id--именованные-текстовые-узлы)
     - [\<template\> — фабричные функции](#template--фабричные-функции)
     - [\<style\> внутри лейаута](#style-внутри-лейаута)
-8. [Fragments — составные экраны](#8-fragments--составные-экраны)
-9. [LiveData и ViewModel — реактивное состояние](#9-livedata-и-viewmodel--реактивное-состояние)
+8. [Экраны (Screen)](#8-экраны-screen)
+9. [LiveData — состояние](#9-livedata--состояние)
 10. [Пользовательские виджеты](#10-пользовательские-виджеты)
 11. [Навигация и FragmentManager](#11-навигация-и-fragmentmanager)
 12. [Context и Resources](#12-context-и-resources)
@@ -30,21 +30,18 @@
 
 ## 1. Концепция и архитектура
 
-CasperUI — фреймворк, переносящий архитектурные паттерны Android на веб.
+Канон:
 
-### Ключевые параллели с Android
+| Слой | Что это |
+|---|---|
+| HTML | только дерево и `id` |
+| `this.bind.*` | ручки на узлы после inflate |
+| `onCreated()` | `onClick`, `bindText` / `bindInputValue` / `bindVisible`, `repeat` |
+| `LiveData` | значение; молчит, пока экран снят |
 
-| Android            | CasperUI              |
-|--------------------|-----------------------|
-| `Application`      | `Application`         |
-| `Activity`         | `Activity`            |
-| `Fragment`         | `JFragment`           |
-| `View`             | `View`                |
-| `ViewModel`        | `ViewModel`           |
-| `LiveData`         | `LiveData`            |
-| `FragmentManager`  | `FragmentManager`     |
-| `R.id`, `R.layout` | `R.id`, `R.layout`    |
-| XML-лейауты        | HTML-лейауты → BXML   |
+Экран — `Screen(R.layout.*)`, не ручной `onCreateView`. Список — `repeat`, не ручной reconcile. Выражений в HTML нет: поток данных виден в TypeScript.
+
+Имена `Application` / `Activity` / `Fragment` — нарезка приложения. Писать экраны нужно через `Screen`.
 
 ### Жизненный цикл приложения
 
@@ -54,9 +51,9 @@ main.ts
   └── application.startActivity(new MainActivity())
         └── activity.onCreate()
               └── setContentView(layout)
-                    └── replaceFragment(id, fragment)
-                          └── fragment.onCreateView()
-                          └── fragment.onCreated()
+                    └── replaceFragment(id, new MyScreen(this))
+                          └── onCreateView()     ← Screen возвращает bind.root
+                          └── onCreated()        ← проводка
 ```
 
 ---
@@ -71,7 +68,7 @@ my-app/
 │   ├── R.ts                 ← ГЕНЕРИРУЕТСЯ (не редактировать)
 │   ├── bind.ts              ← ГЕНЕРИРУЕТСЯ (не редактировать)
 │   ├── models/              ← ViewModel-классы
-│   ├── view/fragments/      ← JFragment-классы
+│   ├── view/fragments/      ← экраны (Screen)
 │   └── widgets/             ← кастомные View-компоненты
 ├── res/
 │   ├── layout/              ← HTML-лейауты
@@ -231,11 +228,11 @@ export class MainActivity extends Activity {
     }
 
     showAuthFragment() {
-        this.replaceFragment(R.id.app_content, new AuthFragment())
+        this.replaceFragment(R.id.app_content, new AuthFragment(this))
     }
 
     showMainContent() {
-        this.replaceFragment(R.id.app_content, new MainFragment())
+        this.replaceFragment(R.id.app_content, new MainFragment(this))
     }
 }
 ```
@@ -344,8 +341,8 @@ view.setScrollX(0)
 ```typescript
 view.getStyle()                           // CSSStyleDeclaration
 view.setStyle("background-color", "red")
-view.setParameter("data-id", "42")
-view.getParameter("data-id")
+view.setAttr("data-id", "42")
+view.getAttr("data-id")
 view.appendAttributes({ "data-x": "1", class: "foo" })
 ```
 
@@ -359,13 +356,12 @@ view.setImageSrc("/img.png")              // src для <img>
 ### События
 
 ```typescript
-view.setOnClickListener((e) => { ... })
-view.setOnFastClickListener((e) => { ... })  // mousedown
-view.onMouseDownListener((e) => { ... })
-view.onMouseOverListener((e) => { ... })
-view.onMouseOutListener((e) => { ... })
-view.onMouseMoveListener((e) => { ... })
-view.onMouseDoubleClickListener((e) => { ... })
+view.onClick((e) => { ... })
+view.onMouseDown((e) => { ... })
+view.onMouseOver((e) => { ... })
+view.onMouseOut((e) => { ... })
+view.onMouseMove((e) => { ... })
+view.onDoubleClick((e) => { ... })
 
 view.vEvent("scroll", (e) => { ... })
 view.vEvent("input", handler, 300)        // с дебаунсом (ms)
@@ -373,7 +369,43 @@ view.vEvent("input", handler, 300)        // с дебаунсом (ms)
 view.mNode.addEventListener("keydown", handler, { passive: true })  // DOM напрямую
 ```
 
-> Все методы `setOn*/vEvent` внутри используют `makeSafeEvent` — повторный вызов **заменяет** предыдущий обработчик того же типа, не добавляет новый.
+> `onClick` / `vEvent` внутри используют `makeSafeEvent` — повторный вызов **заменяет** предыдущий обработчик того же типа, не добавляет новый.
+
+### Привязка к LiveData
+
+Вызывать в `onCreated()` — к этому моменту экран уже owner подписок.
+
+```typescript
+view.bindText(model.title)                 // LiveData<string> → setText
+view.bindInputValue(model.email)           // двусторонний input
+view.bindInputChecked(model.agree)         // двусторонний checkbox
+view.bindVisible(model.open)               // показать, если true
+view.bindHidden(model.loading)             // скрыть, если true
+view.bindClass("error", model.hasError)
+view.bindAttr("href", model.url)
+view.bindStyle("color", model.color)
+view.bindOpacity(model.opacity)
+view.bindImageSrc(model.avatarUrl)
+```
+
+`bindInputValue` не зацикливается: запись в LiveData идёт с `caller = view`, обратный апдейт с тем же caller пропускается.
+
+### Списки — repeat
+
+```typescript
+this.bind.list.repeat(this.model.users, this.bind.user_row, {
+    key: u => u.id,
+    bind: (row, user) => {
+        row.name.setText(user.name)
+        row.delete.onClick(() => this.remove(user))
+    }
+})
+```
+
+- `bind` вызывается и на новой строке, и на каждом `setValue` / `update` списка
+- с `key` — reuse строки, перестановка, удаление
+- без `key` — контейнер очищается и собирается заново
+- клики в `bind` безопасны: `onClick` заменяет предыдущий listener
 
 ### Дочерние View
 
@@ -448,7 +480,7 @@ const bind = R.layout.fragments.profile(this.ctx())
 bind.name.setText("Иван Петров")
 bind.email.setText("ivan@example.com")
 bind.avatar.setImageSrc("/avatars/ivan.png")
-bind.logout_btn.setOnClickListener(() => this.onLogout())
+bind.logout_btn.onClick(() => this.onLogout())
 
 this.setContentView(bind.root)
 // или
@@ -537,18 +569,25 @@ export interface IMyList {
 }
 ```
 
-```typescript
-const layout = R.layout.my_list(this.ctx())
+Список — через `repeat`. Фабрика `list_item` создаёт строку, `bind` заполняет её при каждом обновлении массива:
 
-function addItem(title: string, sub: string) {
-    const item = layout.list_item()   // новый экземпляр каждый раз
-    item.title.setText(title)
-    item.subtitle.setText(sub)
-    item.delete_btn.setOnClickListener(() => {
-        layout.list_container.removeView(item.root)
-    })
-    layout.list_container.addView(item.root)
-}
+```typescript
+this.bind.list_container.repeat(this.model.items, this.bind.list_item, {
+    key: item => item.id,
+    bind: (row, item) => {
+        row.title.setText(item.title)
+        row.subtitle.setText(item.subtitle)
+        row.delete_btn.onClick(() => this.remove(item))
+    }
+})
+```
+
+Один экземпляр шаблона (не список) — вызвать фабрику вручную:
+
+```typescript
+const item = this.bind.list_item()
+item.title.setText(title)
+this.bind.list_container.addView(item.root)
 ```
 
 **Переключатель шаблонов:**
@@ -573,25 +612,22 @@ function addItem(title: string, sub: string) {
 ```
 
 ```typescript
-export class RuleEditor extends JFragment {
-    private layout = R.layout.profiles.rules.rule_editor(this.ctx())
+export class RuleEditor extends Screen(R.layout.profiles.rules.rule_editor) {
     private currentRule: View | null = null
 
-    onCreateView() { return this.layout.root }
-
     onCreated() {
-        const selector = this.layout.selector_type as RadioGroup
+        const selector = this.bind.selector_type as RadioGroup
         selector.setOnItemSelected((index) => this.showTemplate(index))
         selector.setActive(0, true)
     }
 
     private showTemplate(index: number) {
-        const container = this.layout.selector_content
+        const container = this.bind.selector_content
         if (this.currentRule) container.removeView(this.currentRule)
 
         const factories = [
-            () => this.layout.rule_weekday(),
-            () => this.layout.rule_dates(),
+            () => this.bind.rule_weekday(),
+            () => this.bind.rule_dates(),
         ]
         const bind = factories[index]()
         this.currentRule = bind.root
@@ -652,51 +688,38 @@ let [c, t, l, i] = _getLayCTX(ctx, layoutId)
 
 ---
 
-## 8. Fragments — составные экраны
+## 8. Экраны (Screen)
 
-### Создание Fragment
+Экран = лейаут + проводка. `Screen(R.layout.*)` inflate'ит разметку, кладёт ручки в `this.bind` и сам возвращает `bind.root`.
 
 ```typescript
-import {JFragment} from "@casperui/core/app/JFragment"
-import {View} from "@casperui/core/view/View"
+import {Screen} from "@casperui/core/app/Screen"
 import {R} from "@app/R"
 import {MainActivity} from "@app/MainActivity"
 
-export class ProfileFragment extends JFragment {
-
-    private bind = R.layout.fragments.profile(this.ctx())
+export class ProfileFragment extends Screen(R.layout.fragments.profile) {
     private get main() { return this.getActivity() as MainActivity }
 
-    onCreateView(): View {
-        return this.bind.root
-    }
-
     onCreated() {
-        const user = this.main.usersModel.self.getValue()
-        this.bind.name.setText(user?.name ?? "")
-
-        this.bind.logout_btn.setOnClickListener(async () => {
+        this.bind.name.bindText(this.main.usersModel.name)
+        this.bind.logout_btn.onClick(async () => {
             await this.main.usersModel.logout()
             this.main.showAuthFragment()
         })
-
-        this.main.usersModel.self.observe(this, (user) => {
-            this.bind.name.setText(user?.name ?? "")
-        })
     }
-
-    onAttachSingle() { /* первый раз в DOM — DOM-зависимая инициализация */ }
-    onAttach()       { /* каждый раз в DOM */ }
-    onDetach()       { /* уход с экрана — очистить ресурсы */ }
 }
 ```
 
-### Жизненный цикл Fragment
+Создание: `new ProfileFragment(this)` — в конструктор передаётся Activity или родительский экран (нужен `ctx` для inflate).
+
+`JFragment` — базовый класс с lifecycle. `Screen` его расширяет. Свой `onCreateView` нужен только если корень не из лейаута.
+
+### Жизненный цикл
 
 ```
-replaceFragment(id, new MyFragment())
-  └── onCreateView()      ← вернуть View (DOM ещё не вставлен)
-  └── onCreated()         ← инициализировать логику
+replaceFragment(id, new MyScreen(this))
+  └── onCreateView()      ← Screen возвращает bind.root (DOM ещё не вставлен)
+  └── onCreated()         ← клики и bind*/repeat
   └── [View вставляется в DOM]
   └── onAttachSingle()    ← только при первом attach
   └── onAttach()          ← при каждом attach
@@ -705,26 +728,21 @@ replaceFragment(id, другой)
   └── onDetach()          ← очистить ресурсы
 ```
 
-### Когда что использовать
-
 | Хук | Когда | Что делать |
 |---|---|---|
-| `onCreateView()` | До DOM | Вернуть `this.bind.root` |
-| `onCreated()` | После `onCreateView` | Обработчики, подписки на LiveData |
-| `onAttachSingle()` | Первый раз в DOM | Размеры, Canvas, фокус — всё что требует DOM |
-| `onAttach()` | Каждый раз в DOM | Рестарт поллинга, обновление данных |
-| `onDetach()` | Уход | Очистить интервалы, анимации |
+| `onCreated()` | После inflate, до DOM | `onClick`, `bindText`, `repeat` |
+| `onAttachSingle()` | Первый раз в DOM | Размеры, Canvas, фокус |
+| `onAttach()` | Каждый раз в DOM | Рестарт поллинга |
+| `onDetach()` | Уход | Интервалы, анимации |
 
-> `getWidth()`, `getHeight()`, инициализация `<canvas>` вернут `0` в `onCreated()` — элемент ещё не в DOM. Используйте `onAttachSingle()`.
+> `getWidth()`, `getHeight()`, `<canvas>` в `onCreated()` ещё нули — элемент не в DOM. Это `onAttachSingle()`.
 
-### Пример: DOM-зависимая инициализация
+### DOM-зависимая инициализация
 
 ```typescript
-export class ChartFragment extends JFragment {
-    private bind = R.layout.fragments.chart(this.ctx())
+export class ChartFragment extends Screen(R.layout.fragments.chart) {
     private chart: Chart | null = null
-
-    onCreateView() { return this.bind.root }
+    private get main() { return this.getActivity() as MainActivity }
 
     onCreated() {
         this.bind.title.setText("Загрузка...")
@@ -733,8 +751,7 @@ export class ChartFragment extends JFragment {
     onAttachSingle() {
         const canvas = this.bind.chart_canvas.mNode as HTMLCanvasElement
         this.chart = new Chart(canvas, { type: "line", data: { datasets: [] } })
-
-        const width = this.bind.container.getWidth()  // корректный размер
+        this.bind.container.getWidth()
         this.loadData()
     }
 
@@ -750,9 +767,10 @@ export class ChartFragment extends JFragment {
 }
 ```
 
-### Вспомогательные методы JFragment
+### Методы экрана
 
 ```typescript
+this.bind                  // ручки лейаута
 this.ctx()
 this.getActivity()
 this.getFragmentManager()
@@ -760,7 +778,7 @@ this.getView()
 this.replaceFragment(id, fragment)
 ```
 
-### Вложенные фрагменты
+### Вложенные экраны
 
 ```html
 <!-- res/layout/fragments/main.html -->
@@ -771,65 +789,78 @@ this.replaceFragment(id, fragment)
 ```
 
 ```typescript
-export class MainFragment extends JFragment {
-    private bind = R.layout.fragments.main(this.ctx())
-
-    onCreateView() { return this.bind.root }
-
+export class MainFragment extends Screen(R.layout.fragments.main) {
     onCreated() {
-        this.replaceFragment(R.id.content_area, new DashboardFragment())
+        this.replaceFragment(R.id.content_area, new DashboardFragment(this))
     }
 
     showSettings() {
-        this.replaceFragment(R.id.content_area, new SettingsFragment())
+        this.replaceFragment(R.id.content_area, new SettingsFragment(this))
     }
 }
 ```
 
 ---
 
-## 9. LiveData и ViewModel — реактивное состояние
+## 9. LiveData — состояние
 
-### LiveData
+`LiveData` хранит значение и будит подписчиков. Пока экран снят, колбэки не пишут в DOM. Это не граф зависимостей и не выражения в HTML: одна подписка = одна строка в `onCreated()`.
 
 ```typescript
 import {LiveData} from "@casperui/core/live/LiveData"
 
 const counter = new LiveData<number>(0)
 
-counter.setValue(42)          // установить → уведомит всех наблюдателей
-counter.setIfChanged(42)      // установить только если изменилось
+counter.setValue(42)          // уведомить всех
+counter.setIfChanged(42)      // только если значение другое
 counter.getValue()            // 42
-counter.update()              // уведомить без изменения (если мутировали объект)
+counter.update()              // уведомить без смены ссылки (мутация объекта)
 
 const list = new LiveData<string[]>([])
-list.pushValueToArray("item") // добавить в массив и уведомить
+list.pushValueToArray("item")
 ```
 
-### Наблюдение
-
-`Activity` и `JFragment` реализуют `ILiveManager` — их можно передавать как observer напрямую.
+### Привязка в экране
 
 ```typescript
-model.counter.observe(this, (value, caller) => {
-    this.bind.label.setText(String(value))
+onCreated() {
+    this.bind.title.bindText(this.model.title)
+    this.bind.email.bindInputValue(this.model.email)
+    this.bind.spinner.bindVisible(this.model.isLoading)
+    this.bind.save.onClick(() => this.model.save())
+}
+```
+
+Для числа/объекта сначала приведите к строке:
+
+```typescript
+this.bind.counter.bindText(this.model.count.map(n => String(n)))
+```
+
+`observe` — низкий уровень, если готового `bind*` нет:
+
+```typescript
+model.self.observe(this, (user) => {
+    if (!user) this.main.showAuthFragment()
 })
 ```
 
-- Callback вызывается сразу при подписке (если `LiveManager` активен)
-- `caller` — аргумент из `setValue(value, caller)`, полезен для фильтрации источника
+- колбэк зовётся сразу, если экран активен
+- `caller` из `setValue(value, caller)` — чтобы отличить источник
 
-### ViewModel
+### Модель
+
+Модель — объект с полями `LiveData`, живёт в Activity:
 
 ```typescript
-import {ViewModel} from "@casperui/core/live/ViewModel"
 import {LiveData} from "@casperui/core/live/LiveData"
 import {LiveDataObjectId} from "@casperui/core/live/LiveDataObjectId"
 
-export class UsersModel extends ViewModel {
+export class UsersModel {
     isLoading = new LiveData<boolean>(false)
+    name      = new LiveData<string>("")
     self      = new LiveData<IUser | null>(null)
-    users     = new LiveDataObjectId<IUser[]>([])  // оптимизирован для массивов объектов с id
+    users     = new LiveDataObjectId<IUser[]>([])
 
     async loadUsers() {
         this.isLoading.setValue(true)
@@ -840,53 +871,41 @@ export class UsersModel extends ViewModel {
         }
     }
 
-    async auth(email: string, password: string) {
-        this.self.setValue(await this.api.post("sign-in", { email, password }))
-    }
-
     async logout() {
         await this.api.post("sign-out")
         this.self.setValue(null)
+        this.name.setValue("")
     }
 }
 ```
-
-Модели создаются в `Activity` один раз и доступны из любого `Fragment`:
 
 ```typescript
 // MainActivity
 usersModel = new UsersModel()
 
-// В Fragment
+// В экране
 private get main() { return this.getActivity() as MainActivity }
 
 onCreated() {
-    this.main.usersModel.self.observe(this, (user) => {
-        if (user) {
-            this.bind.name.setText(user.name)
-        } else {
-            this.main.showAuthFragment()
-        }
-    })
-
-    this.main.usersModel.isLoading.observe(this, (loading) => {
-        this.bind.spinner.toggle(loading)
-    })
+    this.bind.name.bindText(this.main.usersModel.name)
+    this.bind.spinner.bindVisible(this.main.usersModel.isLoading)
 }
 ```
 
-### MappedLiveData
+### Вычисляемые значения
 
 ```typescript
-import {MappedLiveData} from "@casperui/core/live/MappedLiveData"
+import {computed} from "@casperui/core/live/LiveData"
 
-const fullName = new MappedLiveData(
-    userModel.self,
-    (user) => user ? `${user.firstName} ${user.lastName}` : ""
+const fullName = computed(
+    [userModel.first, userModel.last],
+    (first, last) => `${first} ${last}`
 )
 
-fullName.observe(this, (name) => this.bind.title.setText(name))
+this.bind.title.bindText(fullName)
 ```
+
+`LiveData.map(fn)` — то же для одного источника. `MappedLiveData` — индекс массива по полю, не формула.
 
 ---
 
@@ -944,7 +963,7 @@ export class CheckBoxBlock extends View {
 
         if (attr?.["title"]) bind.title.setText(attr["title"] as string)
 
-        this.setOnClickListener(() => this.setBoolValue(!this.mIsChecked))
+        this.onClick(() => this.setBoolValue(!this.mIsChecked))
         this.setBoolValue(false)
     }
 
@@ -981,7 +1000,7 @@ export class RadioGroup extends View {
 
     addView(view: View, index?: number) {
         super.addView(view, index)
-        view.setOnClickListener(() => this.setActive(this.getChildren().indexOf(view)))
+        view.onClick(() => this.setActive(this.getChildren().indexOf(view)))
         return this
     }
 }
@@ -1005,7 +1024,7 @@ export class GroupBlock extends View {
             if (saved !== null) this.isOpen = saved === "1"
         }
 
-        bind.header.setOnClickListener(() => {
+        bind.header.onClick(() => {
             this.isOpen = !this.isOpen
             this.updateVisibility()
             if (this.memoryKey) localStorage.setItem(this.memoryKey, this.isOpen ? "1" : "0")
@@ -1032,25 +1051,21 @@ export class GroupBlock extends View {
 
 ```typescript
 // В Activity
-this.replaceFragment(R.id.app_content, new MainFragment())
+this.replaceFragment(R.id.app_content, new MainFragment(this))
 
-// В Fragment (вложенные)
-this.replaceFragment(R.id.content_area, new SettingsFragment())
+// Вложенный экран
+this.replaceFragment(R.id.content_area, new SettingsFragment(this))
 
 // Через менеджер
-this.getFragmentManager().replaceFragment(R.id.content_area, new SettingsFragment())
+this.getFragmentManager().replaceFragment(R.id.content_area, new SettingsFragment(this))
 ```
 
-При `replaceFragment`: старый фрагмент получает `onDetach()`, его DOM удаляется; новый проходит `onCreateView` → `onCreated` → `onAttachSingle` (первый раз) → `onAttach`.
+При `replaceFragment`: старый экран получает `onDetach()`, его DOM удаляется; новый проходит `onCreateView` → `onCreated` → `onAttachSingle` (первый раз) → `onAttach`.
 
 ### Паттерн: side-bar навигация
 
 ```typescript
-export class MainFragment extends JFragment {
-    private bind = R.layout.fragments.main(this.ctx())
-
-    onCreateView() { return this.bind.root }
-
+export class MainFragment extends Screen(R.layout.fragments.main) {
     onCreated() {
         const navItems = [
             this.bind.nav_dashboard,
@@ -1059,16 +1074,20 @@ export class MainFragment extends JFragment {
         ]
 
         navItems.forEach((item, i) => {
-            item.setOnClickListener(() => {
+            item.onClick(() => {
                 navItems.forEach(n => n.deactivate())
                 item.activate()
-                const fragments = [new DashboardFragment(), new StatsFragment(), new UsersFragment()]
+                const fragments = [
+                    new DashboardFragment(this),
+                    new StatsFragment(this),
+                    new UsersFragment(this),
+                ]
                 this.replaceFragment(R.id.content_area, fragments[i])
             })
         })
 
         navItems[0].activate()
-        this.replaceFragment(R.id.content_area, new DashboardFragment())
+        this.replaceFragment(R.id.content_area, new DashboardFragment(this))
     }
 }
 ```
@@ -1077,7 +1096,7 @@ export class MainFragment extends JFragment {
 
 ## 12. Context и Resources
 
-`Activity` и `JFragment` являются `Context` (через `ContextWrapper`).
+`Activity` и `Screen` (`JFragment`) являются `Context` (через `ContextWrapper`).
 
 ```typescript
 const ctx = this.ctx()                        // в Fragment
@@ -1133,35 +1152,29 @@ canvas.concat(matrix)
 
 ## 14. Паттерны и best practices
 
-### Структура Fragment
+### Структура экрана
 
 ```typescript
-export class StatsFragment extends JFragment {
-
-    private bind = R.layout.fragments.stats(this.ctx())
+export class StatsFragment extends Screen(R.layout.fragments.stats) {
     private get main() { return this.getActivity() as MainActivity }
 
-    onCreateView() { return this.bind.root }
-
     onCreated() {
-        this.initFilters()
-        this.subscribeToData()
+        const dr = this.bind.date_range as DateRangePicker
+        dr.setOnChange(() => this.loadData())
+
+        this.bind.table_body.repeat(this.main.analyticsModel.tableData, this.bind.stat_row, {
+            key: item => item.id,
+            bind: (row, item) => {
+                row.id_cell.setText(item.id)
+                row.value_cell.setText(item.value.toString())
+            }
+        })
+
         this.loadData()
     }
 
     onDetach() {
-        // очистить интервалы, анимации
-    }
-
-    private initFilters() {
-        const dr = this.bind.date_range as DateRangePicker
-        dr.setOnChange(() => this.loadData())
-    }
-
-    private subscribeToData() {
-        this.main.analyticsModel.tableData.observe(this, (data) => {
-            this.renderTable(data)
-        })
+        // интервалы, анимации
     }
 
     private async loadData() {
@@ -1171,46 +1184,10 @@ export class StatsFragment extends JFragment {
             to:   formatDate(dr.getRange().end),
         })
     }
-
-    private renderTable(data: RowData[]) {
-        const tbody = this.bind.table_body
-        tbody.removeAllViews()
-        for (const item of data) {
-            const row = R.layout.table.stat_row(this.ctx())
-            row.id_cell.setText(item.id)
-            row.value_cell.setText(item.value.toString())
-            tbody.addView(row.root)
-        }
-    }
 }
 ```
 
-### Эффективное обновление списка
-
-```typescript
-private rowCache = new Map<string, ReturnType<typeof R.layout.table.row>>()
-
-updateList(data: Item[]) {
-    // удалить исчезнувшие
-    for (const [key, bind] of this.rowCache) {
-        if (!data.find(d => d.id === key)) {
-            this.container.removeView(bind.root)
-            this.rowCache.delete(key)
-        }
-    }
-    // обновить или создать
-    for (const item of data) {
-        if (!this.rowCache.has(item.id)) {
-            const bind = R.layout.table.row(this.ctx())
-            this.rowCache.set(item.id, bind)
-            this.container.addView(bind.root)
-        }
-        const bind = this.rowCache.get(item.id)!
-        bind.name.setText(item.name)
-        bind.value.setText(item.value.toString())
-    }
-}
-```
+`<template id="stat_row">` лежит в том же лейауте, что и таблица. `repeat` сам создаёт, обновляет и убирает строки.
 
 ### Анимация числовых значений
 
@@ -1234,17 +1211,20 @@ const cancel = animateValue(0, 1500, 800, (v) => {
 
 ### Типичные ошибки
 
-**Биндинг — поле класса, не локальная переменная:**
+**Экран через `Screen`, не ручной inflate:**
 ```typescript
-// Плохо
+// Плохо — bind локальный, onCreated его не увидит
 onCreateView() {
     const bind = R.layout.fragments.profile(this.ctx())
     return bind.root
 }
 
 // Хорошо
-private bind = R.layout.fragments.profile(this.ctx())
-onCreateView() { return this.bind.root }
+export class ProfileFragment extends Screen(R.layout.fragments.profile) {
+    onCreated() {
+        this.bind.name.bindText(this.model.name)
+    }
+}
 ```
 
 **Очистка в onDetach:**
@@ -1294,21 +1274,16 @@ export class CounterModel extends ViewModel {
 
 ### src/view/fragments/MainFragment.ts
 ```typescript
-import {JFragment} from "@casperui/core/app/JFragment"
-import {View} from "@casperui/core/view/View"
+import {Screen} from "@casperui/core/app/Screen"
 import {R} from "@app/R"
 import {MainActivity} from "@app/MainActivity"
 
-export class MainFragment extends JFragment {
-    private bind = R.layout.main(this.ctx())
-
-    onCreateView(): View { return this.bind.root }
-
+export class MainFragment extends Screen(R.layout.main) {
     onCreated() {
         const main = this.getActivity() as MainActivity
         this.bind.greeting.setText("Привет, мир!")
-        main.counter.count.observe(this, (n) => this.bind.counter.setText(String(n)))
-        this.bind.btn.setOnClickListener(() => main.counter.increment())
+        this.bind.counter.bindText(main.counter.count.map(n => String(n)))
+        this.bind.btn.onClick(() => main.counter.increment())
     }
 }
 ```
@@ -1325,7 +1300,7 @@ export class MainActivity extends Activity {
 
     async onCreate() {
         this.setContentView(R.layout.root(this).root)
-        this.replaceFragment(R.id.app_content, new MainFragment())
+        this.replaceFragment(R.id.app_content, new MainFragment(this))
     }
 }
 ```
