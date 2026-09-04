@@ -1058,6 +1058,8 @@ import {WidgetRegistrar} from "@casperui/core/view/inflater/WidgetRegistrar"
 
 Глобальный реестр кастомных виджетов. Связывает HTML-тег с конструктором View.
 
+В приложении регистрируйте все виджеты в `src/widgets/index.ts` и вызывайте `registerWidgets()` из `main.ts`. `casperui-new widget Name` дописывает туда строку.
+
 ### `register(className: string, constructor: ViewConstructor): void`
 Регистрирует виджет. `className` — тег в HTML-лейауте. `constructor` — фабричная функция:
 

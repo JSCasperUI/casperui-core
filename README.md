@@ -69,7 +69,7 @@ my-app/
 │   ├── bind.ts              ← ГЕНЕРИРУЕТСЯ (не редактировать)
 │   ├── models/              ← ViewModel-классы
 │   ├── view/fragments/      ← экраны (Screen)
-│   └── widgets/             ← кастомные View-компоненты
+│   └── widgets/             ← кастомные View + index.ts (registerWidgets)
 ├── res/
 │   ├── layout/              ← HTML-лейауты
 │   ├── icons/               ← SVG-иконки
@@ -109,6 +109,19 @@ npm run build              # webpack production
 ```
 
 Правка лейаута: сохранил HTML → resmaker пересобрал пакет → страница сама перезагрузилась. Полный reload нужен потому что `res.html` читается один раз при старте `Application`.
+
+### Новый экран / виджет
+
+Внутри приложения (нужен `resconfig.json`):
+
+```bash
+casperui-new fragment Profile          # res/layout/fragments/profile.html
+                                       # src/view/fragments/ProfileFragment.ts
+casperui-new fragment auth/Login       # вложенный путь
+casperui-new widget Badge              # лейаут + класс + регистрация тега <Badge>
+```
+
+Фрагмент сразу на `Screen(R.layout.fragments.profile)`. Виджет регистрируется в `src/widgets/index.ts`; `main.ts` вызывает `registerWidgets()`.
 
 ### tsconfig.json
 
@@ -176,12 +189,10 @@ activity.byId(R.id.email)                    // найти View по id
 
 ```typescript
 import {Application} from "@casperui/core/app/Application"
-import {WidgetRegistrar} from "@casperui/core/view/inflater/WidgetRegistrar"
-import {CheckBoxBlock} from "@app/widgets/CheckBoxBlock"
+import {registerWidgets} from "@app/widgets"
 import {MainActivity} from "@app/MainActivity"
 
-WidgetRegistrar.register("CheckBoxBlock", (ctx, tag, attr) => new CheckBoxBlock(ctx, tag, attr))
-WidgetRegistrar.register("RadioGroup",    (ctx, tag, attr) => new RadioGroup(ctx, tag, attr))
+registerWidgets()
 
 const application = new Application()
 
@@ -944,9 +955,16 @@ export class Badge extends View {
 
 ### Регистрация и использование в HTML
 
+`casperui-new widget Badge` дописывает регистрацию в `src/widgets/index.ts`. Вручную:
+
 ```typescript
-// main.ts
-WidgetRegistrar.register("Badge", (ctx, tag, attr) => new Badge(ctx, tag, attr))
+// src/widgets/index.ts
+import {WidgetRegistrar} from "@casperui/core/view/inflater/WidgetRegistrar"
+import {Badge} from "./Badge"
+
+export function registerWidgets() {
+    WidgetRegistrar.register("Badge", (ctx, tag, attr) => new Badge(ctx, tag, attr))
+}
 ```
 
 ```html
